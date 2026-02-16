@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tyrone - Dispatch Department</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --success: #059669;
+            --warning: #d97706;
+            --danger: #dc2626;
+            --info: #0891b2;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --border: #e2e8f0;
+            --text: #1e293b;
+            --text-muted: #64748b;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.5;
+        }
+        
+        .app {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #1a5f23, #2d8c3a);
+            color: white;
+            padding: 1.5rem 2rem;
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+        
+        .header-subtitle {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        .nav {
+            background: white;
+            border-bottom: 1px solid var(--border);
+            padding: 0 2rem;
+        }
+        
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            gap: 2rem;
+        }
+        
+        .nav-item {
+            padding: 1rem 0;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-weight: 500;
+            border-bottom: 3px solid transparent;
+        }
+        
+        .nav-item:hover {
+            color: var(--primary);
+        }
+        
+        .nav-item.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+        
+        .main {
+            flex: 1;
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+            width: 100%;
+        }
+        
+        .card {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border: 1px solid var(--border);
+            margin-bottom: 20px;
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--border);
+        }
+        
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .badge-success {
+            background: #d1fae5;
+            color: var(--success);
+        }
+        
+        .badge-info {
+            background: #e0f2fe;
+            color: #0369a1;
+        }
+        
+        .badge-primary {
+            background: #dbeafe;
+            color: var(--primary);
+        }
+        
+        .order-card {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .order-card:hover {
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+            transform: translateY(-1px);
+        }
+        
+        .order-card.selected {
+            border-left: 4px solid var(--success);
+            background: #f0fdf4;
+        }
+        
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        
+        .order-number {
+            font-weight: 600;
+            font-size: 16px;
+        }
+        
+        .order-customer {
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+        
+        .stats {
+            display: flex;
+            gap: 16px;
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+        
+        .dispatch-area {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px;
+            margin-top: 20px;
+        }
+        
+        .dispatch-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background: #f8fafc;
+            border-radius: 8px;
+            margin-bottom: 8px;
+        }
+        
+        .item-details {
+            flex: 1;
+        }
+        
+        .item-name {
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+        
+        .item-meta {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+        
+        .dispatch-input {
+            width: 100px;
+            padding: 8px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            margin-right: 8px;
+        }
+        
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+        
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+        
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text);
+        }
+        
+        .btn-outline:hover {
+            background: #f8fafc;
+        }
+        
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+        
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        .filter-bar {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .filter-input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+        }
+        
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 12px 20px;
+            background: var(--success);
+            color: white;
+            border-radius: 8px;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+            z-index: 1001;
+            transform: translateX(120%);
+            transition: transform 0.3s ease;
+        }
+        
+        .toast.show {
+            transform: translateX(0);
+        }
+        
+        .toast.error {
+            background: var(--danger);
+        }
+        
+        .ready-badge {
+            background: var(--success);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            margin-left: 8px;
+        }
+        
+        @media (max-width: 768px) {
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <div class="header">
+            <h1>Dispatch Department</h1>
+            <div class="header-subtitle">Tyrone Agrochemicals Private Limited</div>
+        </div>
+        
+        <nav class="nav">
+            <div class="nav-container">
+                 <a href="dashboard.html" class="nav-item">Dashboard</a>
+                    <a href="master-data.html" class="nav-item" id="navMasterData">Master Data</a>
+                    <a href="bottle-inventory.html" class="nav-item" id="navBottleInventory">Bottle Inventory</a>
+                    <a href="create-order.html" class="nav-item" id="navCreateOrder">Create Order</a>
+                    <a href="packing.html" class="nav-item" id="navPacking">Packing</a>
+                    <a href="dispatch.html" class="nav-item" id="navDispatch">Dispatch</a>
+                    <a href="orders.html" class="nav-item active" id="navOrders">Orders</a>
+                    <a href="formulation.html" class="nav-item" id="navFormulation">Formulation</a>
+                    <a href="reports.html" class="nav-item" id="navReports">Reports</a>
+            </div>
+        </nav>
+        
+        <main class="main">
+            <div class="grid-2">
+                <!-- Left Column - Orders Ready for Dispatch -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Orders Ready for Dispatch</h3>
+                        <span class="badge badge-success" id="readyOrdersCount">0</span>
+                    </div>
+                    
+                    <div class="filter-bar">
+                        <input type="text" class="filter-input" id="searchOrders" placeholder="Search orders...">
+                    </div>
+                    
+                    <div id="ordersList" style="max-height: 600px; overflow-y: auto;">
+                        <!-- Orders will be loaded here -->
+                    </div>
+                </div>
+                
+                <!-- Right Column - Dispatch Area -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Dispatch Area</h3>
+                        <div>
+                            <span class="badge badge-primary" id="selectedOrder">No Order Selected</span>
+                        </div>
+                    </div>
+                    
+                    <div id="dispatchArea" class="dispatch-area">
+                        <div class="text-center text-muted" style="padding: 40px;">
+                            Select an order to start dispatch
+                        </div>
+                    </div>
+                    
+                    <div style="margin-top: 20px; text-align: right;">
+                        <button class="btn btn-outline" id="refreshOrders">Refresh List</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <div id="toast" class="toast"></div>
+    
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBowsklKCH-C5uVv1laoqE9joupuGeqVdk",
+            authDomain: "tyrone-oms.firebaseapp.com",
+            projectId: "tyrone-oms",
+            storageBucket: "tyrone-oms.firebasestorage.app",
+            messagingSenderId: "494239566320",
+            appId: "1:494239566320:web:9f44f2da4c8f00f7e9b535"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+         // Auth check for each page
+    (function checkPageAccess() {
+        const user = JSON.parse(localStorage.getItem('currentUser') || sessionStorage.getItem('currentUser'));
+        
+        if (!user) {
+            window.location.href = 'index.html';
+            return;
+        }
+        
+        // Define page permissions
+        const pagePermissions = {
+            'master-data.html': 'canAccessMasterData',
+            'bottle-inventory.html': 'canAccessBottleInventory',
+            'create-order.html': 'canCreateOrder',
+            'packing.html': 'canAccessPacking',
+            'dispatch.html': 'canAccessDispatch',
+            'orders.html': 'canViewOrders',
+            'formulation.html': 'canAccessFormulation',
+            'reports.html': 'canAccessReports'
+        };
+        
+        const currentPage = window.location.pathname.split('/').pop();
+        const requiredPermission = pagePermissions[currentPage];
+        
+        if (requiredPermission && !user.permissions[requiredPermission]) {
+            // User doesn't have permission for this page
+            window.location.href = 'dashboard.html';
+            showToast('You do not have permission to access this page', 'error');
+        }
+    })();
+        let selectedOrder = null;
+        let customers = [];
+        let products = [];
+        
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast ${type}`;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+        
+        // Load all data
+        async function loadData() {
+            const [ordersSnap, customersSnap, productsSnap, packingsSnap, dispatchesSnap] = await Promise.all([
+                db.collection("orders").get(),
+                db.collection("customers").get(),
+                db.collection("products").get(),
+                db.collection("packing").get(),
+                db.collection("dispatches").get()
+            ]);
+            
+            customers = customersSnap.docs.map(doc => doc.data());
+            products = productsSnap.docs.map(doc => doc.data());
+            const packings = packingsSnap.docs.map(doc => doc.data());
+            const dispatches = dispatchesSnap.docs.map(doc => doc.data());
+            
+            // Process orders - only those that are fully packed
+            let orders = ordersSnap.docs.map(doc => doc.data());
+            
+            orders = orders.filter(order => {
+                const orderPackings = packings.filter(p => p.order_id === order.id);
+                const totalPacked = orderPackings.reduce((sum, p) => sum + (p.packed_boxes || 0), 0);
+                const orderDispatches = dispatches.filter(d => d.order_id === order.id);
+                const totalDispatched = orderDispatches.reduce((sum, d) => sum + d.dispatched_boxes, 0);
+                
+                // Show if packed but not fully dispatched
+                return totalPacked > 0 && totalDispatched < totalPacked;
+            });
+            
+            // Add packing and dispatch info to each order
+            orders = orders.map(order => {
+                const orderPackings = packings.filter(p => p.order_id === order.id);
+                const totalPacked = orderPackings.reduce((sum, p) => sum + (p.packed_boxes || 0), 0);
+                
+                const orderDispatches = dispatches.filter(d => d.order_id === order.id);
+                const totalDispatched = orderDispatches.reduce((sum, d) => sum + d.dispatched_boxes, 0);
+                
+                const packedLines = {};
+                orderPackings.forEach(p => {
+                    packedLines[p.order_line_id] = (packedLines[p.order_line_id] || 0) + p.packed_boxes;
+                });
+                
+                return { 
+                    ...order, 
+                    totalPacked, 
+                    totalDispatched,
+                    packedLines,
+                    remainingToDispatch: totalPacked - totalDispatched
+                };
+            });
+            
+            renderOrdersList(orders);
+            document.getElementById('readyOrdersCount').textContent = orders.length;
+        }
+        
+        function renderOrdersList(orders) {
+            const container = document.getElementById('ordersList');
+            const searchTerm = document.getElementById('searchOrders').value.toLowerCase();
+            
+            let filteredOrders = orders.filter(order => {
+                const customer = customers.find(c => c.id === order.customer_id) || {};
+                return order.order_number.toLowerCase().includes(searchTerm) ||
+                       customer.company?.toLowerCase().includes(searchTerm);
+            });
+            
+            container.innerHTML = filteredOrders.map(order => {
+                const customer = customers.find(c => c.id === order.customer_id) || {};
+                const isSelected = selectedOrder?.id === order.id;
+                
+                return `
+                    <div class="order-card ${isSelected ? 'selected' : ''}" onclick="selectOrder('${order.id}')">
+                        <div class="order-header">
+                            <span class="order-number">${order.order_number}</span>
+                            <span class="badge badge-success">Ready</span>
+                        </div>
+                        <div class="order-customer">${customer.company || 'Unknown'}</div>
+                        <div class="stats" style="margin-top: 8px;">
+                            <span>📦 Packed: ${order.totalPacked} boxes</span>
+                            <span>🚚 Dispatched: ${order.totalDispatched} boxes</span>
+                            <span>⏳ To Dispatch: ${order.remainingToDispatch} boxes</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            if (filteredOrders.length === 0) {
+                container.innerHTML = '<div class="text-center text-muted" style="padding: 40px;">No orders ready for dispatch</div>';
+            }
+        }
+        
+        // Select order for dispatch
+        window.selectOrder = async function(orderId) {
+            const orderSnap = await db.collection("orders").doc(orderId).get();
+            selectedOrder = orderSnap.data();
+            
+            // Get packing records
+            const packingsSnap = await db.collection("packing").where("order_id", "==", orderId).get();
+            const packings = packingsSnap.docs.map(doc => doc.data());
+            
+            // Get dispatch records
+            const dispatchesSnap = await db.collection("dispatches").where("order_id", "==", orderId).get();
+            const dispatches = dispatchesSnap.docs.map(doc => doc.data());
+            
+            // Calculate packed quantities per line
+            const packedPerLine = {};
+            packings.forEach(p => {
+                packedPerLine[p.order_line_id] = (packedPerLine[p.order_line_id] || 0) + p.packed_boxes;
+            });
+            
+            // Calculate dispatched quantities per line
+            const dispatchedPerLine = {};
+            dispatches.forEach(d => {
+                dispatchedPerLine[d.order_line_id] = (dispatchedPerLine[d.order_line_id] || 0) + d.dispatched_boxes;
+            });
+            
+            renderDispatchArea(selectedOrder, packedPerLine, dispatchedPerLine);
+            renderOrdersList(await getReadyOrders()); // Refresh list to show selection
+        };
+        
+        async function getReadyOrders() {
+            const [ordersSnap, packingsSnap, dispatchesSnap] = await Promise.all([
+                db.collection("orders").get(),
+                db.collection("packing").get(),
+                db.collection("dispatches").get()
+            ]);
+            
+            let orders = ordersSnap.docs.map(doc => doc.data());
+            const packings = packingsSnap.docs.map(doc => doc.data());
+            const dispatches = dispatchesSnap.docs.map(doc => doc.data());
+            
+            return orders.filter(order => {
+                const orderPackings = packings.filter(p => p.order_id === order.id);
+                const totalPacked = orderPackings.reduce((sum, p) => sum + (p.packed_boxes || 0), 0);
+                const orderDispatches = dispatches.filter(d => d.order_id === order.id);
+                const totalDispatched = orderDispatches.reduce((sum, d) => sum + d.dispatched_boxes, 0);
+                
+                return totalPacked > 0 && totalDispatched < totalPacked;
+            }).map(order => {
+                const orderPackings = packings.filter(p => p.order_id === order.id);
+                const totalPacked = orderPackings.reduce((sum, p) => sum + (p.packed_boxes || 0), 0);
+                const orderDispatches = dispatches.filter(d => d.order_id === order.id);
+                const totalDispatched = orderDispatches.reduce((sum, d) => sum + d.dispatched_boxes, 0);
+                
+                return { ...order, totalPacked, totalDispatched, remainingToDispatch: totalPacked - totalDispatched };
+            });
+        }
+        
+        function renderDispatchArea(order, packedPerLine, dispatchedPerLine) {
+            const container = document.getElementById('dispatchArea');
+            document.getElementById('selectedOrder').textContent = `Order: ${order.order_number}`;
+            
+            let html = '<h4 style="margin-bottom: 16px;">Items to Dispatch</h4>';
+            
+            order.lines.forEach(line => {
+                const product = products.find(p => p.id === line.product_id) || {};
+                const packed = packedPerLine[line.id] || 0;
+                const dispatched = dispatchedPerLine[line.id] || 0;
+                const remaining = packed - dispatched;
+                
+                if (remaining > 0) {
+                    html += `
+                        <div class="dispatch-item">
+                            <div class="item-details">
+                                <div class="item-name">${product.name || 'Unknown'}</div>
+                                <div class="item-meta">
+                                    Size: ${line.size} | Packed: ${packed} | Dispatched: ${dispatched} | Remaining: ${remaining}
+                                </div>
+                            </div>
+                            <div style="display: flex; align-items: center;">
+                                <input type="number" 
+                                       class="dispatch-input" 
+                                       id="dispatch-${line.id}"
+                                       min="1" 
+                                       max="${remaining}" 
+                                       value="${remaining}">
+                                <button class="btn btn-success btn-sm" onclick="dispatchLine('${order.id}', '${line.id}', ${remaining})">
+                                    Dispatch
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+            
+            if (order.lines.every(line => (dispatchedPerLine[line.id] || 0) >= (packedPerLine[line.id] || 0))) {
+                html += `
+                    <div class="text-center" style="padding: 20px;">
+                        <span class="badge badge-success">All packed items dispatched! Order complete</span>
+                    </div>
+                `;
+            }
+            
+            // Add LR Number field
+            html += `
+                <div style="margin-top: 20px;">
+                    <label for="lrNumber">LR Number (Optional)</label>
+                    <input type="text" id="lrNumber" class="filter-input" placeholder="Enter LR number" style="margin-top: 8px;">
+                </div>
+            `;
+            
+            container.innerHTML = html;
+        }
+        
+        // Dispatch a line
+        window.dispatchLine = async function(orderId, lineId, maxQty) {
+            const input = document.getElementById(`dispatch-${lineId}`);
+            const qty = parseInt(input.value);
+            const lrNumber = document.getElementById('lrNumber')?.value.trim() || '';
+            
+            if (!qty || qty < 1 || qty > maxQty) {
+                showToast(`Please enter quantity between 1 and ${maxQty}`, 'error');
+                return;
+            }
+            
+            const dispatchRecord = {
+                id: 'DISP' + Date.now().toString(36) + Math.random().toString(36).substr(2, 4),
+                order_id: orderId,
+                order_line_id: lineId,
+                dispatched_boxes: qty,
+                dispatch_date: new Date().toISOString().split('T')[0],
+                lr_number: lrNumber,
+                dispatched_by: 'Dispatch Manager',
+                created_at: new Date().toISOString()
+            };
+            
+            try {
+                await db.collection("dispatches").doc(dispatchRecord.id).set(dispatchRecord);
+                showToast(`Dispatched ${qty} boxes successfully`);
+                
+                // Refresh the dispatch area
+                await selectOrder(orderId);
+                
+                // Refresh orders list
+                const orders = await getReadyOrders();
+                renderOrdersList(orders);
+                
+            } catch (error) {
+                console.error("Error saving dispatch:", error);
+                showToast('Error saving dispatch record', 'error');
+            }
+        };
+        
+        // Event listeners
+        document.getElementById('searchOrders').addEventListener('input', async () => {
+            const orders = await getReadyOrders();
+            renderOrdersList(orders);
+        });
+        
+        document.getElementById('refreshOrders').addEventListener('click', async () => {
+            await loadData();
+            showToast('Orders list refreshed');
+        });
+        
+        // Initialize
+        loadData();
+        
+        // Refresh every 30 seconds
+        setInterval(loadData, 30000);
+    </script>
+</body>
+</html>

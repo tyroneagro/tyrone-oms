@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tyrone - Dashboard</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --success: #059669;
+            --warning: #d97706;
+            --danger: #dc2626;
+            --info: #0891b2;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --border: #e2e8f0;
+            --text: #1e293b;
+            --text-muted: #64748b;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.5;
+        }
+        
+        .app {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #1a5f23, #2d8c3a);
+            color: white;
+            padding: 1.5rem 2rem;
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+        
+        .header-subtitle {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        .nav {
+            background: white;
+            border-bottom: 1px solid var(--border);
+            padding: 0 2rem;
+        }
+        
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .nav-item {
+            padding: 1rem 0;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-weight: 500;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s;
+        }
+        
+        .nav-item:hover {
+            color: var(--primary);
+        }
+        
+        .nav-item.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+        
+        .nav-item.hidden {
+            display: none;
+        }
+        
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.5rem 1rem;
+            background: var(--bg);
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+        
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        .user-details {
+            line-height: 1.3;
+        }
+        
+        .user-name {
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        .user-role {
+            font-size: 12px;
+            color: var(--text-muted);
+            text-transform: capitalize;
+        }
+        
+        .logout-btn {
+            padding: 0.5rem 1rem;
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text);
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .logout-btn:hover {
+            background: var(--bg);
+            border-color: var(--text-muted);
+        }
+        
+        .main {
+            flex: 1;
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+            width: 100%;
+        }
+        
+        .welcome-section {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            padding: 2rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+        }
+        
+        .welcome-title {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        
+        .welcome-subtitle {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border: 1px solid var(--border);
+        }
+        
+        .stat-title {
+            color: var(--text-muted);
+            font-size: 14px;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+        
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .action-card {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid var(--border);
+            text-decoration: none;
+            color: inherit;
+        }
+        
+        .action-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+        }
+        
+        .action-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .action-title {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+        
+        .action-desc {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+        
+        .recent-orders {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid var(--border);
+        }
+        
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .order-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .order-item:last-child {
+            border-bottom: none;
+        }
+        
+        .order-info h4 {
+            font-size: 16px;
+            margin-bottom: 0.25rem;
+        }
+        
+        .order-info p {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+        
+        .order-status {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .status-pending { background: #fef3c7; color: #92400e; }
+        .status-packing { background: #e0f2fe; color: #0369a1; }
+        .status-dispatched { background: #d1fae5; color: #065f46; }
+        
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 12px 20px;
+            background: var(--success);
+            color: white;
+            border-radius: 8px;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+            z-index: 1001;
+            transform: translateX(120%);
+            transition: transform 0.3s ease;
+        }
+        
+        .toast.show {
+            transform: translateX(0);
+        }
+        
+        .toast.error {
+            background: var(--danger);
+        }
+        
+        @media (max-width: 768px) {
+            .nav-container {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .nav-links {
+                justify-content: center;
+            }
+            
+            .user-menu {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <div class="header">
+            <h1>Dashboard</h1>
+            <div class="header-subtitle">Tyrone Agrochemicals Private Limited</div>
+        </div>
+        
+        <nav class="nav">
+            <div class="nav-container">
+                <div class="nav-links" id="navLinks">
+                    <a href="dashboard.html" class="nav-item active">Dashboard</a>
+                    <a href="master-data.html" class="nav-item" id="navMasterData">Master Data</a>
+                    <a href="bottle-inventory.html" class="nav-item" id="navBottleInventory">Bottle Inventory</a>
+                    <a href="create-order.html" class="nav-item" id="navCreateOrder">Create Order</a>
+                    <a href="packing.html" class="nav-item" id="navPacking">Packing</a>
+                    <a href="dispatch.html" class="nav-item" id="navDispatch">Dispatch</a>
+                    <a href="orders.html" class="nav-item" id="navOrders">Orders</a>
+                    <a href="formulation.html" class="nav-item" id="navFormulation">Formulation</a>
+                    <a href="reports.html" class="nav-item" id="navReports">Reports</a>
+                </div>
+                <div class="user-menu">
+                    <div class="user-info">
+                        <div class="user-avatar" id="userAvatar">A</div>
+                        <div class="user-details">
+                            <div class="user-name" id="userName">Loading...</div>
+                            <div class="user-role" id="userRole">Loading...</div>
+                        </div>
+                    </div>
+                    <button class="logout-btn" onclick="logout()">Logout</button>
+                </div>
+            </div>
+        </nav>
+        
+        <main class="main">
+            <!-- Welcome Section -->
+            <div class="welcome-section">
+                <div class="welcome-title" id="welcomeMessage">Welcome back!</div>
+                <div class="welcome-subtitle" id="roleMessage">Here's what's happening with your orders today.</div>
+            </div>
+            
+            <!-- Stats Grid -->
+            <div class="stats-grid" id="statsGrid">
+                <!-- Stats will be loaded by JavaScript -->
+            </div>
+            
+            <!-- Quick Actions based on role -->
+            <div class="quick-actions" id="quickActions">
+                <!-- Actions will be populated by JS -->
+            </div>
+            
+            <!-- Recent Orders -->
+            <div class="recent-orders">
+                <div class="section-header">
+                    <h2 class="section-title">Recent Orders</h2>
+                    <a href="orders.html" class="view-link" style="color: var(--primary); text-decoration: none;">View All →</a>
+                </div>
+                <div id="recentOrdersList">
+                    <!-- Orders will be loaded here -->
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <div id="toast" class="toast"></div>
+    
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBowsklKCH-C5uVv1laoqE9joupuGeqVdk",
+            authDomain: "tyrone-oms.firebaseapp.com",
+            projectId: "tyrone-oms",
+            storageBucket: "tyrone-oms.firebasestorage.app",
+            messagingSenderId: "494239566320",
+            appId: "1:494239566320:web:9f44f2da4c8f00f7e9b535"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        
+        // Check authentication and get user
+        function checkAuth() {
+            const user = JSON.parse(localStorage.getItem('currentUser') || sessionStorage.getItem('currentUser'));
+            
+            if (!user) {
+                window.location.href = 'index.html';
+                return null;
+            }
+            
+            return user;
+        }
+        
+        // Update navigation based on permissions
+        function updateNavigation(user) {
+            const navItems = {
+                navMasterData: user.permissions.canAccessMasterData,
+                navBottleInventory: user.permissions.canAccessBottleInventory,
+                navCreateOrder: user.permissions.canCreateOrder,
+                navPacking: user.permissions.canAccessPacking,
+                navDispatch: user.permissions.canAccessDispatch,
+                navOrders: user.permissions.canViewOrders,
+                navFormulation: user.permissions.canAccessFormulation,
+                navReports: user.permissions.canAccessReports
+            };
+            
+            Object.entries(navItems).forEach(([id, show]) => {
+                const element = document.getElementById(id);
+                if (element) {
+                    if (!show) {
+                        element.classList.add('hidden');
+                    }
+                }
+            });
+        }
+        
+        // Update user info in header
+        function updateUserInfo(user) {
+            document.getElementById('userName').textContent = user.name;
+            document.getElementById('userRole').textContent = user.role;
+            document.getElementById('userAvatar').textContent = user.name.charAt(0);
+            
+            const welcomeMessage = document.getElementById('welcomeMessage');
+            const roleMessage = document.getElementById('roleMessage');
+            
+            welcomeMessage.textContent = `Welcome back, ${user.name}!`;
+            
+            switch(user.role) {
+                case 'admin':
+                    roleMessage.textContent = 'You have full access to the system.';
+                    break;
+                case 'packing':
+                    roleMessage.textContent = 'You can manage packing operations and view orders.';
+                    break;
+                case 'dispatch':
+                    roleMessage.textContent = 'You can manage dispatch operations and view orders.';
+                    break;
+                case 'viewer':
+                    roleMessage.textContent = 'You have view-only access to orders.';
+                    break;
+            }
+        }
+        
+        // Load dashboard data
+        async function loadDashboard(user) {
+            try {
+                const ordersSnap = await db.collection("orders").get();
+                const orders = ordersSnap.docs.map(doc => doc.data());
+                
+                // Calculate stats
+                const totalOrders = orders.length;
+                const pendingOrders = orders.filter(o => o.status === 'pending').length;
+                const packedOrders = orders.filter(o => o.status === 'packed').length;
+                const dispatchedOrders = orders.filter(o => o.status === 'dispatched').length;
+                
+                // Update stats based on permissions
+                let statsHtml = '';
+                
+                if (user.permissions.canViewOrders) {
+                    statsHtml += `
+                        <div class="stat-card">
+                            <div class="stat-title">Total Orders</div>
+                            <div class="stat-value">${totalOrders}</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-title">Pending</div>
+                            <div class="stat-value">${pendingOrders}</div>
+                        </div>
+                    `;
+                }
+                
+                if (user.permissions.canAccessPacking) {
+                    statsHtml += `
+                        <div class="stat-card">
+                            <div class="stat-title">In Packing</div>
+                            <div class="stat-value">${packedOrders}</div>
+                        </div>
+                    `;
+                }
+                
+                if (user.permissions.canAccessDispatch) {
+                    statsHtml += `
+                        <div class="stat-card">
+                            <div class="stat-title">To Dispatch</div>
+                            <div class="stat-value">${dispatchedOrders}</div>
+                        </div>
+                    `;
+                }
+                
+                document.getElementById('statsGrid').innerHTML = statsHtml;
+                
+                // Load quick actions
+                loadQuickActions(user);
+                
+                // Load recent orders
+                loadRecentOrders(orders.slice(0, 5));
+                
+            } catch (error) {
+                console.error("Error loading dashboard:", error);
+                showToast("Error loading dashboard data", "error");
+            }
+        }
+        
+        function loadQuickActions(user) {
+            const actions = [];
+            
+            if (user.permissions.canCreateOrder) {
+                actions.push({
+                    icon: '📝',
+                    title: 'Create Order',
+                    desc: 'Create a new order',
+                    link: 'create-order.html'
+                });
+            }
+            
+            if (user.permissions.canAccessPacking) {
+                actions.push({
+                    icon: '📦',
+                    title: 'Packing Section',
+                    desc: 'Pack orders for dispatch',
+                    link: 'packing.html'
+                });
+            }
+            
+            if (user.permissions.canAccessDispatch) {
+                actions.push({
+                    icon: '🚚',
+                    title: 'Dispatch Section',
+                    desc: 'Dispatch packed orders',
+                    link: 'dispatch.html'
+                });
+            }
+            
+            if (user.permissions.canViewOrders) {
+                actions.push({
+                    icon: '📋',
+                    title: 'View Orders',
+                    desc: 'See all orders',
+                    link: 'orders.html'
+                });
+            }
+            
+            if (user.permissions.canAccessReports) {
+                actions.push({
+                    icon: '📊',
+                    title: 'Reports',
+                    desc: 'View analytics',
+                    link: 'reports.html'
+                });
+            }
+            
+            const actionsHtml = actions.map(action => `
+                <a href="${action.link}" class="action-card">
+                    <div class="action-icon">${action.icon}</div>
+                    <div class="action-title">${action.title}</div>
+                    <div class="action-desc">${action.desc}</div>
+                </a>
+            `).join('');
+            
+            document.getElementById('quickActions').innerHTML = actionsHtml;
+        }
+        
+        async function loadRecentOrders(orders) {
+            const container = document.getElementById('recentOrdersList');
+            
+            if (orders.length === 0) {
+                container.innerHTML = '<p style="color: var(--text-muted); text-align: center; padding: 2rem;">No orders found</p>';
+                return;
+            }
+            
+            const ordersHtml = orders.map(order => {
+                const statusClass = order.status === 'pending' ? 'status-pending' :
+                                   order.status === 'packed' ? 'status-packing' : 'status-dispatched';
+                
+                return `
+                    <div class="order-item">
+                        <div class="order-info">
+                            <h4>Order #${order.order_number}</h4>
+                            <p>${order.order_date} • ${order.total_boxes} boxes</p>
+                        </div>
+                        <span class="order-status ${statusClass}">${order.status}</span>
+                    </div>
+                `;
+            }).join('');
+            
+            container.innerHTML = ordersHtml;
+        }
+        
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast ${type}`;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+        
+        // Logout function
+        window.logout = function() {
+            localStorage.removeItem('currentUser');
+            sessionStorage.removeItem('currentUser');
+            window.location.href = 'index.html';
+        };
+        
+        // Initialize
+        const user = checkAuth();
+        if (user) {
+            updateNavigation(user);
+            updateUserInfo(user);
+            loadDashboard(user);
+        }
+    </script>
+</body>
+</html>
