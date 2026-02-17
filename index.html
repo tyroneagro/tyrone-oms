@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tyrone Agrochemicals - Login</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --success: #059669;
+            --warning: #d97706;
+            --danger: #dc2626;
+            --info: #0891b2;
+            --purple: #7c3aed;
+            --purple-dark: #6d28d9;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --border: #e2e8f0;
+            --text: #1e293b;
+            --text-muted: #64748b;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .login-container {
+            max-width: 400px;
+            width: 100%;
+        }
+
+        .login-card {
+            background: var(--card);
+            border-radius: 16px;
+            padding: 40px;
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);
+            border: 1px solid var(--border);
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo h1 {
+            font-size: 28px;
+            color: var(--primary);
+            margin-bottom: 8px;
+        }
+
+        .logo p {
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text);
+        }
+
+        input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .password-input {
+            position: relative;
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: var(--text-muted);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+        }
+
+        .error-message {
+            background: #fee2e2;
+            color: var(--danger);
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .info-box {
+            background: #f0f9ff;
+            border: 1px solid #bae6fd;
+            border-radius: 8px;
+            padding: 16px;
+            margin-top: 20px;
+        }
+
+        .info-title {
+            font-weight: 600;
+            color: var(--info);
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            padding: 4px 0;
+            border-bottom: 1px dashed #bae6fd;
+        }
+
+        .info-item:last-child {
+            border-bottom: none;
+        }
+
+        .role {
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .role.formulation {
+            color: var(--purple);
+        }
+
+        .access {
+            color: var(--text-muted);
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-card">
+            <div class="logo">
+                <h1>🔬 Tyrone Agrochemicals</h1>
+                <p>Order Management System</p>
+            </div>
+
+            <div class="error-message" id="errorMessage"></div>
+
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" placeholder="Enter your username" autocomplete="off">
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <div class="password-input">
+                    <input type="password" id="password" placeholder="Enter your password">
+                    <span class="toggle-password" onclick="togglePassword()">👁️</span>
+                </div>
+            </div>
+
+            <button class="btn" onclick="login()">Sign In</button>
+
+            <div class="info-box">
+                <div class="info-title">🔑 Demo Credentials</div>
+                <div class="info-item">
+                    <span class="role">Admin</span>
+                    <span class="access">admin / Admin123</span>
+                </div>
+                <div class="info-item">
+                    <span class="role">Packing</span>
+                    <span class="access">pack / Pack123</span>
+                </div>
+                <div class="info-item">
+                    <span class="role">Dispatch</span>
+                    <span class="access">dispatch / Dis123</span>
+                </div>
+                <div class="info-item">
+                    <span class="role">Formulation</span>
+                    <span class="access">formulation / Form123</span>
+                </div>
+                <div class="info-item">
+                    <span class="role">Viewer</span>
+                    <span class="access">view / View123</span>
+                </div>
+            </div>
+
+            <div class="footer">
+                © 2024 Tyrone Agrochemicals. All rights reserved.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // User credentials and roles
+        const USERS = {
+            'admin': {
+                password: 'Admin123',
+                role: 'admin',
+                name: 'Administrator',
+                permissions: {
+                    canViewDashboard: true,
+                    canAccessMasterData: true,
+                    canAccessBottleInventory: true,
+                    canCreateOrder: true,
+                    canAccessPacking: true,
+                    canAccessDispatch: true,
+                    canViewOrders: true,
+                    canAccessFormulation: true,
+                    canAccessReports: true,
+                    canEditOrders: true,
+                    canDeleteOrders: true,
+                    canModifyOrderItems: true
+                }
+            },
+            'pack': {
+                password: 'Pack123',
+                role: 'packing',
+                name: 'Packing Manager',
+                permissions: {
+                    canViewDashboard: true,
+                    canAccessMasterData: false,
+                    canAccessBottleInventory: true,
+                    canCreateOrder: false,
+                    canAccessPacking: true,
+                    canAccessDispatch: false,
+                    canViewOrders: true,
+                    canAccessFormulation: false,
+                    canAccessReports: false,
+                    canEditOrders: false,
+                    canDeleteOrders: false
+                }
+            },
+            'dispatch': {
+                password: 'Dis123',
+                role: 'dispatch',
+                name: 'Dispatch Manager',
+                permissions: {
+                    canViewDashboard: true,
+                    canAccessMasterData: false,
+                    canAccessBottleInventory: false,
+                    canCreateOrder: false,
+                    canAccessPacking: false,
+                    canAccessDispatch: true,
+                    canViewOrders: true,
+                    canAccessFormulation: false,
+                    canAccessReports: false,
+                    canEditOrders: false,
+                    canDeleteOrders: false
+                }
+            },
+            'formulation': {
+                password: 'Form123',
+                role: 'formulation',
+                name: 'Formulation Manager',
+                permissions: {
+                    canViewDashboard: true,
+                    canAccessMasterData: false,
+                    canAccessBottleInventory: false,
+                    canCreateOrder: false,
+                    canAccessPacking: false,
+                    canAccessDispatch: false,
+                    canViewOrders: true,
+                    canAccessFormulation: true,
+                    canAccessReports: false,
+                    canEditOrders: false,
+                    canDeleteOrders: false
+                }
+            },
+            'view': {
+                password: 'View123',
+                role: 'viewer',
+                name: 'Viewer',
+                permissions: {
+                    canViewDashboard: true,
+                    canAccessMasterData: false,
+                    canAccessBottleInventory: false,
+                    canCreateOrder: false,
+                    canAccessPacking: false,
+                    canAccessDispatch: false,
+                    canViewOrders: true,
+                    canAccessFormulation: false,
+                    canAccessReports: false,
+                    canEditOrders: false,
+                    canDeleteOrders: false
+                }
+            }
+        };
+
+        // Toggle password visibility
+        function togglePassword() {
+            const passwordInput = document.getElementById('password');
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+        }
+
+        // Login function
+        function login() {
+            const username = document.getElementById('username').value.trim().toLowerCase();
+            const password = document.getElementById('password').value;
+            const errorElement = document.getElementById('errorMessage');
+
+            // Check if user exists
+            const user = USERS[username];
+            
+            if (!user) {
+                showError('Invalid username');
+                return;
+            }
+
+            if (user.password !== password) {
+                showError('Invalid password');
+                return;
+            }
+
+            // Successful login - store user session
+            const userSession = {
+                username: username,
+                role: user.role,
+                name: user.name,
+                permissions: user.permissions,
+                loginTime: new Date().toISOString()
+            };
+
+            localStorage.setItem('currentUser', JSON.stringify(userSession));
+            sessionStorage.setItem('currentUser', JSON.stringify(userSession));
+
+            // Redirect to dashboard
+            window.location.href = 'dashboard.html';
+        }
+
+        function showError(message) {
+            const errorElement = document.getElementById('errorMessage');
+            errorElement.textContent = message;
+            errorElement.classList.add('show');
+            
+            setTimeout(() => {
+                errorElement.classList.remove('show');
+            }, 3000);
+        }
+
+        // Check if already logged in
+        (function checkExistingSession() {
+            const session = localStorage.getItem('currentUser') || sessionStorage.getItem('currentUser');
+            if (session) {
+                window.location.href = 'dashboard.html';
+            }
+        })();
+
+        // Handle enter key
+        document.getElementById('password').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                login();
+            }
+        });
+
+        document.getElementById('username').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                document.getElementById('password').focus();
+            }
+        });
+    </script>
+</body>
+</html>

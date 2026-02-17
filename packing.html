@@ -1,0 +1,1159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tyrone - Packing Department</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --success: #059669;
+            --warning: #d97706;
+            --danger: #dc2626;
+            --info: #0891b2;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --border: #e2e8f0;
+            --text: #1e293b;
+            --text-muted: #64748b;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.5;
+        }
+        
+        .app {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #1a5f23, #2d8c3a);
+            color: white;
+            padding: 1.5rem 2rem;
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+        
+        .header-subtitle {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        .nav {
+            background: white;
+            border-bottom: 1px solid var(--border);
+            padding: 0 2rem;
+        }
+        
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+        
+        .nav-item {
+            padding: 1rem 0;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-weight: 500;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s;
+        }
+        
+        .nav-item:hover {
+            color: var(--primary);
+        }
+        
+        .nav-item.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+        
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.5rem 1rem;
+            background: var(--bg);
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+        
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        .user-details {
+            line-height: 1.3;
+        }
+        
+        .user-name {
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        .user-role {
+            font-size: 12px;
+            color: var(--text-muted);
+            text-transform: capitalize;
+        }
+        
+        .logout-btn {
+            padding: 0.5rem 1rem;
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text);
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .logout-btn:hover {
+            background: var(--bg);
+            border-color: var(--text-muted);
+        }
+        
+        .main {
+            flex: 1;
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+            width: 100%;
+        }
+        
+        .card {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border: 1px solid var(--border);
+            margin-bottom: 20px;
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--border);
+        }
+        
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .badge-warning {
+            background: #fef3c7;
+            color: var(--warning);
+        }
+        
+        .badge-info {
+            background: #e0f2fe;
+            color: #0369a1;
+        }
+        
+        .badge-success {
+            background: #d1fae5;
+            color: var(--success);
+        }
+        
+        .badge-primary {
+            background: #dbeafe;
+            color: var(--primary);
+        }
+        
+        .order-card {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .order-card:hover {
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+            transform: translateY(-1px);
+        }
+        
+        .order-card.selected {
+            border-left: 4px solid var(--primary);
+            background: #f0f9ff;
+        }
+        
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        
+        .order-number {
+            font-weight: 600;
+            font-size: 16px;
+        }
+        
+        .order-customer {
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            margin: 12px 0;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: var(--success);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+        
+        .stats {
+            display: flex;
+            gap: 16px;
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+        
+        .packing-area {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px;
+            margin-top: 20px;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+        
+        .packing-item {
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            margin-bottom: 16px;
+            overflow: hidden;
+        }
+        
+        .item-header {
+            background: #f8fafc;
+            padding: 12px;
+            font-weight: 600;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .item-content {
+            padding: 16px;
+        }
+        
+        .batch-list {
+            margin-bottom: 16px;
+        }
+        
+        .batch-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            font-size: 13px;
+        }
+        
+        .batch-details {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+        
+        .batch-details span {
+            background: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            border: 1px solid var(--border);
+        }
+        
+        .add-batch-form {
+            background: #f8fafc;
+            padding: 16px;
+            border-radius: 8px;
+            margin-top: 12px;
+            border: 1px dashed var(--primary);
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 0.5fr;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+        
+        .form-group {
+            margin-bottom: 8px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 4px;
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 8px 10px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 13px;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+        }
+        
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+        
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+        
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text);
+        }
+        
+        .btn-outline:hover {
+            background: #f8fafc;
+        }
+        
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+        
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #b91c1c;
+        }
+        
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        .filter-bar {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .filter-input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+        }
+        
+        .filter-select {
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: white;
+        }
+        
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 12px 20px;
+            background: var(--success);
+            color: white;
+            border-radius: 8px;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+            z-index: 1001;
+            transform: translateX(120%);
+            transition: transform 0.3s ease;
+        }
+        
+        .toast.show {
+            transform: translateX(0);
+        }
+        
+        .toast.error {
+            background: var(--danger);
+        }
+        
+        .status-message {
+            padding: 20px;
+            text-align: center;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-weight: 500;
+        }
+        
+        .status-message.pending {
+            background: #fef3c7;
+            color: var(--warning);
+            border: 1px solid #fcd34d;
+        }
+        
+        .status-message.packed {
+            background: #d1fae5;
+            color: var(--success);
+            border: 1px solid #a7f3d0;
+        }
+        
+        .status-message.partial {
+            background: #e0f2fe;
+            color: var(--info);
+            border: 1px solid #bae6fd;
+        }
+        
+        .remaining-boxes {
+            background: #fef3c7;
+            color: var(--warning);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 13px;
+        }
+        
+        @media (max-width: 768px) {
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .nav-container {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .nav-links {
+                justify-content: center;
+            }
+            
+            .user-menu {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <div class="header">
+            <h1>Packing Department</h1>
+            <div class="header-subtitle">Tyrone Agrochemicals Private Limited</div>
+        </div>
+        
+        <!-- Navigation -->
+        <nav class="nav">
+            <div class="nav-container">
+                <div class="nav-links" id="navLinks">
+                    <!-- Navigation will be dynamically loaded by JavaScript -->
+                </div>
+                <div class="user-menu">
+                    <div class="user-info">
+                        <div class="user-avatar" id="userAvatar">U</div>
+                        <div class="user-details">
+                            <div class="user-name" id="userName">Loading...</div>
+                            <div class="user-role" id="userRole">Loading...</div>
+                        </div>
+                    </div>
+                    <button class="logout-btn" id="logoutBtn">Logout</button>
+                </div>
+            </div>
+        </nav>
+        
+        <main class="main">
+            <div class="grid-2">
+                <!-- Left Column - Orders List -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <span>📋</span>
+                            Orders Ready for Packing
+                        </h3>
+                        <span class="badge badge-info" id="pendingOrdersCount">0</span>
+                    </div>
+                    
+                    <div class="filter-bar">
+                        <input type="text" class="filter-input" id="searchOrders" placeholder="Search orders...">
+                        <select class="filter-select" id="filterStatus">
+                            <option value="all">All</option>
+                            <option value="pending">Pending</option>
+                            <option value="in-progress">In Progress</option>
+                        </select>
+                    </div>
+                    
+                    <div id="ordersList" style="max-height: 600px; overflow-y: auto;"></div>
+                </div>
+                
+                <!-- Right Column - Packing Area -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <span>📦</span>
+                            Packing Area
+                        </h3>
+                        <div>
+                            <span class="badge badge-primary" id="selectedOrder">No Order Selected</span>
+                        </div>
+                    </div>
+                    
+                    <div id="packingArea" class="packing-area">
+                        <div class="text-center text-muted" style="padding: 2.5rem;">
+                            Select an order to start packing
+                        </div>
+                    </div>
+                    
+                    <div class="flex justify-end mt-4" style="margin-top: 20px; text-align: right;">
+                        <button class="btn btn-outline" id="refreshOrders">Refresh List</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <div id="toast" class="toast"></div>
+    
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    
+    <script>
+        // ==================== FIREBASE CONFIG ====================
+        const firebaseConfig = {
+            apiKey: "AIzaSyBowsklKCH-C5uVv1laoqE9joupuGeqVdk",
+            authDomain: "tyrone-oms.firebaseapp.com",
+            projectId: "tyrone-oms",
+            storageBucket: "tyrone-oms.firebasestorage.app",
+            messagingSenderId: "494239566320",
+            appId: "1:494239566320:web:9f44f2da4c8f00f7e9b535"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        
+        // ==================== GLOBAL FUNCTIONS ====================
+        
+        // Get current user from storage
+        function getCurrentUser() {
+            try {
+                return JSON.parse(localStorage.getItem('currentUser') || sessionStorage.getItem('currentUser'));
+            } catch (e) {
+                console.error("Error parsing user data:", e);
+                return null;
+            }
+        }
+
+        // Logout function
+        function logout() {
+            console.log("Logging out...");
+            localStorage.removeItem('currentUser');
+            sessionStorage.removeItem('currentUser');
+            window.location.href = 'index.html';
+        }
+
+        // Show toast notification
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            if (toast) {
+                toast.textContent = message;
+                toast.className = `toast ${type}`;
+                toast.classList.add('show');
+                setTimeout(() => toast.classList.remove('show'), 3000);
+            }
+        }
+
+        // Update navigation based on user permissions
+        function updateNavigation() {
+            const user = getCurrentUser();
+            if (!user) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            // Define all navigation items with their required permissions
+            const navItems = [
+                { permission: 'canViewDashboard', url: 'dashboard.html', text: 'Dashboard' },
+                { permission: 'canAccessMasterData', url: 'master-data.html', text: 'Master Data' },
+                { permission: 'canAccessBottleInventory', url: 'bottle-inventory.html', text: 'Bottle Inventory' },
+                { permission: 'canCreateOrder', url: 'create-order.html', text: 'Create Order' },
+                { permission: 'canAccessPacking', url: 'packing.html', text: 'Packing' },
+                { permission: 'canAccessDispatch', url: 'dispatch.html', text: 'Dispatch' },
+                { permission: 'canViewOrders', url: 'orders.html', text: 'Orders' },
+                { permission: 'canAccessFormulation', url: 'formulation.html', text: 'Formulation' },
+                { permission: 'canAccessReports', url: 'reports.html', text: 'Reports' }
+            ];
+
+            const navContainer = document.getElementById('navLinks');
+            if (!navContainer) return;
+
+            // Clear existing navigation
+            navContainer.innerHTML = '';
+
+            // Add navigation items based on permissions
+            navItems.forEach(item => {
+                if (user.permissions && user.permissions[item.permission]) {
+                    const link = document.createElement('a');
+                    link.href = item.url;
+                    link.className = 'nav-item';
+                    link.textContent = item.text;
+                    
+                    // Highlight current page
+                    const currentPage = window.location.pathname.split('/').pop();
+                    if (currentPage === item.url) {
+                        link.classList.add('active');
+                    }
+                    
+                    navContainer.appendChild(link);
+                }
+            });
+
+            // Update user info
+            updateUserInfo(user);
+        }
+
+        // Update user info in header
+        function updateUserInfo(user) {
+            const userNameEl = document.getElementById('userName');
+            const userRoleEl = document.getElementById('userRole');
+            const userAvatarEl = document.getElementById('userAvatar');
+            
+            if (userNameEl) userNameEl.textContent = user.name || 'User';
+            if (userRoleEl) userRoleEl.textContent = (user.role || 'user').replace('_', ' ').toUpperCase();
+            if (userAvatarEl) userAvatarEl.textContent = (user.name || 'U').charAt(0).toUpperCase();
+        }
+
+        // Check page access permissions
+        function checkPageAccess() {
+            const user = getCurrentUser();
+            
+            if (!user) {
+                window.location.href = 'index.html';
+                return false;
+            }
+            
+            // Define page permissions
+            const pagePermissions = {
+                'master-data.html': 'canAccessMasterData',
+                'bottle-inventory.html': 'canAccessBottleInventory',
+                'create-order.html': 'canCreateOrder',
+                'packing.html': 'canAccessPacking',
+                'dispatch.html': 'canAccessDispatch',
+                'orders.html': 'canViewOrders',
+                'formulation.html': 'canAccessFormulation',
+                'reports.html': 'canAccessReports'
+            };
+            
+            const currentPage = window.location.pathname.split('/').pop();
+            const requiredPermission = pagePermissions[currentPage];
+            
+            if (requiredPermission && (!user.permissions || !user.permissions[requiredPermission])) {
+                window.location.href = 'dashboard.html';
+                showToast('You do not have permission to access this page', 'error');
+                return false;
+            }
+            
+            return true;
+        }
+
+        // ==================== PAGE-SPECIFIC CODE ====================
+        
+        const COLLECTIONS = {
+            CUSTOMERS: 'customers',
+            PRODUCTS: 'products',
+            ORDERS: 'orders',
+            PACKING: 'packing',
+            DISPATCHES: 'dispatches',
+            BOTTLES: 'bottles'
+        };
+        
+        let selectedOrder = null;
+        let customers = [];
+        let products = [];
+        
+        // Load all data
+        async function loadData() {
+            try {
+                console.log("Loading packing data...");
+                
+                const [ordersSnap, customersSnap, productsSnap, packingsSnap] = await Promise.all([
+                    db.collection(COLLECTIONS.ORDERS).get(),
+                    db.collection(COLLECTIONS.CUSTOMERS).get(),
+                    db.collection(COLLECTIONS.PRODUCTS).get(),
+                    db.collection(COLLECTIONS.PACKING).get()
+                ]);
+                
+                customers = customersSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                products = productsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                const packings = packingsSnap.docs.map(doc => doc.data());
+                
+                // Process orders
+                let orders = ordersSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                
+                // Calculate packed boxes for each order
+                orders = orders.map(order => {
+                    const orderPackings = packings.filter(p => p.order_id === order.id);
+                    const packedBoxes = orderPackings.reduce((sum, p) => sum + (p.packed_boxes || 0), 0);
+                    
+                    // Calculate total boxes from lines
+                    let totalBoxes = 0;
+                    if (order.lines && Array.isArray(order.lines)) {
+                        totalBoxes = order.lines.reduce((sum, line) => sum + (line.boxes || line.qty || 0), 0);
+                    }
+                    
+                    const progress = totalBoxes > 0 ? (packedBoxes / totalBoxes) * 100 : 0;
+                    const hasPacking = orderPackings.length > 0;
+                    
+                    return { 
+                        ...order, 
+                        packedBoxes, 
+                        progress,
+                        hasPacking,
+                        totalBoxes,
+                        isFullyPacked: packedBoxes >= totalBoxes
+                    };
+                });
+                
+                // Filter orders that are not fully packed
+                const pendingOrders = orders.filter(order => !order.isFullyPacked);
+                
+                renderOrdersList(pendingOrders);
+                
+                const pendingCount = document.getElementById('pendingOrdersCount');
+                if (pendingCount) pendingCount.textContent = pendingOrders.length;
+                
+            } catch (error) {
+                console.error("Error loading data:", error);
+                showToast("Error loading data: " + error.message, "error");
+            }
+        }
+        
+        function renderOrdersList(orders) {
+            const container = document.getElementById('ordersList');
+            if (!container) return;
+            
+            const searchTerm = document.getElementById('searchOrders')?.value.toLowerCase() || '';
+            const filter = document.getElementById('filterStatus')?.value || 'all';
+            
+            let filteredOrders = orders.filter(order => {
+                const customer = customers.find(c => c.id === order.customer_id) || {};
+                const customerName = customer.company || customer.name || '';
+                const matchesSearch = (order.order_number || '').toLowerCase().includes(searchTerm) ||
+                                     customerName.toLowerCase().includes(searchTerm);
+                
+                if (filter === 'pending') return matchesSearch && !order.hasPacking;
+                if (filter === 'in-progress') return matchesSearch && order.hasPacking && !order.isFullyPacked;
+                return matchesSearch;
+            });
+            
+            container.innerHTML = filteredOrders.map(order => {
+                const customer = customers.find(c => c.id === order.customer_id) || {};
+                const customerName = customer.company || customer.name || 'Unknown';
+                const isSelected = selectedOrder?.id === order.id;
+                const remainingBoxes = (order.totalBoxes || 0) - (order.packedBoxes || 0);
+                
+                let statusBadge = order.hasPacking ? 'badge-info' : 'badge-warning';
+                let statusText = order.hasPacking ? 'In Progress' : 'Pending';
+                
+                return `
+                    <div class="order-card ${isSelected ? 'selected' : ''}" onclick="selectOrder('${order.id}')">
+                        <div class="order-header">
+                            <span class="order-number">${order.order_number || 'Unknown'}</span>
+                            <span class="badge ${statusBadge}">${statusText}</span>
+                        </div>
+                        <div class="order-customer">${customerName}</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${order.progress || 0}%"></div>
+                        </div>
+                        <div class="stats">
+                            <span>📦 Total: ${order.totalBoxes || 0} boxes</span>
+                            <span>✅ Packed: ${order.packedBoxes || 0} boxes</span>
+                            <span>⏳ Left: ${remainingBoxes} boxes</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            if (filteredOrders.length === 0) {
+                container.innerHTML = '<div class="text-center text-muted" style="padding: 40px;">No orders found</div>';
+            }
+        }
+        
+        // Select order for packing
+        window.selectOrder = async function(orderId) {
+            try {
+                console.log("Selecting order:", orderId);
+                
+                const orderSnap = await db.collection(COLLECTIONS.ORDERS).doc(orderId).get();
+                selectedOrder = { id: orderSnap.id, ...orderSnap.data() };
+                
+                // Get packing history for this order
+                const packingsSnap = await db.collection(COLLECTIONS.PACKING).where("order_id", "==", orderId).get();
+                const packings = packingsSnap.docs.map(doc => doc.data());
+                
+                renderPackingArea(selectedOrder, packings);
+                
+                // Refresh orders list to show selection
+                await loadData();
+                
+            } catch (error) {
+                console.error("Error selecting order:", error);
+                showToast("Error loading order details: " + error.message, "error");
+            }
+        };
+        
+        function renderPackingArea(order, packings = []) {
+            const container = document.getElementById('packingArea');
+            if (!container) return;
+            
+            const selectedOrderSpan = document.getElementById('selectedOrder');
+            if (selectedOrderSpan) {
+                selectedOrderSpan.textContent = `Order: ${order.order_number || 'Unknown'}`;
+            }
+            
+            // Check if order has lines
+            if (!order.lines || order.lines.length === 0) {
+                container.innerHTML = '<div class="status-message pending">No items in this order</div>';
+                return;
+            }
+            
+            let html = '<h4 style="margin-bottom: 16px;">Items to Pack</h4>';
+            let totalOrderedBoxes = 0;
+            let totalPackedBoxes = 0;
+            
+            // Group packings by line
+            const packingsByLine = {};
+            packings.forEach(p => {
+                if (!packingsByLine[p.order_line_id]) {
+                    packingsByLine[p.order_line_id] = [];
+                }
+                packingsByLine[p.order_line_id].push(p);
+            });
+            
+            order.lines.forEach((line) => {
+                const boxQty = line.boxes || line.qty || 0;
+                const product = products.find(p => p.id === line.product_id) || {};
+                const linePackings = packingsByLine[line.id] || [];
+                const packedSoFar = linePackings.reduce((sum, p) => sum + p.packed_boxes, 0);
+                const remaining = boxQty - packedSoFar;
+                
+                totalOrderedBoxes += boxQty;
+                totalPackedBoxes += packedSoFar;
+                
+                html += `
+                    <div class="packing-item">
+                        <div class="item-header">
+                            <div>
+                                <span style="font-weight: 600;">${product.name || 'Unknown Product'}</span>
+                                <span style="margin-left: 12px; color: var(--text-muted);">Size: ${line.size || 'N/A'}</span>
+                                <span style="margin-left: 12px; color: var(--text-muted);">PCS/Box: ${line.pcs_per_box || 'N/A'}</span>
+                            </div>
+                            <div class="remaining-boxes">
+                                Remaining: ${remaining} of ${boxQty} boxes
+                            </div>
+                        </div>
+                        
+                        <div class="item-content">
+                `;
+                
+                // Show existing batches
+                if (linePackings.length > 0) {
+                    html += '<div class="batch-list"><h5 style="margin-bottom: 8px;">Packed Batches:</h5>';
+                    linePackings.forEach(p => {
+                        html += `
+                            <div class="batch-item">
+                                <div class="batch-details">
+                                    <span>📦 ${p.packed_boxes} boxes</span>
+                                    <span>🔖 Batch: ${p.batch_number || 'N/A'}</span>
+                                    <span>📅 MFG: ${p.mfg_date || 'N/A'}</span>
+                                    <span>📅 EXP: ${p.exp_date || 'N/A'}</span>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    html += '</div>';
+                }
+                
+                // Add form for new batch if remaining > 0
+                if (remaining > 0) {
+                    html += `
+                        <div class="add-batch-form" id="form-${line.id}">
+                            <h5 style="margin-bottom: 12px;">Add New Batch (Max ${remaining} boxes)</h5>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Boxes to Pack</label>
+                                    <input type="number" class="form-control" id="qty-${line.id}" 
+                                           min="1" max="${remaining}" value="${Math.min(remaining, 10)}">
+                                </div>
+                                <div class="form-group">
+                                    <label>Batch Number</label>
+                                    <input type="text" class="form-control" id="batch-${line.id}" 
+                                           placeholder="e.g., BATCH-001">
+                                </div>
+                                <div class="form-group">
+                                    <label>MFG Date</label>
+                                    <input type="date" class="form-control" id="mfg-${line.id}" 
+                                           value="${new Date().toISOString().split('T')[0]}">
+                                </div>
+                                <div class="form-group">
+                                    <label>EXP Date</label>
+                                    <input type="date" class="form-control" id="exp-${line.id}" 
+                                           value="${new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split('T')[0]}">
+                                </div>
+                            </div>
+                            <div style="text-align: right;">
+                                <button class="btn btn-success btn-sm" onclick="packBatch('${order.id}', '${line.id}', ${remaining})">
+                                    Pack This Batch
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                html += '</div></div>';
+            });
+            
+            // Add summary
+            const overallProgress = totalOrderedBoxes > 0 ? Math.round((totalPackedBoxes / totalOrderedBoxes) * 100) : 0;
+            
+            html += `
+                <div style="margin-top: 20px; padding: 16px; background: #f8fafc; border-radius: 8px; border: 1px solid var(--border);">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <strong>Order Summary:</strong><br>
+                            Total Boxes: ${totalOrderedBoxes}<br>
+                            Packed Boxes: ${totalPackedBoxes}<br>
+                            Remaining: ${totalOrderedBoxes - totalPackedBoxes} boxes
+                        </div>
+                        <div style="font-size: 24px; font-weight: 700; color: var(--primary);">
+                            ${overallProgress}%
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            container.innerHTML = html;
+        }
+        
+        // Pack a batch
+        window.packBatch = async function(orderId, lineId, maxRemaining) {
+            const qtyInput = document.getElementById(`qty-${lineId}`);
+            const batchInput = document.getElementById(`batch-${lineId}`);
+            const mfgInput = document.getElementById(`mfg-${lineId}`);
+            const expInput = document.getElementById(`exp-${lineId}`);
+            
+            const qty = parseInt(qtyInput?.value);
+            const batchNumber = batchInput?.value.trim();
+            const mfgDate = mfgInput?.value;
+            const expDate = expInput?.value;
+            
+            // Validation
+            if (!qty || qty < 1 || qty > maxRemaining) {
+                showToast(`Please enter quantity between 1 and ${maxRemaining}`, 'error');
+                return;
+            }
+            
+            if (!batchNumber) {
+                showToast('Please enter batch number', 'error');
+                return;
+            }
+            
+            if (!mfgDate) {
+                showToast('Please select manufacturing date', 'error');
+                return;
+            }
+            
+            if (!expDate) {
+                showToast('Please select expiry date', 'error');
+                return;
+            }
+            
+            // Validate dates
+            const mfg = new Date(mfgDate);
+            const exp = new Date(expDate);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            if (mfg > today) {
+                showToast('Manufacturing date cannot be in the future', 'error');
+                return;
+            }
+            
+            if (exp <= mfg) {
+                showToast('Expiry date must be after manufacturing date', 'error');
+                return;
+            }
+            
+            // Get product name for the line
+            const order = selectedOrder;
+            const line = order.lines.find(l => l.id === lineId);
+            const product = products.find(p => p.id === line?.product_id) || {};
+            
+            const packingRecord = {
+                id: 'PACK' + Date.now().toString(36) + Math.random().toString(36).substr(2, 4),
+                order_id: orderId,
+                order_line_id: lineId,
+                packed_boxes: qty,
+                batch_number: batchNumber,
+                mfg_date: mfgDate,
+                exp_date: expDate,
+                product_name: product.name,
+                pcs_per_box: line?.pcs_per_box || 0,
+                size: line?.size || 'N/A',
+                packed_by: 'Packing Manager',
+                packed_date: new Date().toISOString().split('T')[0],
+                created_at: new Date().toISOString()
+            };
+            
+            try {
+                await db.collection(COLLECTIONS.PACKING).doc(packingRecord.id).set(packingRecord);
+                showToast(`Packed ${qty} boxes with batch ${batchNumber}`);
+                
+                // Refresh the packing area
+                await selectOrder(orderId);
+                
+            } catch (error) {
+                console.error("Error saving packing:", error);
+                showToast('Error saving packing record: ' + error.message, 'error');
+            }
+        };
+        
+        // ==================== INITIALIZATION ====================
+        
+        // Check authentication and permissions
+        if (!checkPageAccess()) {
+            // Redirect will happen in checkPageAccess
+        } else {
+            // Update navigation
+            updateNavigation();
+            
+            // Add logout button event listener
+            document.getElementById('logoutBtn').addEventListener('click', function(e) {
+                e.preventDefault();
+                logout();
+            });
+            
+            // Load initial data
+            loadData();
+        }
+        
+        // Event listeners
+        const searchInput = document.getElementById('searchOrders');
+        if (searchInput) {
+            searchInput.addEventListener('input', async () => {
+                await loadData();
+            });
+        }
+        
+        const filterSelect = document.getElementById('filterStatus');
+        if (filterSelect) {
+            filterSelect.addEventListener('change', async () => {
+                await loadData();
+            });
+        }
+        
+        const refreshBtn = document.getElementById('refreshOrders');
+        if (refreshBtn) {
+            refreshBtn.addEventListener('click', async () => {
+                await loadData();
+                showToast('Orders list refreshed');
+            });
+        }
+        
+        // Refresh every 30 seconds
+        setInterval(loadData, 30000);
+    </script>
+</body>
+</html>
