@@ -1,0 +1,1460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tyrone - Finished Goods Inventory</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --success: #059669;
+            --warning: #d97706;
+            --danger: #dc2626;
+            --info: #0891b2;
+            --purple: #7c3aed;
+            --purple-dark: #6d28d9;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --border: #e2e8f0;
+            --text: #1e293b;
+            --text-muted: #64748b;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.5;
+        }
+        
+        .app {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #1a5f23, #2d8c3a);
+            color: white;
+            padding: 1.5rem 2rem;
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+        
+        .header-subtitle {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        .nav {
+            background: white;
+            border-bottom: 1px solid var(--border);
+            padding: 0 2rem;
+        }
+        
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+        
+        .nav-item {
+            padding: 1rem 0;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-weight: 500;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s;
+        }
+        
+        .nav-item:hover {
+            color: var(--primary);
+        }
+        
+        .nav-item.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+        
+        .nav-item.hidden {
+            display: none;
+        }
+        
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.5rem 1rem;
+            background: var(--bg);
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+        
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        .user-details {
+            line-height: 1.3;
+        }
+        
+        .user-name {
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        .user-role {
+            font-size: 12px;
+            color: var(--text-muted);
+            text-transform: capitalize;
+        }
+        
+        .logout-btn {
+            padding: 0.5rem 1rem;
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text);
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .logout-btn:hover {
+            background: var(--bg);
+            border-color: var(--text-muted);
+        }
+        
+        .main {
+            flex: 1;
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+            width: 100%;
+        }
+        
+        .card {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border: 1px solid var(--border);
+            margin-bottom: 20px;
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--border);
+        }
+        
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, var(--purple), var(--purple-dark));
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+        }
+        
+        .stat-card.success {
+            background: linear-gradient(135deg, var(--success), #047857);
+        }
+        
+        .stat-card.warning {
+            background: linear-gradient(135deg, var(--warning), #b45309);
+        }
+        
+        .stat-card.info {
+            background: linear-gradient(135deg, var(--info), #0e7490);
+        }
+        
+        .stat-label {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 8px;
+        }
+        
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+        }
+        
+        .filter-bar {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .filter-input {
+            flex: 1;
+            min-width: 200px;
+            padding: 10px 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        
+        .filter-select {
+            padding: 10px 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: white;
+            min-width: 150px;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+        
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #047857;
+        }
+        
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text);
+        }
+        
+        .btn-outline:hover {
+            background: #f8fafc;
+        }
+        
+        .btn-purple {
+            background: var(--purple);
+            color: white;
+        }
+        
+        .btn-purple:hover {
+            background: var(--purple-dark);
+        }
+        
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .badge-purple {
+            background: #ede9fe;
+            color: var(--purple);
+        }
+        
+        .badge-info {
+            background: #e0f2fe;
+            color: #0369a1;
+        }
+        
+        .badge-warning {
+            background: #fef3c7;
+            color: #d97706;
+        }
+        
+        .badge-success {
+            background: #d1fae5;
+            color: var(--success);
+        }
+        
+        .badge-pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        
+        .table-container {
+            overflow-x: auto;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            margin-top: 20px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1200px;
+        }
+        
+        th {
+            background: #f1f5f9;
+            padding: 12px 16px;
+            text-align: left;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            border-bottom: 2px solid var(--border);
+        }
+        
+        td {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+            font-size: 14px;
+        }
+        
+        tr:hover {
+            background: #f8fafc;
+        }
+        
+        .action-cell {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        
+        .use-btn {
+            background: var(--purple);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 6px 12px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .use-btn:hover {
+            background: var(--purple-dark);
+            transform: translateY(-1px);
+        }
+        
+        .use-btn:disabled {
+            background: #cbd5e1;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .view-btn {
+            background: var(--info);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 6px 12px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .view-btn:hover {
+            background: #0e7490;
+            transform: translateY(-1px);
+        }
+        
+        .order-tag {
+            display: inline-block;
+            background: #ede9fe;
+            color: var(--purple);
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin: 2px;
+            font-size: 11px;
+            border: 1px solid #c4b5fd;
+            cursor: pointer;
+        }
+        
+        .order-tag:hover {
+            background: var(--purple);
+            color: white;
+        }
+        
+        .orders-used {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+        
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 12px 20px;
+            background: var(--success);
+            color: white;
+            border-radius: 8px;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+            z-index: 1001;
+            transform: translateX(120%);
+            transition: transform 0.3s ease;
+        }
+        
+        .toast.show {
+            transform: translateX(0);
+        }
+        
+        .toast.error {
+            background: var(--danger);
+        }
+        
+        .toast.purple {
+            background: var(--purple);
+        }
+        
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+            animation: modalSlideIn 0.3s ease;
+        }
+        
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .modal-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(135deg, var(--purple), var(--purple-dark));
+            color: white;
+            border-radius: 12px 12px 0 0;
+        }
+        
+        .modal-header h3 {
+            color: white;
+            margin: 0;
+        }
+        
+        .modal-body {
+            padding: 24px;
+        }
+        
+        .modal-footer {
+            padding: 20px 24px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+        
+        .close-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+        }
+        
+        .form-group {
+            margin-bottom: 16px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text);
+        }
+        
+        select, input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        
+        select:focus, input:focus {
+            outline: none;
+            border-color: var(--purple);
+            box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+        }
+        
+        .info-box {
+            background: #ede9fe;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid var(--purple);
+        }
+        
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        .info-label {
+            color: var(--text-muted);
+        }
+        
+        .info-value {
+            font-weight: 600;
+            color: var(--purple);
+        }
+        
+        .warning-box {
+            background: #fef3c7;
+            padding: 12px;
+            border-radius: 8px;
+            margin: 16px 0;
+            border-left: 4px solid var(--warning);
+            font-size: 13px;
+            color: #92400e;
+        }
+        
+        .orders-history {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px;
+        }
+        
+        .history-item {
+            padding: 8px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .history-item:last-child {
+            border-bottom: none;
+        }
+        
+        .history-order {
+            font-weight: 600;
+            color: var(--purple);
+        }
+        
+        .history-qty {
+            background: #ede9fe;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            color: var(--purple);
+        }
+        
+        .product-match-badge {
+            background: var(--success);
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 10px;
+            margin-left: 4px;
+        }
+        
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            .nav-container {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            .nav-links {
+                justify-content: center;
+            }
+            .user-menu {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <div class="header">
+            <h1>Finished Goods Inventory</h1>
+            <div class="header-subtitle">Tyrone Agrochemicals Private Limited</div>
+        </div>
+        
+        <nav class="nav">
+            <div class="nav-container">
+                <div class="nav-links" id="navLinks">
+                    <!-- Navigation will be dynamically loaded -->
+                </div>
+                <div class="user-menu">
+                    <div class="user-info">
+                        <div class="user-avatar" id="userAvatar">U</div>
+                        <div class="user-details">
+                            <div class="user-name" id="userName">Loading...</div>
+                            <div class="user-role" id="userRole">Loading...</div>
+                        </div>
+                    </div>
+                    <button class="logout-btn" id="logoutBtn">Logout</button>
+                </div>
+            </div>
+        </nav>
+        
+        <main class="main">
+            <!-- Stats -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Total Boxes in Stock</div>
+                    <div class="stat-value" id="totalBoxes">0</div>
+                </div>
+                <div class="stat-card success">
+                    <div class="stat-label">Used in Orders</div>
+                    <div class="stat-value" id="usedBoxes">0</div>
+                </div>
+                <div class="stat-card info">
+                    <div class="stat-label">Orders Served</div>
+                    <div class="stat-value" id="ordersServed">0</div>
+                </div>
+                <div class="stat-card warning">
+                    <div class="stat-label">Active Batches</div>
+                    <div class="stat-value" id="activeBatches">0</div>
+                </div>
+            </div>
+            
+            <!-- Filters -->
+            <div class="card">
+                <div class="filter-bar">
+                    <input type="text" class="filter-input" id="searchInventory" placeholder="Search by brand, technical or batch...">
+                    <select class="filter-select" id="filterSize">
+                        <option value="">All Sizes</option>
+                        <option value="1 Ltr">1 Ltr</option>
+                        <option value="500 ML">500 ML</option>
+                        <option value="250 ML">250 ML</option>
+                        <option value="150 ML">150 ML</option>
+                        <option value="100 ML">100 ML</option>
+                        <option value="60 ML">60 ML</option>
+                    </select>
+                    <button class="btn btn-outline" onclick="refreshInventory()">↻ Refresh</button>
+                </div>
+            </div>
+            
+            <!-- Inventory Table -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Finished Goods Stock</h3>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Brand Name</th>
+                                <th>Technical Name</th>
+                                <th>Size</th>
+                                <th>Batch No.</th>
+                                <th>MFG/EXP</th>
+                                <th>Available</th>
+                                <th>Used In Orders</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="inventoryTableBody">
+                            <tr>
+                                <td colspan="8" class="text-center text-muted" style="padding: 40px;">
+                                    Loading inventory...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <!-- Use in Order Modal -->
+    <div id="useInOrderModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">Use Finished Goods in Order</h3>
+                <button class="close-btn" onclick="closeModal()">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="info-box" id="selectedItemInfo">
+                    <!-- Will be populated dynamically -->
+                </div>
+                
+                <div class="form-group">
+                    <label for="orderSelect">Select Order & Product Line *</label>
+                    <select id="orderSelect" required>
+                        <option value="">Loading orders...</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="useQuantity">Quantity to Use (Boxes) *</label>
+                    <input type="number" id="useQuantity" min="1" required>
+                    <small style="color: var(--text-muted);">Max: <span id="maxQuantity">0</span> boxes</small>
+                </div>
+                
+                <div id="orderLineInfo" class="warning-box" style="display: none;">
+                    <!-- Will show matching order line info -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+                <button class="btn btn-purple" onclick="confirmUseInOrder()">Use in Order</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- View Orders Modal -->
+    <div id="viewOrdersModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Orders Using This Batch</h3>
+                <button class="close-btn" onclick="closeViewModal()">✕</button>
+            </div>
+            <div class="modal-body">
+                <div id="ordersHistory" class="orders-history">
+                    <!-- Orders will be loaded here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeViewModal()">Close</button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="toast" class="toast"></div>
+    
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBowsklKCH-C5uVv1laoqE9joupuGeqVdk",
+            authDomain: "tyrone-oms.firebaseapp.com",
+            projectId: "tyrone-oms",
+            storageBucket: "tyrone-oms.firebasestorage.app",
+            messagingSenderId: "494239566320",
+            appId: "1:494239566320:web:9f44f2da4c8f00f7e9b535"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        
+        const FINISHED_GOODS_COLLECTION = 'finished_goods';
+        const ORDERS_COLLECTION = 'orders';
+        const PACKING_COLLECTION = 'packing';
+        const FORMULATION_COLLECTION = 'formulation';
+        
+        let inventory = [];
+        let pendingOrders = [];
+        let currentSelectedItem = null;
+        
+        // ==================== GLOBAL FUNCTIONS ====================
+        
+        function getCurrentUser() {
+            try {
+                return JSON.parse(localStorage.getItem('currentUser') || sessionStorage.getItem('currentUser'));
+            } catch (e) {
+                return null;
+            }
+        }
+        
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            if (toast) {
+                toast.textContent = message;
+                toast.className = `toast ${type}`;
+                toast.classList.add('show');
+                setTimeout(() => toast.classList.remove('show'), 3000);
+            }
+        }
+        
+        // Logout function
+        function logout() {
+            console.log("Logging out...");
+            localStorage.removeItem('currentUser');
+            sessionStorage.removeItem('currentUser');
+            window.location.href = 'index.html';
+        }
+        
+        // Check if user has permission to use finished goods (Admin and Packing Manager only)
+        function canUseFinishedGoods() {
+            const user = getCurrentUser();
+            return user && (user.role === 'admin' || user.role === 'packing');
+        }
+        
+        // Update navigation based on user permissions
+        function updateNavigation() {
+            const user = getCurrentUser();
+            if (!user) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            // Define all navigation items with their required permissions
+            const navItems = [
+                { permission: 'canViewDashboard', url: 'dashboard.html', text: 'Dashboard' },
+                { permission: 'canAccessMasterData', url: 'master-data.html', text: 'Master Data' },
+                { permission: 'canAccessBottleInventory', url: 'bottle-inventory.html', text: 'Bottle Inventory' },
+                { permission: 'canCreateOrder', url: 'create-order.html', text: 'Create Order' },
+                { permission: 'canAccessPacking', url: 'packing.html', text: 'Packing' },
+                { permission: 'canAccessBulkInventory', url: 'bulk-inventory.html', text: 'Bulk Inventory' },
+                { permission: 'canAccessFinishedGoods', url: 'finished-goods-inventory.html', text: 'Finished Goods' },
+                { permission: 'canAccessDispatch', url: 'dispatch.html', text: 'Dispatch' },
+                { permission: 'canViewOrders', url: 'orders.html', text: 'Orders' },
+                { permission: 'canAccessFormulation', url: 'formulation.html', text: 'Formulation' },
+                { permission: 'canAccessFormulationInventory', url: 'formulation-inventory.html', text: 'Formulation Inventory' },
+                { permission: 'canAccessReports', url: 'reports.html', text: 'Reports' }
+            ];
+
+            const navContainer = document.getElementById('navLinks');
+            if (!navContainer) return;
+
+            // Clear existing navigation
+            navContainer.innerHTML = '';
+
+            // Add navigation items based on permissions
+            navItems.forEach(item => {
+                if (user.permissions && user.permissions[item.permission]) {
+                    const link = document.createElement('a');
+                    link.href = item.url;
+                    link.className = 'nav-item';
+                    link.textContent = item.text;
+                    
+                    // Highlight current page
+                    const currentPage = window.location.pathname.split('/').pop();
+                    if (currentPage === item.url) {
+                        link.classList.add('active');
+                    }
+                    
+                    navContainer.appendChild(link);
+                }
+            });
+
+            // Update user info
+            updateUserInfo(user);
+        }
+
+        // Update user info in header
+        function updateUserInfo(user) {
+            const userNameEl = document.getElementById('userName');
+            const userRoleEl = document.getElementById('userRole');
+            const userAvatarEl = document.getElementById('userAvatar');
+            
+            if (userNameEl) userNameEl.textContent = user.name || 'User';
+            if (userRoleEl) userRoleEl.textContent = (user.role || 'user').replace('_', ' ').toUpperCase();
+            if (userAvatarEl) userAvatarEl.textContent = (user.name || 'U').charAt(0).toUpperCase();
+        }
+
+        // Check page access permissions
+        function checkPageAccess() {
+            const user = getCurrentUser();
+            
+            if (!user) {
+                window.location.href = 'index.html';
+                return false;
+            }
+            
+            // Define page permissions
+            const pagePermissions = {
+                'master-data.html': 'canAccessMasterData',
+                'bottle-inventory.html': 'canAccessBottleInventory',
+                'create-order.html': 'canCreateOrder',
+                'packing.html': 'canAccessPacking',
+                'bulk-inventory.html': 'canAccessBulkInventory',
+                'finished-goods-inventory.html': 'canAccessFinishedGoods',
+                'dispatch.html': 'canAccessDispatch',
+                'orders.html': 'canViewOrders',
+                'formulation.html': 'canAccessFormulation',
+                'formulation-inventory.html': 'canAccessFormulationInventory',
+                'reports.html': 'canAccessReports'
+            };
+            
+            const currentPage = window.location.pathname.split('/').pop();
+            const requiredPermission = pagePermissions[currentPage];
+            
+            if (requiredPermission && (!user.permissions || !user.permissions[requiredPermission])) {
+                window.location.href = 'dashboard.html';
+                showToast('You do not have permission to access this page', 'error');
+                return false;
+            }
+            
+            return true;
+        }
+        
+        async function loadInventory() {
+            try {
+                const snapshot = await db.collection(FINISHED_GOODS_COLLECTION)
+                    .orderBy('addedAt', 'desc')
+                    .get();
+                
+                inventory = snapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data(),
+                    usedInOrders: doc.data().usedInOrders || []
+                }));
+                
+                updateStats();
+                renderTable();
+                
+            } catch (error) {
+                console.error("Error loading inventory:", error);
+                showToast("Error loading inventory", "error");
+            }
+        }
+        
+        async function loadPendingOrders() {
+            try {
+                const ordersSnap = await db.collection(ORDERS_COLLECTION).get();
+                const packingsSnap = await db.collection(PACKING_COLLECTION).get();
+                
+                const packings = packingsSnap.docs.map(doc => doc.data());
+                
+                // Get all orders and calculate packed status for each line
+                const orders = await Promise.all(ordersSnap.docs.map(async doc => {
+                    const order = { id: doc.id, ...doc.data() };
+                    
+                    // Get packings for this order
+                    const orderPackings = packings.filter(p => p.order_id === order.id);
+                    
+                    // Enhance each line with packing info
+                    const enhancedLines = [];
+                    
+                    if (order.lines && Array.isArray(order.lines)) {
+                        for (const line of order.lines) {
+                            const linePackings = orderPackings.filter(p => p.order_line_id === line.id);
+                            const packedSoFar = linePackings.reduce((sum, p) => sum + (p.packed_boxes || 0), 0);
+                            const orderedQty = line.boxes || line.qty || 0;
+                            
+                            enhancedLines.push({
+                                ...line,
+                                id: line.id,
+                                packedSoFar: packedSoFar,
+                                remaining: orderedQty - packedSoFar,
+                                isFullyPacked: packedSoFar >= orderedQty
+                            });
+                        }
+                    }
+                    
+                    const totalOrdered = order.total_boxes || 0;
+                    const totalPacked = orderPackings.reduce((sum, p) => sum + (p.packed_boxes || 0), 0);
+                    
+                    return {
+                        ...order,
+                        lines: enhancedLines,
+                        totalPacked,
+                        isFullyPacked: totalPacked >= totalOrdered
+                    };
+                }));
+                
+                // Filter orders that are not fully packed
+                pendingOrders = orders.filter(order => !order.isFullyPacked);
+                
+                return pendingOrders;
+            } catch (error) {
+                console.error("Error loading pending orders:", error);
+                return [];
+            }
+        }
+        
+        function updateStats() {
+            const totalBoxes = inventory.reduce((sum, item) => sum + (item.quantity || 0), 0);
+            const usedBoxes = inventory.reduce((sum, item) => sum + (item.usedQuantity || 0), 0);
+            const uniqueProducts = new Set(inventory.map(item => 
+                `${item.brandName}-${item.technicalName}-${item.size}`
+            )).size;
+            const activeBatches = inventory.filter(item => (item.quantity || 0) > 0).length;
+            
+            // Count unique orders served
+            const ordersSet = new Set();
+            inventory.forEach(item => {
+                (item.usedInOrders || []).forEach(order => {
+                    ordersSet.add(order.orderNumber);
+                });
+            });
+            
+            document.getElementById('totalBoxes').textContent = totalBoxes;
+            document.getElementById('usedBoxes').textContent = usedBoxes;
+            document.getElementById('ordersServed').textContent = ordersSet.size;
+            document.getElementById('activeBatches').textContent = activeBatches;
+        }
+        
+        function renderTable() {
+            const tbody = document.getElementById('inventoryTableBody');
+            const searchTerm = document.getElementById('searchInventory')?.value.toLowerCase() || '';
+            const sizeFilter = document.getElementById('filterSize')?.value || '';
+            
+            let filtered = inventory.filter(item => {
+                const matchesSearch = 
+                    (item.brandName?.toLowerCase() || '').includes(searchTerm) ||
+                    (item.technicalName?.toLowerCase() || '').includes(searchTerm) ||
+                    (item.batchNumber?.toLowerCase() || '').includes(searchTerm);
+                
+                const matchesSize = !sizeFilter || item.size === sizeFilter;
+                
+                return matchesSearch && matchesSize;
+            });
+            
+            if (filtered.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="8" class="text-center text-muted" style="padding: 40px;">
+                            No finished goods found
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            tbody.innerHTML = filtered.map(item => {
+                const available = item.quantity || 0;
+                const canUse = available > 0 && canUseFinishedGoods();
+                
+                // Create order tags for used orders
+                const orderTags = (item.usedInOrders || []).map(order => 
+                    `<span class="order-tag" onclick="viewOrderDetails('${order.orderNumber}')" title="Used ${order.quantity} boxes on ${new Date(order.usedOn).toLocaleDateString()}">${order.orderNumber}</span>`
+                ).join('');
+                
+                return `
+                    <tr>
+                        <td><strong>${item.brandName || 'N/A'}</strong></td>
+                        <td><span class="badge badge-purple">${item.technicalName || 'N/A'}</span></td>
+                        <td><span class="badge badge-info">${item.size || 'N/A'}</span></td>
+                        <td><span class="badge badge-warning">${item.batchNumber || 'N/A'}</span></td>
+                        <td>
+                            <div>MFG: ${item.mfgDate || 'N/A'}</div>
+                            <div>EXP: ${item.expDate || 'N/A'}</div>
+                        </td>
+                        <td><strong style="color: #7c3aed;">${available}</strong></td>
+                        <td>
+                            ${orderTags || '<span class="text-muted">Not used yet</span>'}
+                            ${(item.usedInOrders || []).length > 0 ? 
+                                `<div class="orders-used">${item.usedInOrders.length} order(s)</div>` : ''}
+                        </td>
+                        <td class="action-cell">
+                            ${canUse ? `
+                                <button class="use-btn" onclick="openUseModal('${item.id}')" ${available === 0 ? 'disabled' : ''}>
+                                    📦 Use
+                                </button>
+                            ` : ''}
+                            ${(item.usedInOrders || []).length > 0 ? `
+                                <button class="view-btn" onclick="viewOrders('${item.id}')">
+                                    👁️ View
+                                </button>
+                            ` : ''}
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+        
+        // Navigate to order details
+        window.viewOrderDetails = function(orderNumber) {
+            window.location.href = `orders.html?search=${orderNumber}`;
+        };
+        
+        // Open modal to use finished goods in order
+        window.openUseModal = async function(itemId) {
+            const item = inventory.find(i => i.id === itemId);
+            if (!item) return;
+            
+            currentSelectedItem = item;
+            
+            await loadPendingOrders();
+            
+            const orderSelect = document.getElementById('orderSelect');
+            orderSelect.innerHTML = '<option value="">Select Order & Product Line</option>';
+            
+            let hasMatchingOrders = false;
+            
+            pendingOrders.forEach(order => {
+                const matchingLines = order.lines?.filter(line => {
+                    const brandMatch = line.brand_name === item.brandName;
+                    const techMatch = line.technical_name === item.technicalName;
+                    const sizeMatch = line.size === item.size;
+                    
+                    return brandMatch && techMatch && sizeMatch && line.remaining > 0;
+                }) || [];
+                
+                if (matchingLines.length > 0) {
+                    hasMatchingOrders = true;
+                    
+                    matchingLines.forEach((line, index) => {
+                        const option = document.createElement('option');
+                        
+                        option.value = `${order.id}|${line.id}`;
+                        
+                        const orderedQty = line.boxes || line.qty || 0;
+                        const remaining = line.remaining || 0;
+                        
+                        const productDisplay = `${line.brand_name} - ${line.size}`;
+                        option.textContent = `${order.order_number} | ${productDisplay} | Need: ${remaining} boxes`;
+                        
+                        option.setAttribute('data-order-id', order.id);
+                        option.setAttribute('data-order-number', order.order_number);
+                        option.setAttribute('data-line-id', line.id);
+                        option.setAttribute('data-ordered', orderedQty);
+                        option.setAttribute('data-remaining', remaining);
+                        option.setAttribute('data-brand', line.brand_name);
+                        option.setAttribute('data-technical', line.technical_name);
+                        option.setAttribute('data-size', line.size);
+                        
+                        orderSelect.appendChild(option);
+                    });
+                }
+            });
+            
+            if (!hasMatchingOrders) {
+                orderSelect.innerHTML = `<option value="">No pending orders need ${item.brandName} - ${item.technicalName} - ${item.size}</option>`;
+            }
+            
+            document.getElementById('selectedItemInfo').innerHTML = `
+                <div class="info-row">
+                    <span class="info-label">Brand:</span>
+                    <span class="info-value">${item.brandName}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Technical:</span>
+                    <span class="info-value">${item.technicalName}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Size:</span>
+                    <span class="info-value">${item.size}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Batch:</span>
+                    <span class="info-value">${item.batchNumber}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">PCS/Box:</span>
+                    <span class="info-value">${item.pcsPerBox || 1}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Available:</span>
+                    <span class="info-value">${item.quantity} boxes</span>
+                </div>
+            `;
+            
+            document.getElementById('maxQuantity').textContent = item.quantity;
+            document.getElementById('useQuantity').value = Math.min(10, item.quantity);
+            document.getElementById('useQuantity').max = item.quantity;
+            document.getElementById('orderLineInfo').style.display = 'none';
+            
+            orderSelect.onchange = function() {
+                const selectedOption = orderSelect.options[orderSelect.selectedIndex];
+                if (selectedOption && selectedOption.value) {
+                    const remaining = selectedOption.getAttribute('data-remaining') || 0;
+                    const orderedQty = selectedOption.getAttribute('data-ordered') || 0;
+                    const brand = selectedOption.getAttribute('data-brand') || '';
+                    const tech = selectedOption.getAttribute('data-technical') || '';
+                    const size = selectedOption.getAttribute('data-size') || '';
+                    
+                    document.getElementById('orderLineInfo').style.display = 'block';
+                    document.getElementById('orderLineInfo').innerHTML = `
+                        <strong>Selected Product Line:</strong><br>
+                        Product: ${brand} - ${tech}<br>
+                        Size: ${size}<br>
+                        Ordered: ${orderedQty} boxes<br>
+                        Still Need: ${remaining} boxes
+                    `;
+                } else {
+                    document.getElementById('orderLineInfo').style.display = 'none';
+                }
+            };
+            
+            document.getElementById('useInOrderModal').classList.add('active');
+        };
+        
+        window.viewOrders = function(itemId) {
+            const item = inventory.find(i => i.id === itemId);
+            if (!item || !item.usedInOrders) return;
+            
+            const ordersHtml = item.usedInOrders.map(order => `
+                <div class="history-item" onclick="viewOrderDetails('${order.orderNumber}')" style="cursor: pointer;">
+                    <div>
+                        <span class="history-order">Order #${order.orderNumber}</span>
+                        <div style="font-size: 11px; color: var(--text-muted);">
+                            Used on: ${new Date(order.usedOn).toLocaleDateString()}
+                        </div>
+                    </div>
+                    <span class="history-qty">${order.quantity} boxes</span>
+                </div>
+            `).join('');
+            
+            document.getElementById('ordersHistory').innerHTML = ordersHtml || '<div class="text-center text-muted">No usage history</div>';
+            document.getElementById('viewOrdersModal').classList.add('active');
+        };
+        
+        window.closeModal = function() {
+            document.getElementById('useInOrderModal').classList.remove('active');
+            currentSelectedItem = null;
+        };
+        
+        window.closeViewModal = function() {
+            document.getElementById('viewOrdersModal').classList.remove('active');
+        };
+        
+        window.confirmUseInOrder = async function() {
+            if (!currentSelectedItem) {
+                showToast('No item selected', 'error');
+                return;
+            }
+            
+            const orderSelect = document.getElementById('orderSelect');
+            const selectedValue = orderSelect.value;
+            const quantity = parseInt(document.getElementById('useQuantity').value);
+            
+            if (!selectedValue) {
+                showToast('Please select an order and product line', 'error');
+                return;
+            }
+            
+            const [orderId, lineId] = selectedValue.split('|');
+            
+            if (!orderId || !lineId) {
+                showToast('Invalid order selection', 'error');
+                return;
+            }
+            
+            if (!quantity || quantity < 1 || quantity > currentSelectedItem.quantity) {
+                showToast(`Please enter quantity between 1 and ${currentSelectedItem.quantity}`, 'error');
+                return;
+            }
+            
+            const selectedOption = orderSelect.options[orderSelect.selectedIndex];
+            const remaining = parseInt(selectedOption?.getAttribute('data-remaining') || 0);
+            
+            if (quantity > remaining) {
+                showToast(`This order line only needs ${remaining} boxes. You cannot use more than needed.`, 'error');
+                return;
+            }
+            
+            try {
+                const orderSnap = await db.collection(ORDERS_COLLECTION).doc(orderId).get();
+                const order = orderSnap.data();
+                
+                const matchingLine = order.lines?.find(line => line.id === lineId);
+                
+                if (!matchingLine) {
+                    showToast('Selected product line not found in order', 'error');
+                    return;
+                }
+                
+                if (matchingLine.brand_name !== currentSelectedItem.brandName ||
+                    matchingLine.technical_name !== currentSelectedItem.technicalName ||
+                    matchingLine.size !== currentSelectedItem.size) {
+                    
+                    showToast('Product mismatch! Brand, technical name and size must match exactly.', 'error');
+                    return;
+                }
+                
+                const size = currentSelectedItem.size;
+                const volumePerBox = convertSizeToLiters(size) * (currentSelectedItem.pcsPerBox || 1);
+                const totalVolume = quantity * volumePerBox;
+                
+                const packingRecord = {
+                    id: 'PACK-FG-' + Date.now().toString(36) + Math.random().toString(36).substr(2, 4),
+                    order_id: orderId,
+                    order_line_id: lineId,
+                    packed_boxes: quantity,
+                    batch_number: currentSelectedItem.batchNumber,
+                    mfg_date: currentSelectedItem.mfgDate,
+                    exp_date: currentSelectedItem.expDate,
+                    product_name: currentSelectedItem.brandName,
+                    pcs_per_box: currentSelectedItem.pcsPerBox || 0,
+                    size: currentSelectedItem.size,
+                    packed_by: 'Finished Goods',
+                    packed_date: new Date().toISOString().split('T')[0],
+                    created_at: new Date().toISOString(),
+                    from_finished_goods: true,
+                    finished_goods_id: currentSelectedItem.id
+                };
+                
+                await db.collection(PACKING_COLLECTION).doc(packingRecord.id).set(packingRecord);
+                
+                const formulationRecord = {
+                    id: 'FORM-FG-' + Date.now().toString(36) + Math.random().toString(36).substr(2, 4),
+                    order_id: orderId,
+                    technical_name: currentSelectedItem.technicalName,
+                    formulated_qty: totalVolume,
+                    batch_number: currentSelectedItem.batchNumber,
+                    mfg_date: currentSelectedItem.mfgDate,
+                    exp_date: currentSelectedItem.expDate,
+                    remarks: `Used from Finished Goods - Order ${order.order_number}`,
+                    formulated_date: new Date().toISOString().split('T')[0],
+                    created_at: new Date().toISOString(),
+                    formulated_by: 'Finished Goods',
+                    from_finished_goods: true,
+                    finished_goods_id: currentSelectedItem.id
+                };
+                
+                await db.collection(FORMULATION_COLLECTION).doc(formulationRecord.id).set(formulationRecord);
+                
+                const newQuantity = currentSelectedItem.quantity - quantity;
+                const newUsedQuantity = (currentSelectedItem.usedQuantity || 0) + quantity;
+                
+                const usedOrders = currentSelectedItem.usedInOrders || [];
+                usedOrders.push({
+                    orderId: orderId,
+                    orderNumber: order.order_number,
+                    lineId: lineId,
+                    quantity: quantity,
+                    size: currentSelectedItem.size,
+                    usedOn: new Date().toISOString()
+                });
+                
+                await db.collection(FINISHED_GOODS_COLLECTION).doc(currentSelectedItem.id).update({
+                    quantity: newQuantity,
+                    usedQuantity: newUsedQuantity,
+                    usedInOrders: usedOrders,
+                    updatedAt: new Date().toISOString()
+                });
+                
+                showToast(`✅ Used ${quantity} boxes (${currentSelectedItem.size}) for order ${order.order_number}`, 'purple');
+                showToast(`✅ Marked ${totalVolume.toFixed(2)} L as formulated`, 'success');
+                
+                closeModal();
+                await loadInventory();
+                
+            } catch (error) {
+                console.error("Error using finished goods:", error);
+                showToast('Error using finished goods: ' + error.message, 'error');
+            }
+        };
+        
+        function convertSizeToLiters(size) {
+            if (!size) return 0;
+            const sizeStr = size.toString().toUpperCase();
+            const value = parseFloat(sizeStr) || 0;
+            if (sizeStr.includes('ML')) {
+                return value / 1000;
+            } else if (sizeStr.includes('LTR') || sizeStr.includes('L')) {
+                return value;
+            }
+            return 0;
+        }
+        
+        window.refreshInventory = function() {
+            loadInventory();
+            showToast('Inventory refreshed');
+        };
+        
+        // ==================== INITIALIZATION ====================
+        
+        if (!checkPageAccess()) {
+            // Redirect will happen in checkPageAccess
+        } else {
+            updateNavigation();
+            
+            document.getElementById('logoutBtn').addEventListener('click', function(e) {
+                e.preventDefault();
+                logout();
+            });
+            
+            loadInventory();
+        }
+        
+        document.getElementById('searchInventory').addEventListener('input', renderTable);
+        document.getElementById('filterSize').addEventListener('change', renderTable);
+        
+        window.addEventListener('click', (event) => {
+            const modal = document.getElementById('useInOrderModal');
+            const viewModal = document.getElementById('viewOrdersModal');
+            if (event.target === modal) closeModal();
+            if (event.target === viewModal) closeViewModal();
+        });
+    </script>
+</body>
+</html>
