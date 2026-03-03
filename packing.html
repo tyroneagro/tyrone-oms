@@ -227,6 +227,20 @@
             cursor: pointer;
             transition: all 0.2s;
             box-shadow: var(--shadow);
+            position: relative;
+        }
+
+        .order-card.locked {
+            background: #f1f5f9;
+            border-color: var(--text-muted);
+            opacity: 0.9;
+            cursor: not-allowed;
+        }
+
+        .order-card.locked:hover {
+            transform: none;
+            box-shadow: var(--shadow);
+            border-color: var(--text-muted);
         }
 
         .order-card:hover {
@@ -246,6 +260,34 @@
             font-weight: 600;
             font-size: 1.1rem;
             color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .lock-badge {
+            background: var(--danger);
+            color: white;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .unlock-badge {
+            background: var(--success);
+            color: white;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            cursor: pointer;
         }
 
         .order-status {
@@ -268,6 +310,11 @@
         .status-completed {
             background: #d1fae5;
             color: var(--success);
+        }
+
+        .status-locked {
+            background: #fee2e2;
+            color: var(--danger);
         }
 
         .customer-name {
@@ -349,6 +396,74 @@
             margin-left: 0.5rem;
         }
 
+        /* Admin Controls */
+        .admin-controls {
+            margin-top: 1rem;
+            padding-top: 0.75rem;
+            border-top: 1px solid var(--border);
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .lock-btn {
+            background: var(--danger);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 0.4rem 0.75rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            flex: 1;
+            justify-content: center;
+        }
+
+        .lock-btn:hover {
+            background: #b91c1c;
+        }
+
+        .lock-btn:disabled {
+            background: var(--border);
+            cursor: not-allowed;
+        }
+
+        .unlock-btn {
+            background: var(--success);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 0.4rem 0.75rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            flex: 1;
+            justify-content: center;
+        }
+
+        .unlock-btn:hover {
+            background: #047857;
+        }
+
+        .view-only-badge {
+            background: var(--info);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
         /* Modal Styles */
         .modal {
             display: none;
@@ -403,6 +518,17 @@
         .modal-header h2 {
             font-size: 1.5rem;
             font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .modal-lock-badge {
+            background: rgba(255,255,255,0.2);
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
         }
 
         .close-btn {
@@ -426,6 +552,32 @@
 
         .modal-body {
             padding: 2rem;
+        }
+
+        /* View Only Mode */
+        .view-only-overlay {
+            background: #f8fafc;
+            border: 2px solid var(--info);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            color: var(--info);
+        }
+
+        .view-only-icon {
+            font-size: 1.5rem;
+        }
+
+        .view-only-text {
+            font-weight: 500;
+        }
+
+        .disabled-form {
+            opacity: 0.7;
+            pointer-events: none;
         }
 
         /* Order Summary */
@@ -649,6 +801,12 @@
             border-width: 2px;
         }
 
+        .batch-card.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
         .batch-number {
             font-weight: 600;
             color: var(--text);
@@ -753,6 +911,12 @@
             padding: 1.5rem;
         }
 
+        .packing-form.disabled {
+            opacity: 0.5;
+            background: #f1f5f9;
+            border-color: var(--text-muted);
+        }
+
         .form-title {
             font-size: 1rem;
             font-weight: 600;
@@ -832,6 +996,13 @@
             box-shadow: var(--shadow);
         }
 
+        .btn-pack:disabled {
+            background: var(--border);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
         .calculation-hint {
             margin-top: 1rem;
             font-size: 0.875rem;
@@ -868,6 +1039,10 @@
 
         .toast.purple {
             background: var(--purple);
+        }
+
+        .toast.info {
+            background: var(--info);
         }
 
         /* Responsive */
@@ -1020,6 +1195,7 @@
         let bulkInventory = [];
         let selectedBatch = null;
         let allPackings = [];
+        let currentUser = null;
         
         // ==================== UTILITY FUNCTIONS ====================
         
@@ -1029,6 +1205,10 @@
             } catch (e) {
                 return null;
             }
+        }
+
+        function isAdmin() {
+            return currentUser && (currentUser.role === 'admin' || currentUser.role === 'Admin');
         }
 
         function logout() {
@@ -1053,6 +1233,8 @@
                 window.location.href = 'index.html';
                 return;
             }
+
+            currentUser = user;
 
             const navItems = [
                 { permission: 'canViewDashboard', url: 'dashboard.html', text: 'Dashboard' },
@@ -1135,6 +1317,48 @@
             }
             
             return true;
+        }
+
+        // ==================== ORDER LOCK FUNCTIONS ====================
+        
+        async function toggleOrderLock(orderId, currentLockStatus) {
+            if (!isAdmin()) {
+                showToast('Only Admin can lock/unlock orders', 'error');
+                return false;
+            }
+            
+            try {
+                const newLockStatus = !currentLockStatus;
+                const orderRef = db.collection(COLLECTIONS.ORDERS).doc(orderId);
+                
+                await orderRef.update({
+                    isLocked: newLockStatus,
+                    lockedBy: newLockStatus ? currentUser?.name || 'Admin' : null,
+                    lockedAt: newLockStatus ? new Date().toISOString() : null,
+                    unlockedAt: !newLockStatus ? new Date().toISOString() : null
+                });
+                
+                showToast(
+                    newLockStatus ? '🔒 Order locked successfully' : '🔓 Order unlocked successfully',
+                    newLockStatus ? 'info' : 'success'
+                );
+                
+                // Refresh data
+                await loadData();
+                
+                // If modal is open with this order, refresh it
+                if (selectedOrder && selectedOrder.id === orderId) {
+                    selectedOrder.isLocked = newLockStatus;
+                    const orderPackings = allPackings.filter(p => p.order_id === selectedOrder.id);
+                    await renderOrderDetails(selectedOrder, orderPackings);
+                }
+                
+                return true;
+            } catch (error) {
+                console.error("Error toggling order lock:", error);
+                showToast('Error updating order lock', 'error');
+                return false;
+            }
         }
 
         // ==================== SIZE CONVERSION ====================
@@ -1304,7 +1528,8 @@
                         extraBoxes,      // Extra boxes made
                         totalBoxes: totalOrderBoxes,
                         progress,
-                        isFullyPacked
+                        isFullyPacked,
+                        isLocked: order.isLocked || false
                     };
                 });
                 
@@ -1351,12 +1576,16 @@
                 const extraBoxes = order.extraBoxes || 0;
                 const totalBoxes = order.totalBoxes || 0;
                 const remainingForOrder = Math.max(0, totalBoxes - orderBoxes);
+                const isLocked = order.isLocked || false;
                 
                 // Determine status based ONLY on order fulfillment
                 let statusClass = 'status-pending';
                 let statusText = 'Pending';
                 
-                if (order.isFullyPacked) {
+                if (isLocked) {
+                    statusClass = 'status-locked';
+                    statusText = 'Locked';
+                } else if (order.isFullyPacked) {
                     statusClass = 'status-completed';
                     statusText = 'Completed';
                 } else if (orderBoxes > 0) {
@@ -1365,9 +1594,12 @@
                 }
                 
                 return `
-                    <div class="order-card" onclick="openOrderModal('${order.id}')">
+                    <div class="order-card ${isLocked ? 'locked' : ''}" onclick="${!isLocked ? `openOrderModal('${order.id}')` : ''}">
                         <div class="order-header">
-                            <span class="order-number">${order.order_number || 'Unknown'}</span>
+                            <span class="order-number">
+                                ${order.order_number || 'Unknown'}
+                                ${isLocked ? '<span class="lock-badge">🔒 Locked</span>' : ''}
+                            </span>
                             <span class="order-status ${statusClass}">${statusText}</span>
                         </div>
                         <div class="customer-name">
@@ -1388,7 +1620,7 @@
                             ${extraBoxes > 0 ? 
                                 `<span class="order-extra">✨ Extra: ${extraBoxes}</span>` : 
                                 ''}
-                            ${!order.isFullyPacked ? 
+                            ${!order.isFullyPacked && !isLocked ? 
                                 `<span class="order-left">⏳ Left: ${remainingForOrder}</span>` : 
                                 ''}
                         </div>
@@ -1397,6 +1629,19 @@
                                 +${extraBoxes} extra boxes in Finished Goods
                             </div>` : 
                             ''}
+                        
+                        ${isAdmin() ? `
+                            <div class="admin-controls">
+                                ${isLocked ? 
+                                    `<button class="unlock-btn" onclick="event.stopPropagation(); toggleOrderLock('${order.id}', true)">
+                                        <span>🔓</span> Unlock Order
+                                    </button>` : 
+                                    `<button class="lock-btn" onclick="event.stopPropagation(); toggleOrderLock('${order.id}', false)">
+                                        <span>🔒</span> Lock Order
+                                    </button>`
+                                }
+                            </div>
+                        ` : ''}
                     </div>
                 `;
             }).join('');
@@ -1410,7 +1655,16 @@
                 selectedOrder = { id: orderSnap.id, ...orderSnap.data() };
                 selectedBatch = null;
                 
-                document.getElementById('modalOrderNumber').textContent = `Order: ${selectedOrder.order_number || 'Unknown'}`;
+                // Check if order is locked
+                if (selectedOrder.isLocked && !isAdmin()) {
+                    showToast('This order is locked. Only Admin can modify.', 'error');
+                    return;
+                }
+                
+                document.getElementById('modalOrderNumber').innerHTML = `
+                    ${selectedOrder.order_number || 'Unknown'}
+                    ${selectedOrder.isLocked ? '<span class="modal-lock-badge">🔒 Locked</span>' : ''}
+                `;
                 
                 const orderPackings = allPackings.filter(p => p.order_id === selectedOrder.id);
                 await renderOrderDetails(selectedOrder, orderPackings);
@@ -1430,6 +1684,8 @@
         
         async function renderOrderDetails(order, packings = []) {
             const container = document.getElementById('modalBody');
+            const isLocked = order.isLocked || false;
+            const canEdit = !isLocked || isAdmin();
             
             const customer = customers.find(c => c.id === order.customer_id) || {};
             
@@ -1454,6 +1710,13 @@
             const isOrderCompleted = totalPackedOrderBoxes >= totalOrderBoxes && totalOrderBoxes > 0;
             
             let html = `
+                ${isLocked && !isAdmin() ? `
+                    <div class="view-only-overlay">
+                        <span class="view-only-icon">🔒</span>
+                        <span class="view-only-text">This order is locked by Admin. View only mode.</span>
+                    </div>
+                ` : ''}
+                
                 <!-- Order Summary -->
                 <div class="order-summary">
                     <div class="summary-grid">
@@ -1482,6 +1745,11 @@
                         `<div class="completion-badge completed">✓ Order Quantity Fully Packed</div>` : 
                         `<div class="completion-badge pending">⏳ Remaining for Order: ${remainingForOrder} boxes</div>`
                     }
+                    ${isLocked ? `
+                        <div style="margin-top: 1rem; padding: 0.5rem; background: #fee2e2; border-radius: 6px; color: var(--danger); text-align: center;">
+                            🔒 This order is locked. ${isAdmin() ? 'Admin can modify.' : 'View only.'}
+                        </div>
+                    ` : ''}
                 </div>
                 
                 <div class="items-container">
@@ -1591,8 +1859,8 @@
                         `;
                     }
                     
-                    // Available Batches
-                    if (availableStock.length > 0) {
+                    // Available Batches - Show but disable if locked
+                    if (availableStock.length > 0 && canEdit) {
                         html += `
                             <div class="history-section">
                                 <div class="history-title">
@@ -1603,7 +1871,25 @@
                                         <div class="batch-card ${selectedBatch?.id === item.id && selectedBatch?.lineId === line.id ? 'selected' : ''}" 
                                              data-id="${item.id}"
                                              data-line="${line.id}"
-                                             onclick="selectBatch('${item.id}', '${item.batchNumber}', '${item.mfgDate || ''}', '${item.expDate || ''}', ${item.quantity || 0}, '${line.id}')">
+                                             onclick="${canEdit ? `selectBatch('${item.id}', '${item.batchNumber}', '${item.mfgDate || ''}', '${item.expDate || ''}', ${item.quantity || 0}, '${line.id}')` : ''}">
+                                            <div class="batch-number">${item.batchNumber}</div>
+                                            <div class="batch-detail">MFG: ${item.mfgDate || 'N/A'}</div>
+                                            <div class="batch-detail">EXP: ${item.expDate || 'N/A'}</div>
+                                            <div class="batch-qty">Available: <span>${(item.quantity || 0).toFixed(2)} L</span></div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        `;
+                    } else if (availableStock.length > 0 && !canEdit) {
+                        html += `
+                            <div class="history-section">
+                                <div class="history-title">
+                                    <span>🏷️</span> Available Batches
+                                </div>
+                                <div class="batch-grid">
+                                    ${availableStock.map(item => `
+                                        <div class="batch-card disabled">
                                             <div class="batch-number">${item.batchNumber}</div>
                                             <div class="batch-detail">MFG: ${item.mfgDate || 'N/A'}</div>
                                             <div class="batch-detail">EXP: ${item.expDate || 'N/A'}</div>
@@ -1615,8 +1901,8 @@
                         `;
                     }
                     
-                    // Packing Form
-                    if (availableStock.length > 0) {
+                    // Packing Form - Show only if editable
+                    if (availableStock.length > 0 && canEdit) {
                         html += `
                             <div class="packing-form">
                                 <div class="form-title">
@@ -1627,7 +1913,8 @@
                                         <label>Boxes to Pack</label>
                                         <input type="number" class="form-control" id="qty-${line.id}" 
                                                min="1" value="1"
-                                               onchange="calculateConsumedQty('${line.id}')">
+                                               onchange="calculateConsumedQty('${line.id}')"
+                                               ${!canEdit ? 'disabled' : ''}>
                                     </div>
                                     <div class="form-field">
                                         <label>Batch Number</label>
@@ -1646,12 +1933,23 @@
                                         <label>Stock to Use (L)</label>
                                         <input type="number" class="form-control calculated-field" id="stock-${line.id}" readonly>
                                     </div>
-                                    <button class="btn-pack" onclick="packBatch('${order.id}', '${line.id}')">
+                                    <button class="btn-pack" onclick="packBatch('${order.id}', '${line.id}')" ${!canEdit ? 'disabled' : ''}>
                                         <span>📦</span> Pack
                                     </button>
                                 </div>
                                 <div class="calculation-hint" id="calculation-${line.id}">
                                     Enter number of boxes to calculate required stock
+                                </div>
+                            </div>
+                        `;
+                    } else if (availableStock.length > 0 && !canEdit) {
+                        html += `
+                            <div class="packing-form disabled">
+                                <div class="form-title">
+                                    <span>📦</span> Packing Disabled
+                                </div>
+                                <div style="text-align: center; padding: 1rem; color: var(--text-muted);">
+                                    This order is locked. Packing not allowed.
                                 </div>
                             </div>
                         `;
@@ -1674,6 +1972,12 @@
         // ==================== BATCH SELECTION ====================
         
         window.selectBatch = function(batchId, batchNumber, mfgDate, expDate, availableQty, lineId) {
+            // Check if order is locked and user is not admin
+            if (selectedOrder?.isLocked && !isAdmin()) {
+                showToast('This order is locked. Cannot select batch.', 'error');
+                return;
+            }
+            
             selectedBatch = {
                 id: batchId,
                 batchNumber: batchNumber,
@@ -1701,6 +2005,11 @@
         // ==================== CALCULATION ====================
         
         window.calculateConsumedQty = function(lineId) {
+            // Check if order is locked and user is not admin
+            if (selectedOrder?.isLocked && !isAdmin()) {
+                return;
+            }
+            
             const boxesInput = document.getElementById(`qty-${lineId}`);
             const stockInput = document.getElementById(`stock-${lineId}`);
             const calculationDisplay = document.getElementById(`calculation-${lineId}`);
@@ -1755,6 +2064,12 @@
         // ==================== PACK BATCH ====================
         
         window.packBatch = async function(orderId, lineId) {
+            // Check if order is locked
+            if (selectedOrder?.isLocked && !isAdmin()) {
+                showToast('This order is locked. Only Admin can pack.', 'error');
+                return;
+            }
+            
             const qtyInput = document.getElementById(`qty-${lineId}`);
             const batchInput = document.getElementById(`batch-${lineId}`);
             const mfgInput = document.getElementById(`mfg-${lineId}`);
