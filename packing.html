@@ -5,12 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tyrone - Packing Department</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
         :root {
             --primary: #2563eb;
             --primary-dark: #1d4ed8;
@@ -303,6 +297,7 @@
             background: var(--border);
             border-radius: 3px;
             overflow: hidden;
+            margin-bottom: 0.5rem;
         }
 
         .progress-fill {
@@ -317,6 +312,41 @@
             justify-content: space-between;
             color: var(--text-muted);
             font-size: 0.875rem;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            padding-top: 0.5rem;
+            border-top: 1px dashed var(--border);
+        }
+
+        .order-total {
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .order-packed {
+            color: var(--success);
+            font-weight: 600;
+        }
+
+        .order-extra {
+            color: var(--purple);
+            font-weight: 600;
+        }
+
+        .order-left {
+            color: var(--warning);
+            font-weight: 600;
+        }
+
+        .extra-badge {
+            display: inline-block;
+            background: var(--purple);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            margin-left: 0.5rem;
         }
 
         /* Modal Styles */
@@ -409,7 +439,7 @@
 
         .summary-grid {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
+            grid-template-columns: repeat(5, 1fr);
             gap: 1.5rem;
         }
 
@@ -434,6 +464,32 @@
 
         .summary-value.highlight {
             color: var(--primary);
+        }
+
+        .summary-value.success {
+            color: var(--success);
+        }
+
+        .summary-value.purple {
+            color: var(--purple);
+        }
+
+        .completion-badge {
+            margin-top: 1rem;
+            padding: 0.75rem;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .completion-badge.completed {
+            background: #d1fae5;
+            color: var(--success);
+        }
+
+        .completion-badge.pending {
+            background: #fef3c7;
+            color: var(--warning);
         }
 
         /* Items Container */
@@ -493,6 +549,9 @@
             border-radius: 20px;
             font-size: 0.875rem;
             border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
 
         .item-content {
@@ -534,6 +593,10 @@
 
         .data-value.warning {
             color: var(--warning);
+        }
+
+        .data-value.purple {
+            color: var(--purple);
         }
 
         /* Stock Status */
@@ -664,6 +727,24 @@
             color: var(--text-muted);
         }
 
+        .history-extra {
+            background: var(--purple);
+            color: white;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+
+        .history-order {
+            background: var(--success);
+            color: white;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+
         /* Packing Form */
         .packing-form {
             background: #f8fafc;
@@ -783,6 +864,10 @@
 
         .toast.error {
             background: var(--danger);
+        }
+
+        .toast.purple {
+            background: var(--purple);
         }
 
         /* Responsive */
@@ -925,7 +1010,8 @@
             ORDERS: 'orders',
             PACKING: 'packing',
             BULK_INVENTORY: 'bulk_inventory',
-            BULK_USAGE: 'bulk_usage'
+            BULK_USAGE: 'bulk_usage',
+            FINISHED_GOODS: 'finished_goods'
         };
         
         let selectedOrder = null;
@@ -1081,6 +1167,64 @@
             return 0;
         }
 
+        function convertSizeToLiters(sizeString) {
+            if (!sizeString) return 0;
+            const sizeML = convertSizeToML(sizeString);
+            return sizeML / 1000;
+        }
+
+        // ==================== ADD TO FINISHED GOODS ====================
+        
+        async function addToFinishedGoods(batchData, line, boxesToPack, stockUsed, order, isExtra) {
+            try {
+                const finishedGood = {
+                    brandName: line.brand_name || 'N/A',
+                    technicalName: line.technical_name,
+                    size: line.size,
+                    pcsPerBox: line.pcs_per_box || 1,
+                    batchNumber: batchData.batchNumber,
+                    mfgDate: batchData.mfgDate,
+                    expDate: batchData.expDate,
+                    quantity: boxesToPack,
+                    usedQuantity: 0,
+                    usedInOrders: [],
+                    sourceOrderId: order.id,
+                    sourceOrderNumber: order.order_number,
+                    sourceBatchId: batchData.id,
+                    isExtra: true,
+                    remarks: `Extra boxes packed from batch ${batchData.batchNumber}`,
+                    addedAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString()
+                };
+
+                const existingSnapshot = await db.collection(COLLECTIONS.FINISHED_GOODS)
+                    .where('batchNumber', '==', batchData.batchNumber)
+                    .where('technicalName', '==', line.technical_name)
+                    .where('size', '==', line.size)
+                    .get();
+
+                if (!existingSnapshot.empty) {
+                    const existingDoc = existingSnapshot.docs[0];
+                    const existingData = existingDoc.data();
+                    const newQuantity = (existingData.quantity || 0) + boxesToPack;
+                    
+                    await existingDoc.ref.update({
+                        quantity: newQuantity,
+                        updatedAt: new Date().toISOString(),
+                        remarks: `Added ${boxesToPack} extra boxes on ${new Date().toLocaleDateString()}`
+                    });
+                    
+                    console.log(`Updated finished goods: +${boxesToPack} boxes`);
+                } else {
+                    await db.collection(COLLECTIONS.FINISHED_GOODS).add(finishedGood);
+                    console.log(`Created new finished goods entry: ${boxesToPack} boxes`);
+                }
+            } catch (error) {
+                console.error("Error adding to finished goods:", error);
+                throw error;
+            }
+        }
+
         // ==================== LOAD DATA ====================
         
         async function loadBulkInventory() {
@@ -1119,7 +1263,7 @@
                 technicals = technicalsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 allPackings = packingsSnap.docs.map(doc => doc.data());
                 
-                // Calculate today's packed boxes
+                // Calculate today's packed boxes (all packing, including extras)
                 const today = new Date().toISOString().split('T')[0];
                 const todayPacked = allPackings
                     .filter(p => p.packed_date === today)
@@ -1130,21 +1274,37 @@
                 
                 orders = orders.map(order => {
                     const orderPackings = allPackings.filter(p => p.order_id === order.id);
-                    const packedBoxes = orderPackings.reduce((sum, p) => sum + (p.packed_boxes || 0), 0);
                     
-                    let totalBoxes = 0;
+                    // Separate order boxes (for fulfilling order) and extra boxes
+                    let orderBoxes = 0; // Boxes that count toward order fulfillment
+                    let extraBoxes = 0; // Extra boxes that go to finished goods
+                    
+                    orderPackings.forEach(p => {
+                        if (p.type === 'extra' || p.moved_to_finished_goods) {
+                            extraBoxes += p.packed_boxes || 0;
+                        } else {
+                            orderBoxes += p.packed_boxes || 0;
+                        }
+                    });
+                    
+                    let totalOrderBoxes = 0;
                     if (order.lines && Array.isArray(order.lines)) {
-                        totalBoxes = order.lines.reduce((sum, line) => sum + (line.boxes || line.qty || 0), 0);
+                        totalOrderBoxes = order.lines.reduce((sum, line) => sum + (line.boxes || line.qty || 0), 0);
                     }
                     
-                    const progress = totalBoxes > 0 ? (packedBoxes / totalBoxes) * 100 : 0;
+                    // Progress based ONLY on order boxes, NOT extra boxes
+                    const progress = totalOrderBoxes > 0 ? (orderBoxes / totalOrderBoxes) * 100 : 0;
+                    
+                    // Order is complete ONLY if orderBoxes >= totalOrderBoxes
+                    const isFullyPacked = orderBoxes >= totalOrderBoxes && totalOrderBoxes > 0;
                     
                     return { 
                         ...order, 
-                        packedBoxes, 
+                        orderBoxes,      // Boxes that fulfill the order
+                        extraBoxes,      // Extra boxes made
+                        totalBoxes: totalOrderBoxes,
                         progress,
-                        totalBoxes,
-                        isFullyPacked: packedBoxes >= totalBoxes && totalBoxes > 0
+                        isFullyPacked
                     };
                 });
                 
@@ -1157,6 +1317,7 @@
                         return stockAvailable;
                     });
                     
+                    // Show if not fully packed OR has stock available for extra packing
                     return (!order.isFullyPacked || hasAvailableStock) && order.totalBoxes > 0;
                 });
                 
@@ -1186,19 +1347,21 @@
             container.innerHTML = orders.map(order => {
                 const customer = customers.find(c => c.id === order.customer_id) || {};
                 const customerName = customer.company || customer.name || 'Unknown';
-                const remainingBoxes = (order.totalBoxes || 0) - (order.packedBoxes || 0);
+                const orderBoxes = order.orderBoxes || 0;
+                const extraBoxes = order.extraBoxes || 0;
+                const totalBoxes = order.totalBoxes || 0;
+                const remainingForOrder = Math.max(0, totalBoxes - orderBoxes);
                 
+                // Determine status based ONLY on order fulfillment
                 let statusClass = 'status-pending';
                 let statusText = 'Pending';
-                
-                if (order.packedBoxes > 0) {
-                    statusClass = 'status-progress';
-                    statusText = 'In Progress';
-                }
                 
                 if (order.isFullyPacked) {
                     statusClass = 'status-completed';
                     statusText = 'Completed';
+                } else if (orderBoxes > 0) {
+                    statusClass = 'status-progress';
+                    statusText = 'In Progress';
                 }
                 
                 return `
@@ -1212,18 +1375,28 @@
                         </div>
                         <div class="progress-container">
                             <div class="progress-header">
-                                <span>Packing Progress</span>
-                                <span>${order.packedBoxes || 0}/${order.totalBoxes || 0} boxes</span>
+                                <span>Order Fulfillment</span>
+                                <span>${orderBoxes}/${totalBoxes} boxes</span>
                             </div>
                             <div class="progress-bar">
                                 <div class="progress-fill" style="width: ${Math.min(order.progress, 100)}%"></div>
                             </div>
                         </div>
                         <div class="order-footer">
-                            <span>📦 Total: ${order.totalBoxes || 0}</span>
-                            <span>✅ Packed: ${order.packedBoxes || 0}</span>
-                            <span>⏳ Left: ${Math.max(remainingBoxes, 0)}</span>
+                            <span class="order-total">📦 Total: ${totalBoxes}</span>
+                            <span class="order-packed">✅ Packed: ${orderBoxes}</span>
+                            ${extraBoxes > 0 ? 
+                                `<span class="order-extra">✨ Extra: ${extraBoxes}</span>` : 
+                                ''}
+                            ${!order.isFullyPacked ? 
+                                `<span class="order-left">⏳ Left: ${remainingForOrder}</span>` : 
+                                ''}
                         </div>
+                        ${extraBoxes > 0 ? 
+                            `<div style="margin-top: 0.5rem; font-size: 0.7rem; color: var(--purple); text-align: right;">
+                                +${extraBoxes} extra boxes in Finished Goods
+                            </div>` : 
+                            ''}
                     </div>
                 `;
             }).join('');
@@ -1259,9 +1432,26 @@
             const container = document.getElementById('modalBody');
             
             const customer = customers.find(c => c.id === order.customer_id) || {};
-            const totalBoxes = order.lines?.reduce((sum, line) => sum + (line.boxes || line.qty || 0), 0) || 0;
-            const packedBoxes = packings.reduce((sum, p) => sum + (p.packed_boxes || 0), 0);
-            const remainingBoxes = totalBoxes - packedBoxes;
+            
+            // Calculate totals - SEPARATE order boxes from extra boxes
+            let totalOrderBoxes = 0;
+            let totalPackedOrderBoxes = 0;
+            let totalExtraBoxes = 0;
+            
+            if (order.lines && Array.isArray(order.lines)) {
+                totalOrderBoxes = order.lines.reduce((sum, line) => sum + (line.boxes || line.qty || 0), 0);
+            }
+            
+            packings.forEach(p => {
+                if (p.type === 'extra' || p.moved_to_finished_goods) {
+                    totalExtraBoxes += p.packed_boxes || 0;
+                } else {
+                    totalPackedOrderBoxes += p.packed_boxes || 0;
+                }
+            });
+            
+            const remainingForOrder = Math.max(0, totalOrderBoxes - totalPackedOrderBoxes);
+            const isOrderCompleted = totalPackedOrderBoxes >= totalOrderBoxes && totalOrderBoxes > 0;
             
             let html = `
                 <!-- Order Summary -->
@@ -1276,14 +1466,22 @@
                             <span class="summary-value">${order.order_date || 'N/A'}</span>
                         </div>
                         <div class="summary-item">
-                            <span class="summary-label">Total Boxes</span>
-                            <span class="summary-value highlight">${totalBoxes}</span>
+                            <span class="summary-label">Order Boxes</span>
+                            <span class="summary-value highlight">${totalOrderBoxes}</span>
                         </div>
                         <div class="summary-item">
-                            <span class="summary-label">Packed Boxes</span>
-                            <span class="summary-value highlight">${packedBoxes}</span>
+                            <span class="summary-label">Packed for Order</span>
+                            <span class="summary-value success">${totalPackedOrderBoxes}</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">Extra Boxes</span>
+                            <span class="summary-value purple">${totalExtraBoxes}</span>
                         </div>
                     </div>
+                    ${isOrderCompleted ? 
+                        `<div class="completion-badge completed">✓ Order Quantity Fully Packed</div>` : 
+                        `<div class="completion-badge pending">⏳ Remaining for Order: ${remainingForOrder} boxes</div>`
+                    }
                 </div>
                 
                 <div class="items-container">
@@ -1294,8 +1492,21 @@
             } else {
                 order.lines.forEach((line) => {
                     const linePackings = packings.filter(p => p.order_line_id === line.id);
-                    const linePacked = linePackings.reduce((sum, p) => sum + p.packed_boxes, 0);
-                    const lineRemaining = (line.boxes || line.qty || 0) - linePacked;
+                    const lineOrdered = line.boxes || line.qty || 0;
+                    
+                    let linePackedOrder = 0;
+                    let linePackedExtra = 0;
+                    
+                    linePackings.forEach(p => {
+                        if (p.type === 'extra' || p.moved_to_finished_goods) {
+                            linePackedExtra += p.packed_boxes || 0;
+                        } else {
+                            linePackedOrder += p.packed_boxes || 0;
+                        }
+                    });
+                    
+                    const lineRemaining = Math.max(0, lineOrdered - linePackedOrder);
+                    const isLineCompleted = linePackedOrder >= lineOrdered && lineOrdered > 0;
                     
                     const availableStock = bulkInventory.filter(item => 
                         item.technicalName === line.technical_name && 
@@ -1317,7 +1528,8 @@
                                     <span class="item-tag">${line.pcs_per_box || '0'} PCS/Box</span>
                                 </div>
                                 <div class="item-progress">
-                                    Packed: ${linePacked}/${line.boxes || line.qty || 0}
+                                    <span>Order: ${linePackedOrder}/${lineOrdered}</span>
+                                    ${linePackedExtra > 0 ? `<span class="extra-badge">Extra: ${linePackedExtra}</span>` : ''}
                                 </div>
                             </div>
                             
@@ -1326,15 +1538,15 @@
                                 <div class="data-grid">
                                     <div class="data-cell">
                                         <span class="data-label">Ordered Boxes</span>
-                                        <span class="data-value">${line.boxes || line.qty || 0}</span>
+                                        <span class="data-value">${lineOrdered}</span>
                                     </div>
                                     <div class="data-cell">
-                                        <span class="data-label">Packed Boxes</span>
-                                        <span class="data-value success">${linePacked}</span>
+                                        <span class="data-label">Packed for Order</span>
+                                        <span class="data-value success">${linePackedOrder}</span>
                                     </div>
                                     <div class="data-cell">
-                                        <span class="data-label">Remaining</span>
-                                        <span class="data-value warning">${Math.max(lineRemaining, 0)}</span>
+                                        <span class="data-label">Extra Boxes</span>
+                                        <span class="data-value purple">${linePackedExtra}</span>
                                     </div>
                                     <div class="data-cell">
                                         <span class="data-label">PCS per Box</span>
@@ -1366,6 +1578,10 @@
                                             <div class="history-info">
                                                 <span class="history-boxes">${p.packed_boxes} boxes</span>
                                                 <span class="history-batch">Batch: ${p.batch_number || 'N/A'}</span>
+                                                ${p.type === 'extra' || p.moved_to_finished_goods ? 
+                                                    '<span class="history-extra">Extra → Finished Goods</span>' : 
+                                                    '<span class="history-order">Order Fulfillment</span>'
+                                                }
                                             </div>
                                             <div class="history-date">${p.packed_date || ''}</div>
                                         </div>
@@ -1447,11 +1663,11 @@
                         `;
                     }
                     
-                    html += '</div></div>'; // Close item-content and item-card
+                    html += '</div></div>';
                 });
             }
             
-            html += '</div>'; // Close items-container
+            html += '</div>';
             container.innerHTML = html;
         }
         
@@ -1504,10 +1720,26 @@
                     
                     stockInput.value = totalLiters.toFixed(2);
                     
+                    const linePackings = allPackings.filter(p => p.order_line_id === line.id);
+                    let linePackedOrder = 0;
+                    linePackings.forEach(p => {
+                        if (!(p.type === 'extra' || p.moved_to_finished_goods)) {
+                            linePackedOrder += p.packed_boxes || 0;
+                        }
+                    });
+                    
+                    const lineOrdered = line.boxes || line.qty || 0;
+                    const remainingForOrder = Math.max(0, lineOrdered - linePackedOrder);
+                    
+                    let calculationText = `Required: ${boxesToPack} boxes × ${pcsPerBox} PCS × ${sizeML}ML = ${totalML}ML = ${totalLiters.toFixed(2)}L`;
+                    
+                    if (boxesToPack > remainingForOrder) {
+                        const extraBoxes = boxesToPack - remainingForOrder;
+                        calculationText += `<br><span style="color: var(--purple);">⚠️ ${extraBoxes} extra box(es) will be sent to Finished Goods</span>`;
+                    }
+                    
                     if (calculationDisplay) {
-                        calculationDisplay.innerHTML = `
-                            Required: ${boxesToPack} boxes × ${pcsPerBox} PCS × ${sizeML}ML = ${totalML}ML = ${totalLiters.toFixed(2)}L
-                        `;
+                        calculationDisplay.innerHTML = calculationText;
                     }
                     
                     if (selectedBatch && totalLiters > selectedBatch.availableQty) {
@@ -1577,7 +1809,31 @@
                 const timestamp = new Date().toISOString();
                 const user = getCurrentUser();
                 
-                // Reduce stock
+                // Calculate order vs extra
+                const linePackings = allPackings.filter(p => p.order_line_id === line.id);
+                let linePackedOrder = 0;
+                linePackings.forEach(p => {
+                    if (!(p.type === 'extra' || p.moved_to_finished_goods)) {
+                        linePackedOrder += p.packed_boxes || 0;
+                    }
+                });
+                
+                const lineOrdered = line.boxes || line.qty || 0;
+                const remainingForOrder = Math.max(0, lineOrdered - linePackedOrder);
+                
+                let orderBoxes = 0;  // Boxes that fulfill the order
+                let extraBoxes = 0;   // Extra boxes for finished goods
+                
+                if (boxesToPack <= remainingForOrder) {
+                    // All boxes go to order fulfillment
+                    orderBoxes = boxesToPack;
+                } else {
+                    // Some go to order, rest are extra
+                    orderBoxes = remainingForOrder;
+                    extraBoxes = boxesToPack - remainingForOrder;
+                }
+                
+                // Reduce stock from bulk inventory
                 const batchRef = db.collection(COLLECTIONS.BULK_INVENTORY).doc(selectedBatch.id);
                 const newQuantity = selectedBatch.availableQty - stockUsed;
                 
@@ -1586,49 +1842,96 @@
                     updatedAt: timestamp
                 });
                 
-                // Create packing record
-                const packingRecord = {
-                    id: 'PACK' + Date.now().toString(36) + Math.random().toString(36).substr(2, 4),
-                    order_id: orderId,
-                    order_line_id: lineId,
-                    packed_boxes: boxesToPack,
-                    batch_number: batchNumber,
-                    batch_id: selectedBatch.id,
-                    mfg_date: mfgDate,
-                    exp_date: expDate,
-                    stock_used: stockUsed,
-                    technical_name: line.technical_name,
-                    brand_name: line.brand_name,
-                    pcs_per_box: line.pcs_per_box || 0,
-                    size: line.size || 'N/A',
-                    packed_by: user?.name || 'Packing Manager',
-                    packed_date: new Date().toISOString().split('T')[0],
-                    created_at: timestamp
-                };
+                // Create packing record for order boxes (fulfillment)
+                if (orderBoxes > 0) {
+                    const orderStockUsed = (orderBoxes / boxesToPack) * stockUsed;
+                    
+                    const packingRecord = {
+                        id: 'PACK-' + Date.now().toString(36) + Math.random().toString(36).substr(2, 4) + '-ORDER',
+                        order_id: orderId,
+                        order_line_id: lineId,
+                        packed_boxes: orderBoxes,
+                        batch_number: batchNumber,
+                        batch_id: selectedBatch.id,
+                        mfg_date: mfgDate,
+                        exp_date: expDate,
+                        stock_used: orderStockUsed,
+                        technical_name: line.technical_name,
+                        brand_name: line.brand_name,
+                        pcs_per_box: line.pcs_per_box || 0,
+                        size: line.size || 'N/A',
+                        packed_by: user?.name || 'Packing Manager',
+                        packed_date: new Date().toISOString().split('T')[0],
+                        created_at: timestamp,
+                        type: 'order'  // Mark as order fulfillment
+                    };
+                    
+                    await db.collection(COLLECTIONS.PACKING).doc(packingRecord.id).set(packingRecord);
+                    
+                    // Create usage record
+                    const usageRecord = {
+                        id: 'USE-' + Date.now().toString(36) + Math.random().toString(36).substr(2, 4),
+                        batchId: selectedBatch.id,
+                        batchNumber: batchNumber,
+                        technicalName: line.technical_name,
+                        brandName: line.brand_name,
+                        quantity: orderStockUsed,
+                        orderId: orderId,
+                        orderNumber: selectedOrder.order_number,
+                        orderLineId: lineId,
+                        productPacked: `${line.size} - ${line.brand_name}`,
+                        packedBoxes: orderBoxes,
+                        remarks: `Packed ${orderBoxes} boxes for order`,
+                        usedBy: user?.name || 'Packing Manager',
+                        usedAt: timestamp
+                    };
+                    
+                    await db.collection(COLLECTIONS.BULK_USAGE).doc(usageRecord.id).set(usageRecord);
+                }
                 
-                await db.collection(COLLECTIONS.PACKING).doc(packingRecord.id).set(packingRecord);
+                // Handle extra boxes - Add to Finished Goods
+                if (extraBoxes > 0) {
+                    const extraStockUsed = (extraBoxes / boxesToPack) * stockUsed;
+                    
+                    await addToFinishedGoods(selectedBatch, line, extraBoxes, extraStockUsed, selectedOrder, true);
+                    
+                    // Create packing record for extra boxes
+                    const extraPackingRecord = {
+                        id: 'PACK-' + Date.now().toString(36) + Math.random().toString(36).substr(2, 4) + '-EXTRA',
+                        order_id: orderId,
+                        order_line_id: lineId,
+                        packed_boxes: extraBoxes,
+                        batch_number: batchNumber,
+                        batch_id: selectedBatch.id,
+                        mfg_date: mfgDate,
+                        exp_date: expDate,
+                        stock_used: extraStockUsed,
+                        technical_name: line.technical_name,
+                        brand_name: line.brand_name,
+                        pcs_per_box: line.pcs_per_box || 0,
+                        size: line.size || 'N/A',
+                        packed_by: user?.name || 'Packing Manager',
+                        packed_date: new Date().toISOString().split('T')[0],
+                        created_at: timestamp,
+                        type: 'extra',  // Mark as extra
+                        moved_to_finished_goods: true
+                    };
+                    
+                    await db.collection(COLLECTIONS.PACKING).doc(extraPackingRecord.id).set(extraPackingRecord);
+                }
                 
-                // Create usage record
-                const usageRecord = {
-                    id: 'USE' + Date.now().toString(36) + Math.random().toString(36).substr(2, 4),
-                    batchId: selectedBatch.id,
-                    batchNumber: batchNumber,
-                    technicalName: line.technical_name,
-                    brandName: line.brand_name,
-                    quantity: stockUsed,
-                    orderId: orderId,
-                    orderNumber: selectedOrder.order_number,
-                    orderLineId: lineId,
-                    productPacked: `${line.size} - ${line.brand_name}`,
-                    packedBoxes: boxesToPack,
-                    remarks: `Packed ${boxesToPack} boxes`,
-                    usedBy: user?.name || 'Packing Manager',
-                    usedAt: timestamp
-                };
-                
-                await db.collection(COLLECTIONS.BULK_USAGE).doc(usageRecord.id).set(usageRecord);
-                
-                showToast(`✅ Packed ${boxesToPack} boxes, Used ${stockUsed.toFixed(2)}L`, 'success');
+                // Show success message
+                let message = '';
+                if (orderBoxes > 0 && extraBoxes > 0) {
+                    message = `✅ Packed ${orderBoxes} boxes for order, ${extraBoxes} extra boxes moved to Finished Goods`;
+                    showToast(message, 'purple');
+                } else if (orderBoxes > 0) {
+                    message = `✅ Packed ${orderBoxes} boxes for order`;
+                    showToast(message, 'success');
+                } else if (extraBoxes > 0) {
+                    message = `✅ Added ${extraBoxes} extra boxes to Finished Goods`;
+                    showToast(message, 'purple');
+                }
                 
                 selectedBatch = null;
                 await loadBulkInventory();
