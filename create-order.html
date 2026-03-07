@@ -60,6 +60,9 @@
             background: white;
             border-bottom: 1px solid var(--border);
             padding: 0 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 50;
         }
         
         .nav-container {
@@ -97,6 +100,15 @@
         
         .nav-item.hidden {
             display: none;
+        }
+        
+        .nav-item.admin {
+            color: var(--purple);
+            font-weight: 600;
+        }
+        
+        .nav-item.admin.active {
+            border-bottom-color: var(--purple);
         }
         
         .user-menu {
@@ -190,6 +202,76 @@
             font-weight: 600;
         }
         
+        .order-type-toggle {
+            display: flex;
+            gap: 12px;
+            background: var(--bg);
+            padding: 4px;
+            border-radius: 40px;
+            border: 1px solid var(--border);
+        }
+        
+        .order-type-btn {
+            padding: 8px 20px;
+            border: none;
+            border-radius: 40px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: transparent;
+            color: var(--text-muted);
+        }
+        
+        .order-type-btn.active {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
+        }
+        
+        .order-type-btn.bulk.active {
+            background: var(--purple);
+        }
+        
+        .order-type-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .role-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+        
+        .role-badge.admin {
+            background: var(--purple);
+            color: white;
+        }
+        
+        .role-badge.packing {
+            background: var(--teal);
+            color: white;
+        }
+        
+        .role-badge.formulation {
+            background: var(--purple);
+            color: white;
+        }
+        
+        .role-badge.dispatch {
+            background: var(--info);
+            color: white;
+        }
+        
+        .role-badge.viewer {
+            background: var(--info);
+            color: white;
+        }
+        
         .form-group {
             margin-bottom: 16px;
         }
@@ -218,15 +300,30 @@
             box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
         }
         
+        input:disabled, select:disabled, textarea:disabled, button:disabled {
+            background: #f1f5f9;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+        
         .form-row {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 12px;
         }
         
+        /* Packed Order Form - 7 columns */
         .form-row-seven {
             display: grid;
             grid-template-columns: 1.2fr 0.8fr 0.8fr 0.8fr 0.6fr 0.6fr 0.3fr;
+            gap: 12px;
+            align-items: end;
+        }
+        
+        /* Bulk Order Form - 4 columns */
+        .form-row-bulk {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 0.3fr;
             gap: 12px;
             align-items: end;
         }
@@ -250,7 +347,7 @@
             color: white;
         }
         
-        .btn-primary:hover {
+        .btn-primary:hover:not(:disabled) {
             background: var(--primary-dark);
         }
         
@@ -259,19 +356,36 @@
             color: white;
         }
         
+        .btn-success:hover:not(:disabled) {
+            background: #047857;
+        }
+        
         .btn-outline {
             background: transparent;
             border: 1px solid var(--border);
             color: var(--text);
         }
         
-        .btn-outline:hover {
+        .btn-outline:hover:not(:disabled) {
             background: #f8fafc;
         }
         
         .btn-danger {
             background: var(--danger);
             color: white;
+        }
+        
+        .btn-danger:hover:not(:disabled) {
+            background: #b91c1c;
+        }
+        
+        .btn-purple {
+            background: var(--purple);
+            color: white;
+        }
+        
+        .btn-purple:hover:not(:disabled) {
+            background: var(--purple-dark);
         }
         
         .btn-sm {
@@ -312,10 +426,23 @@
             color: var(--purple);
         }
         
-        .badge-negative {
-            background: #fee2e2;
-            color: var(--danger);
-            font-weight: 700;
+        .badge-bulk {
+            background: var(--purple);
+            color: white;
+        }
+        
+        .badge-packed {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .badge-viewer {
+            background: var(--info);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            margin-left: 8px;
         }
         
         .table-container {
@@ -328,7 +455,7 @@
         table {
             width: 100%;
             border-collapse: collapse;
-            min-width: 1200px;
+            min-width: 1000px;
         }
         
         th {
@@ -346,6 +473,18 @@
             padding: 12px 16px;
             border-bottom: 1px solid var(--border);
             font-size: 14px;
+        }
+        
+        .bulk-row {
+            background: #faf5ff;
+        }
+        
+        .bulk-row td:first-child {
+            border-left: 4px solid var(--purple);
+        }
+        
+        .packed-row td:first-child {
+            border-left: 4px solid var(--primary);
         }
         
         .size-badge {
@@ -368,25 +507,23 @@
             color: var(--purple);
         }
         
-        .inventory-status {
-            font-size: 11px;
-            margin-top: 4px;
+        .order-type-indicator {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-left: 12px;
         }
         
-        .inventory-ok {
-            color: var(--success);
+        .order-type-indicator.bulk {
+            background: var(--purple);
+            color: white;
         }
         
-        .inventory-low {
-            color: var(--danger);
-        }
-        
-        .inventory-negative {
-            color: var(--danger);
-            font-weight: 700;
-            background: #fee2e2;
-            padding: 2px 6px;
-            border-radius: 4px;
+        .order-type-indicator.packed {
+            background: var(--primary);
+            color: white;
         }
         
         .toast {
@@ -423,65 +560,76 @@
             background: var(--purple);
         }
         
-        .inventory-check {
-            padding: 10px;
-            border-radius: 6px;
-            margin: 10px 0;
-            font-size: 13px;
+        .info-box {
+            background: #ede9fe;
+            padding: 16px;
+            border-radius: 8px;
+            margin: 16px 0;
+            border-left: 4px solid var(--purple);
         }
         
-        .inventory-check.pass {
-            background: #d1fae5;
-            color: var(--success);
+        .info-box.bulk {
+            background: #ede9fe;
+            border-left-color: var(--purple);
         }
         
-        .inventory-check.fail {
+        .info-box.packed {
+            background: #dbeafe;
+            border-left-color: var(--primary);
+        }
+        
+        .info-box.viewer {
+            background: #e0f2fe;
+            border-left-color: var(--info);
+            margin-bottom: 20px;
+        }
+        
+        .info-box.access-denied {
             background: #fee2e2;
+            border-left-color: var(--danger);
             color: var(--danger);
         }
         
-        .inventory-check.warning {
-            background: #fef3c7;
-            color: var(--warning);
-            border-left: 4px solid var(--warning);
-        }
-        
-        .volume-info {
-            background: #f0f9ff;
-            padding: 12px;
-            border-radius: 8px;
-            margin: 10px 0;
-            font-size: 14px;
-            border-left: 4px solid var(--info);
-        }
-        
-        .brand-input {
-            background: #faf5ff;
-            border-color: var(--purple);
-        }
-        
-        .brand-input:focus {
-            border-color: var(--purple);
-            box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
-        }
-        
-        .negative-warning {
-            background: #fee2e2;
-            border-left: 4px solid var(--danger);
-            padding: 12px;
-            margin: 10px 0;
-            border-radius: 4px;
-            font-size: 13px;
-        }
-        
-        .negative-badge {
-            background: var(--danger);
-            color: white;
-            padding: 2px 8px;
-            border-radius: 12px;
+        .inventory-status {
             font-size: 11px;
+            margin-top: 4px;
+        }
+        
+        .inventory-ok {
+            color: var(--success);
+        }
+        
+        .inventory-low {
+            color: var(--warning);
+        }
+        
+        .inventory-negative {
+            color: var(--danger);
             font-weight: 600;
-            margin-left: 8px;
+        }
+        
+        .view-only-notice {
+            background: #e0f2fe;
+            border: 1px solid var(--info);
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--info);
+        }
+        
+        .access-denied-notice {
+            background: #fee2e2;
+            border: 1px solid var(--danger);
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--danger);
         }
         
         @media (max-width: 768px) {
@@ -499,8 +647,13 @@
                 justify-content: center;
             }
             
-            .form-row-seven {
+            .form-row-seven, .form-row-bulk {
                 grid-template-columns: 1fr;
+            }
+            
+            .order-type-toggle {
+                flex-direction: column;
+                border-radius: 12px;
             }
         }
     </style>
@@ -515,9 +668,7 @@
         <!-- Navigation -->
         <nav class="nav">
             <div class="nav-container">
-                <div class="nav-links" id="navLinks">
-                    <!-- Navigation will be dynamically loaded by JavaScript -->
-                </div>
+                <div class="nav-links" id="navLinks"></div>
                 <div class="user-menu">
                     <div class="user-info">
                         <div class="user-avatar" id="userAvatar">U</div>
@@ -535,7 +686,27 @@
             <div class="card">
                 <div class="card-header">
                     <h3 class="card-title">New Order</h3>
-                    <span class="badge badge-warning">Draft</span>
+                    <div class="order-type-toggle">
+                        <button class="order-type-btn packed active" id="packedOrderBtn">📦 Packed Order</button>
+                        <button class="order-type-btn bulk" id="bulkOrderBtn">🛢️ Bulk Order</button>
+                    </div>
+                </div>
+                
+                <!-- Access Denied Notice (for non-admin users) -->
+                <div id="accessDeniedNotice" class="access-denied-notice" style="display: none;">
+                    <span>⛔</span>
+                    <span><strong>Access Denied:</strong> Only Admin users can create orders. You are viewing this page in read-only mode.</span>
+                </div>
+                
+                <!-- Viewer Mode Notice -->
+                <div id="viewerNotice" class="view-only-notice" style="display: none;">
+                    <span>👁️</span>
+                    <span><strong>View Only Mode:</strong> You are in view-only mode. You can see the form but cannot create or edit orders.</span>
+                </div>
+                
+                <!-- Order Type Info -->
+                <div id="orderTypeInfo" class="info-box packed">
+                    <strong>Packed Order:</strong> For bottle-packed products. Will appear in Packing Department.
                 </div>
                 
                 <div class="form-row">
@@ -567,89 +738,101 @@
                     <textarea id="order_notes" rows="2" placeholder="Any special instructions..."></textarea>
                 </div>
                 
-                <h4 style="margin: 20px 0 12px;">Order Items</h4>
+                <h4 style="margin: 20px 0 12px;" id="itemsHeading">Order Items</h4>
                 
-                <!-- Inventory Summary -->
-                <div id="inventorySummary" class="inventory-check pass" style="display: none;">
-                    <!-- Will show inventory status -->
-                </div>
-                
-                <!-- Negative Inventory Warning -->
-                <div id="negativeWarning" class="negative-warning" style="display: none;">
-                    <strong>⚠️ Negative Inventory Alert:</strong> Some items will have negative stock after this order.
-                    <span id="negativeCount" class="negative-badge">0</span>
-                </div>
-                
-                <!-- Volume Calculation Info -->
-                <div class="volume-info" id="volumeInfo" style="display: none;">
-                    <!-- Will show volume calculation -->
-                </div>
-                
-                <div class="form-row-seven">
-                    <div class="form-group">
-                        <label for="line_technical">Technical Name *</label>
-                        <select id="line_technical">
-                            <option value="">Select Technical</option>
-                        </select>
+                <!-- Packed Order Form (Default) -->
+                <div id="packedOrderForm">
+                    <div class="form-row-seven">
+                        <div class="form-group">
+                            <label for="line_technical">Technical Name *</label>
+                            <select id="line_technical">
+                                <option value="">Select Technical</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="line_brand">Brand Name *</label>
+                            <input type="text" id="line_brand" class="brand-input" placeholder="Enter brand name" list="recentBrands">
+                            <datalist id="recentBrands">
+                                <!-- Will be populated with recently used brands -->
+                            </datalist>
+                        </div>
+                        <div class="form-group">
+                            <label for="line_size">Packing Size</label>
+                            <select id="line_size">
+                                <option value="">Select Size</option>
+                                <option value="1 Ltr">1 Ltr</option>
+                                <option value="500 ML">500 ML</option>
+                                <option value="250 ML">250 ML</option>
+                                <option value="150 ML">150 ML</option>
+                                <option value="100 ML">100 ML</option>
+                                <option value="60 ML">60 ML</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="line_bottle">Bottle Type</label>
+                            <select id="line_bottle">
+                                <option value="">Select Bottle</option>
+                            </select>
+                            <div class="inventory-status" id="bottleStockStatus"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="line_pcs_per_box">PCS/Box</label>
+                            <input type="number" id="line_pcs_per_box" min="1" value="12">
+                        </div>
+                        <div class="form-group">
+                            <label for="line_qty">Boxes QTY</label>
+                            <input type="number" id="line_qty" min="1" value="1">
+                        </div>
+                        <div class="form-group">
+                            <button class="btn btn-primary" id="addPackedLine">Add Item</button>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label for="line_brand">Brand Name *</label>
-                        <input type="text" id="line_brand" class="brand-input" placeholder="Enter brand name" list="recentBrands">
-                        <datalist id="recentBrands">
-                            <!-- Will be populated with recently used brands -->
-                        </datalist>
-                    </div>
-                    <div class="form-group">
-                        <label for="line_size">Packing Size</label>
-                        <select id="line_size">
-                            <option value="">Select Size</option>
-                            <option value="1 Ltr">1 Ltr</option>
-                            <option value="500 ML">500 ML</option>
-                            <option value="250 ML">250 ML</option>
-                            <option value="150 ML">150 ML</option>
-                            <option value="100 ML">100 ML</option>
-                            <option value="60 ML">60 ML</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="line_bottle">Bottle Type</label>
-                        <select id="line_bottle">
-                            <option value="">Select Bottle</option>
-                        </select>
-                        <div class="inventory-status" id="bottleStockStatus"></div>
-                    </div>
-                    <div class="form-group">
-                        <label for="line_pcs_per_box">PCS/Box</label>
-                        <input type="number" id="line_pcs_per_box" min="1" value="12">
-                    </div>
-                    <div class="form-group">
-                        <label for="line_qty">Boxes QTY</label>
-                        <input type="number" id="line_qty" min="1" value="1">
-                    </div>
-                    <div class="form-group">
-                        <button class="btn btn-primary" id="addLine">Add Item</button>
+                    
+                    <div style="background: #f8fafc; padding: 12px; border-radius: 8px; margin: 10px 0;">
+                        <strong>Calculation:</strong> 
+                        Bottles Required = <span id="calc_pcs">12</span> PCS/Box × <span id="calc_boxes">1</span> Boxes = <span id="calc_total">12</span> Bottles<br>
+                        <strong>Technical Volume:</strong> <span id="calc_volume">0</span> Liters
                     </div>
                 </div>
                 
-                <div style="background: #f8fafc; padding: 12px; border-radius: 8px; margin: 10px 0;">
-                    <strong>Calculation:</strong> 
-                    Bottles Required = <span id="calc_pcs">12</span> PCS/Box × <span id="calc_boxes">1</span> Boxes = <span id="calc_total">12</span> Bottles<br>
-                    <strong>Technical Volume:</strong> <span id="calc_volume">0</span> Liters
+                <!-- Bulk Order Form (Hidden by Default) -->
+                <div id="bulkOrderForm" style="display: none;">
+                    <div class="info-box bulk">
+                        <strong>Bulk Order:</strong> For bulk liquid orders. Will appear in Formulation Department only. Packing team will not see this.
+                    </div>
+                    
+                    <div class="form-row-bulk">
+                        <div class="form-group">
+                            <label for="bulk_technical">Technical Name *</label>
+                            <select id="bulk_technical">
+                                <option value="">Select Technical</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="bulk_quantity">Quantity (Liters) *</label>
+                            <input type="number" id="bulk_quantity" min="0.01" step="0.01" placeholder="e.g., 1000">
+                        </div>
+                        <div class="form-group">
+                            <label for="bulk_notes">Remarks</label>
+                            <input type="text" id="bulk_notes" placeholder="e.g., Grade, specifications">
+                        </div>
+                        <div class="form-group">
+                            <button class="btn btn-purple" id="addBulkLine">Add Bulk Item</button>
+                        </div>
+                    </div>
                 </div>
                 
                 <div class="table-container">
                     <table id="orderLinesTable">
                         <thead>
                             <tr>
+                                <th>Type</th>
                                 <th>Technical Name</th>
-                                <th>Brand Name</th>
-                                <th>Size</th>
-                                <th>Bottle Type</th>
-                                <th>PCS/Box</th>
-                                <th>Boxes</th>
-                                <th>Total Bottles</th>
+                                <th>Brand/Details</th>
+                                <th>Specifications</th>
+                                <th>Quantity</th>
+                                <th>Unit</th>
                                 <th>Volume (L)</th>
-                                <th>Stock Status</th>
                                 <th>Action</th>
                             </tr>
                         </thead>
@@ -659,10 +842,8 @@
                 
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px; flex-wrap: wrap; gap: 16px;">
                     <div>
-                        <div class="text-muted">Total Items: <span id="totalItems">0</span></div>
-                        <div>Total Boxes: <span id="totalBoxes">0</span></div>
-                        <div style="font-size: 18px; font-weight: 700;">Total Bottles: <span id="totalBottles">0</span></div>
-                        <div style="font-size: 16px; color: var(--purple); font-weight: 600;">Total Volume: <span id="totalVolume">0.00</span> Liters</div>
+                        <div>Total Items: <span id="totalItems">0</span></div>
+                        <div style="font-size: 18px; font-weight: 700;">Total Volume: <span id="totalVolume">0.00</span> Liters</div>
                     </div>
                     <div style="display: flex; gap: 12px;">
                         <button class="btn btn-outline" id="clearOrder">Clear Draft</button>
@@ -695,6 +876,8 @@
         
         // ==================== GLOBAL FUNCTIONS ====================
         
+        let currentUser = null;
+        
         // Get current user from storage
         function getCurrentUser() {
             try {
@@ -702,6 +885,79 @@
             } catch (e) {
                 console.error("Error parsing user data:", e);
                 return null;
+            }
+        }
+
+        // Role-based access functions
+        function isAdmin() {
+            return currentUser && currentUser.role === 'admin';
+        }
+
+        function isPacking() {
+            return currentUser && currentUser.role === 'packing';
+        }
+
+        function isFormulation() {
+            return currentUser && currentUser.role === 'formulation';
+        }
+
+        function isDispatch() {
+            return currentUser && currentUser.role === 'dispatch';
+        }
+
+        function isViewer() {
+            return currentUser && currentUser.role === 'viewer';
+        }
+
+        // Check if user can create orders (only Admin)
+        function canCreateOrder() {
+            return currentUser && currentUser.role === 'admin';
+        }
+
+        // Check if user can view (all authenticated users)
+        function canView() {
+            return currentUser != null;
+        }
+
+        // Apply role-based restrictions
+        function applyRoleRestrictions() {
+            const user = currentUser;
+            if (!user) return;
+            
+            const canCreate = canCreateOrder();
+            const accessDeniedNotice = document.getElementById('accessDeniedNotice');
+            const viewerNotice = document.getElementById('viewerNotice');
+            
+            if (!canCreate) {
+                // Show appropriate notice
+                if (isViewer()) {
+                    if (viewerNotice) viewerNotice.style.display = 'flex';
+                } else {
+                    if (accessDeniedNotice) accessDeniedNotice.style.display = 'flex';
+                }
+                
+                // Disable all form inputs
+                document.querySelectorAll('input, select, textarea, button').forEach(el => {
+                    // Don't disable navigation, logout, and filters
+                    if (!el.classList.contains('nav-item') && 
+                        !el.classList.contains('logout-btn') &&
+                        !el.id?.includes('search')) {
+                        el.disabled = true;
+                    }
+                });
+                
+                // Specifically disable action buttons
+                const actionButtons = ['addPackedLine', 'addBulkLine', 'clearOrder', 'saveOrder'];
+                actionButtons.forEach(id => {
+                    const btn = document.getElementById(id);
+                    if (btn) btn.disabled = true;
+                });
+                
+                // Disable order type toggle
+                const packedBtn = document.getElementById('packedOrderBtn');
+                const bulkBtn = document.getElementById('bulkOrderBtn');
+                if (packedBtn) packedBtn.disabled = true;
+                if (bulkBtn) bulkBtn.disabled = true;
             }
         }
 
@@ -734,37 +990,94 @@
                 return;
             }
 
-            // Define all navigation items with their required permissions
+            currentUser = user;
+
+            // Define all navigation items with their allowed roles
             const navItems = [
-                { permission: 'canViewDashboard', url: 'dashboard.html', text: 'Dashboard' },
-                { permission: 'canAccessMasterData', url: 'master-data.html', text: 'Master Data' },
-                { permission: 'canAccessBottleInventory', url: 'bottle-inventory.html', text: 'Bottle Inventory' },
-                { permission: 'canCreateOrder', url: 'create-order.html', text: 'Create Order' },
-                { permission: 'canAccessPacking', url: 'packing.html', text: 'Packing' },
-                { permission: 'canAccessBulkInventory', url: 'bulk-inventory.html', text: 'Bulk Inventory' },
-                { permission: 'canAccessFinishedGoods', url: 'finished-goods-inventory.html', text: 'Finished Goods' },
-                { permission: 'canAccessDispatch', url: 'dispatch.html', text: 'Dispatch' },
-                { permission: 'canViewOrders', url: 'orders.html', text: 'Orders' },
-                { permission: 'canAccessFormulation', url: 'formulation.html', text: 'Formulation' },
-                { permission: 'canAccessFormulationInventory', url: 'formulation-inventory.html', text: 'Formulation Inventory' },
-                { permission: 'canAccessReports', url: 'reports.html', text: 'Reports' }
+                { 
+                    url: 'dashboard.html', 
+                    text: 'Dashboard',
+                    allowed: ['admin', 'packing', 'formulation', 'dispatch', 'viewer']
+                },
+                { 
+                    url: 'master-data.html', 
+                    text: 'Master Data',
+                    allowed: ['admin']
+                },
+                { 
+                    url: 'bottle-inventory.html', 
+                    text: 'Bottle Inventory',
+                    allowed: ['admin', 'packing']
+                },
+                { 
+                    url: 'create-order.html', 
+                    text: 'Create Order',
+                    allowed: ['admin', 'viewer']
+                },
+                { 
+                    url: 'packing.html', 
+                    text: 'Packing',
+                    allowed: ['admin', 'packing', 'viewer']
+                },
+                { 
+                    url: 'bulk-inventory.html', 
+                    text: 'Bulk Inventory',
+                    allowed: ['admin', 'packing', 'viewer']
+                },
+                { 
+                    url: 'finished-goods-inventory.html', 
+                    text: 'Finished Goods',
+                    allowed: ['admin', 'packing', 'viewer']
+                },
+                { 
+                    url: 'dispatch.html', 
+                    text: 'Dispatch',
+                    allowed: ['admin', 'dispatch', 'viewer']
+                },
+                { 
+                    url: 'orders.html', 
+                    text: 'Orders',
+                    allowed: ['admin', 'packing', 'formulation', 'dispatch', 'viewer']
+                },
+                { 
+                    url: 'formulation.html', 
+                    text: 'Formulation',
+                    allowed: ['admin', 'formulation', 'viewer']
+                },
+                { 
+                    url: 'formulation-inventory.html', 
+                    text: 'Formulation Inventory',
+                    allowed: ['admin', 'formulation', 'viewer']
+                },
+                { 
+                    url: 'reports.html', 
+                    text: 'Reports',
+                    allowed: ['admin', 'viewer']
+                },
+                { 
+                    url: 'user-management.html', 
+                    text: 'User Management',
+                    allowed: ['admin']
+                }
             ];
 
             const navContainer = document.getElementById('navLinks');
             if (!navContainer) return;
 
-            // Clear existing navigation
             navContainer.innerHTML = '';
 
-            // Add navigation items based on permissions
             navItems.forEach(item => {
-                if (user.permissions && user.permissions[item.permission]) {
+                // Check if user's role is allowed to see this page
+                if (item.allowed.includes(user.role)) {
                     const link = document.createElement('a');
                     link.href = item.url;
                     link.className = 'nav-item';
+                    
+                    // Add role-specific class for styling
+                    if (user.role === 'admin') link.classList.add('admin');
+                    
                     link.textContent = item.text;
                     
-                    // Highlight current page
                     const currentPage = window.location.pathname.split('/').pop();
                     if (currentPage === item.url) {
                         link.classList.add('active');
@@ -774,11 +1087,10 @@
                 }
             });
 
-            // Update user info
             updateUserInfo(user);
+            applyRoleRestrictions();
         }
 
-        // Update user info in header
         function updateUserInfo(user) {
             const userNameEl = document.getElementById('userName');
             const userRoleEl = document.getElementById('userRole');
@@ -789,7 +1101,6 @@
             if (userAvatarEl) userAvatarEl.textContent = (user.name || 'U').charAt(0).toUpperCase();
         }
 
-        // Check page access permissions
         function checkPageAccess() {
             const user = getCurrentUser();
             
@@ -798,27 +1109,12 @@
                 return false;
             }
             
-            // Define page permissions
-            const pagePermissions = {
-                'master-data.html': 'canAccessMasterData',
-                'bottle-inventory.html': 'canAccessBottleInventory',
-                'create-order.html': 'canCreateOrder',
-                'packing.html': 'canAccessPacking',
-                'bulk-inventory.html': 'canAccessBulkInventory',
-                'finished-goods-inventory.html': 'canAccessFinishedGoods',
-                'dispatch.html': 'canAccessDispatch',
-                'orders.html': 'canViewOrders',
-                'formulation.html': 'canAccessFormulation',
-                'formulation-inventory.html': 'canAccessFormulationInventory',
-                'reports.html': 'canAccessReports'
-            };
+            // Define which roles can access this page
+            const allowedRoles = ['admin', 'viewer'];
             
-            const currentPage = window.location.pathname.split('/').pop() || 'dashboard.html';
-            const requiredPermission = pagePermissions[currentPage];
-            
-            if (requiredPermission && (!user.permissions || !user.permissions[requiredPermission])) {
+            if (!allowedRoles.includes(user.role)) {
                 window.location.href = 'dashboard.html';
-                showToast('You do not have permission to access this page', 'error');
+                showToast('Only Admin and Viewers can access Create Order page', 'error');
                 return false;
             }
             
@@ -835,6 +1131,9 @@
             BOTTLES: 'bottles',
             BOTTLE_MOVEMENTS: 'bottle_movements'
         };
+        
+        // Order Type
+        let currentOrderType = 'packed'; // 'packed' or 'bulk'
         
         // Utility Functions
         function uid(prefix = 'id') {
@@ -876,6 +1175,49 @@
         let bottlesInventory = [];
         let customersList = [];
         let technicalsList = [];
+        
+        // ==================== ORDER TYPE TOGGLE ====================
+        
+        const packedOrderBtn = document.getElementById('packedOrderBtn');
+        const bulkOrderBtn = document.getElementById('bulkOrderBtn');
+        const packedOrderForm = document.getElementById('packedOrderForm');
+        const bulkOrderForm = document.getElementById('bulkOrderForm');
+        const orderTypeInfo = document.getElementById('orderTypeInfo');
+        const itemsHeading = document.getElementById('itemsHeading');
+        
+        if (packedOrderBtn) {
+            packedOrderBtn.addEventListener('click', () => {
+                if (!canCreateOrder()) {
+                    showToast('Only Admin can change order type', 'error');
+                    return;
+                }
+                currentOrderType = 'packed';
+                packedOrderBtn.classList.add('active');
+                bulkOrderBtn.classList.remove('active');
+                packedOrderForm.style.display = 'block';
+                bulkOrderForm.style.display = 'none';
+                orderTypeInfo.className = 'info-box packed';
+                orderTypeInfo.innerHTML = '<strong>Packed Order:</strong> For bottle-packed products. Will appear in Packing Department.';
+                if (itemsHeading) itemsHeading.textContent = 'Packed Order Items';
+            });
+        }
+        
+        if (bulkOrderBtn) {
+            bulkOrderBtn.addEventListener('click', () => {
+                if (!canCreateOrder()) {
+                    showToast('Only Admin can change order type', 'error');
+                    return;
+                }
+                currentOrderType = 'bulk';
+                bulkOrderBtn.classList.add('active');
+                packedOrderBtn.classList.remove('active');
+                packedOrderForm.style.display = 'none';
+                bulkOrderForm.style.display = 'block';
+                orderTypeInfo.className = 'info-box bulk';
+                orderTypeInfo.innerHTML = '<strong>Bulk Order:</strong> For bulk liquid orders. Will appear in Formulation Department only. Packing team will not see this.';
+                if (itemsHeading) itemsHeading.textContent = 'Bulk Order Items';
+            });
+        }
         
         // Load Customers, Technicals and Bottles
         async function loadData() {
@@ -938,7 +1280,7 @@
                     }
                 }
                 
-                // Fill technical select
+                // Fill technical select for packed orders
                 const techSelect = document.getElementById('line_technical');
                 if (techSelect) {
                     techSelect.innerHTML = '';
@@ -956,6 +1298,27 @@
                             option.textContent += ` (${tech.category})`;
                         }
                         techSelect.appendChild(option);
+                    });
+                }
+                
+                // Fill technical select for bulk orders
+                const bulkTechSelect = document.getElementById('bulk_technical');
+                if (bulkTechSelect) {
+                    bulkTechSelect.innerHTML = '';
+                    
+                    const defaultOption = document.createElement('option');
+                    defaultOption.value = '';
+                    defaultOption.textContent = 'Select Technical';
+                    bulkTechSelect.appendChild(defaultOption);
+                    
+                    technicalsList.forEach(tech => {
+                        const option = document.createElement('option');
+                        option.value = tech.id;
+                        option.textContent = tech.name;
+                        if (tech.category) {
+                            option.textContent += ` (${tech.category})`;
+                        }
+                        bulkTechSelect.appendChild(option);
                     });
                 }
                 
@@ -988,6 +1351,9 @@
                     }
                 }
                 
+                // Apply role restrictions after loading data
+                applyRoleRestrictions();
+                
             } catch (error) {
                 console.error("Error loading data:", error);
                 showToast("Error loading data: " + error.message, "error");
@@ -1007,7 +1373,7 @@
                     const order = doc.data();
                     if (order.lines) {
                         order.lines.forEach(line => {
-                            if (line.brand_name && line.brand_name !== 'Unknown') {
+                            if (line.brand_name && line.brand_name !== 'Unknown' && line.type !== 'bulk') {
                                 brandSet.add(line.brand_name);
                             }
                         });
@@ -1096,10 +1462,15 @@
             });
         }
         
-        // Add line item
-        const addLineBtn = document.getElementById('addLine');
-        if (addLineBtn) {
-            addLineBtn.addEventListener('click', async () => {
+        // Add packed line item
+        const addPackedLineBtn = document.getElementById('addPackedLine');
+        if (addPackedLineBtn) {
+            addPackedLineBtn.addEventListener('click', async () => {
+                if (!canCreateOrder()) {
+                    showToast('Only Admin can add items', 'error');
+                    return;
+                }
+                
                 const technicalId = document.getElementById('line_technical')?.value;
                 const brandName = document.getElementById('line_brand')?.value.trim();
                 const size = document.getElementById('line_size')?.value;
@@ -1132,13 +1503,13 @@
                 
                 // Check if same technical with same size and bottle exists
                 const existingIndex = workingLines.findIndex(line => 
+                    line.type === 'packed' &&
                     line.technical_id === technicalId && 
                     line.size === size && 
                     line.bottle_id === bottleId
                 );
                 
                 if (existingIndex > -1) {
-                    // Allow adding even if it would exceed inventory - we'll track negative
                     workingLines[existingIndex].boxes += boxes;
                     workingLines[existingIndex].pcs_per_box = pcsPerBox;
                     workingLines[existingIndex].total_bottles += totalBottles;
@@ -1146,6 +1517,7 @@
                 } else {
                     workingLines.push({
                         id: uid('L'),
+                        type: 'packed',
                         technical_id: technicalId,
                         technical_name: technical.name,
                         brand_name: brandName,
@@ -1169,7 +1541,52 @@
                 if (document.getElementById('line_bottle')) document.getElementById('line_bottle').value = '';
                 if (document.getElementById('bottleStockStatus')) document.getElementById('bottleStockStatus').innerHTML = '';
                 
-                showToast('Item added');
+                showToast('Packed item added');
+            });
+        }
+        
+        // Add bulk line item
+        const addBulkLineBtn = document.getElementById('addBulkLine');
+        if (addBulkLineBtn) {
+            addBulkLineBtn.addEventListener('click', async () => {
+                if (!canCreateOrder()) {
+                    showToast('Only Admin can add items', 'error');
+                    return;
+                }
+                
+                const technicalId = document.getElementById('bulk_technical')?.value;
+                const quantity = parseFloat(document.getElementById('bulk_quantity')?.value);
+                const notes = document.getElementById('bulk_notes')?.value.trim();
+                
+                if (!technicalId || !quantity || quantity <= 0) {
+                    showToast('Please select technical and enter valid quantity', 'error');
+                    return;
+                }
+                
+                // Get technical details
+                const technical = technicalsList.find(t => t.id === technicalId);
+                if (!technical) {
+                    showToast('Technical not found', 'error');
+                    return;
+                }
+                
+                workingLines.push({
+                    id: uid('B'),
+                    type: 'bulk',
+                    technical_id: technicalId,
+                    technical_name: technical.name,
+                    quantity: quantity,
+                    notes: notes || '',
+                    total_volume: quantity
+                });
+                
+                renderLines();
+                
+                // Reset form
+                document.getElementById('bulk_quantity').value = '';
+                document.getElementById('bulk_notes').value = '';
+                
+                showToast('Bulk item added', 'purple');
             });
         }
         
@@ -1180,148 +1597,86 @@
             
             let html = '';
             let totalItems = 0;
-            let totalBoxes = 0;
-            let totalBottles = 0;
             let totalVolume = 0;
-            let negativeCount = 0;
             
             workingLines.forEach(line => {
-                const bottle = bottlesInventory.find(b => b.id === line.bottle_id);
-                const currentStock = bottle?.current_stock || 0;
-                const newStock = currentStock - line.total_bottles;
-                
                 totalItems++;
-                totalBoxes += line.boxes;
-                totalBottles += line.total_bottles;
                 totalVolume += line.total_volume || 0;
                 
-                let stockStatus = '';
-                let statusClass = '';
-                
-                if (currentStock >= line.total_bottles) {
-                    stockStatus = '<span class="badge badge-success">Sufficient</span>';
-                } else if (currentStock > 0) {
-                    stockStatus = `<span class="badge badge-warning">Partial (${currentStock} avail, ${line.total_bottles - currentStock} negative)</span>`;
-                    negativeCount++;
-                } else {
-                    stockStatus = `<span class="badge badge-danger">Out of Stock (All ${line.total_bottles} negative)</span>`;
-                    negativeCount++;
+                if (line.type === 'packed') {
+                    const bottle = bottlesInventory.find(b => b.id === line.bottle_id);
+                    const currentStock = bottle?.current_stock || 0;
+                    const newStock = currentStock - line.total_bottles;
+                    
+                    let stockStatus = '';
+                    if (currentStock >= line.total_bottles) {
+                        stockStatus = '<span class="badge badge-success">Sufficient</span>';
+                    } else if (currentStock > 0) {
+                        stockStatus = `<span class="badge badge-warning">Partial (${currentStock} avail)</span>`;
+                    } else {
+                        stockStatus = `<span class="badge badge-danger">Out of Stock</span>`;
+                    }
+                    
+                    html += `
+                        <tr class="packed-row">
+                            <td><span class="badge badge-packed">📦 Packed</span></td>
+                            <td><span class="technical-badge">${line.technical_name || 'N/A'}</span></td>
+                            <td><strong>${line.brand_name || 'Unknown'}</strong></td>
+                            <td>
+                                ${line.size} | ${line.bottle_name}<br>
+                                <small>${line.pcs_per_box} PCS/Box × ${line.boxes} Boxes</small>
+                            </td>
+                            <td>${line.total_bottles}</td>
+                            <td>Bottles</td>
+                            <td>${(line.total_volume || 0).toFixed(2)} L</td>
+                            <td>
+                                <button class="btn btn-danger btn-sm" onclick="removeLine('${line.id}')" ${!canCreateOrder() ? 'disabled' : ''}>Remove</button>
+                            </td>
+                        </tr>
+                    `;
+                } else if (line.type === 'bulk') {
+                    html += `
+                        <tr class="bulk-row">
+                            <td><span class="badge badge-bulk">🛢️ Bulk</span></td>
+                            <td><span class="technical-badge">${line.technical_name || 'N/A'}</span></td>
+                            <td>—</td>
+                            <td>${line.notes || 'No remarks'}</td>
+                            <td>${line.quantity.toFixed(2)}</td>
+                            <td>Liters</td>
+                            <td>${line.quantity.toFixed(2)} L</td>
+                            <td>
+                                <button class="btn btn-danger btn-sm" onclick="removeLine('${line.id}')" ${!canCreateOrder() ? 'disabled' : ''}>Remove</button>
+                            </td>
+                        </tr>
+                    `;
                 }
-                
-                html += `
+            });
+            
+            if (workingLines.length === 0) {
+                html = `
                     <tr>
-                        <td><span class="technical-badge">${line.technical_name || 'N/A'}</span></td>
-                        <td><strong>${line.brand_name || 'Unknown'}</strong></td>
-                        <td><span class="size-badge">${line.size}</span></td>
-                        <td>${line.bottle_name || 'Unknown'}</td>
-                        <td>${line.pcs_per_box}</td>
-                        <td>${line.boxes}</td>
-                        <td><strong>${line.total_bottles}</strong></td>
-                        <td>${(line.total_volume || 0).toFixed(2)} L</td>
-                        <td>${stockStatus}</td>
-                        <td>
-                            <button class="btn btn-danger btn-sm" onclick="removeLine('${line.id}')">Remove</button>
+                        <td colspan="8" class="text-center text-muted" style="padding: 40px;">
+                            No items added yet
                         </td>
                     </tr>
                 `;
-            });
+            }
             
             tbody.innerHTML = html;
             
             const totalItemsSpan = document.getElementById('totalItems');
-            const totalBoxesSpan = document.getElementById('totalBoxes');
-            const totalBottlesSpan = document.getElementById('totalBottles');
             const totalVolumeSpan = document.getElementById('totalVolume');
-            const negativeWarning = document.getElementById('negativeWarning');
-            const negativeCountSpan = document.getElementById('negativeCount');
             
             if (totalItemsSpan) totalItemsSpan.textContent = totalItems;
-            if (totalBoxesSpan) totalBoxesSpan.textContent = totalBoxes;
-            if (totalBottlesSpan) totalBottlesSpan.textContent = totalBottles;
             if (totalVolumeSpan) totalVolumeSpan.textContent = totalVolume.toFixed(2);
-            
-            // Show/hide negative warning
-            if (negativeCount > 0) {
-                negativeWarning.style.display = 'block';
-                if (negativeCountSpan) negativeCountSpan.textContent = negativeCount;
-            } else {
-                negativeWarning.style.display = 'none';
-            }
-            
-            // Check overall inventory
-            checkOverallInventory();
-            
-            // Show volume info
-            showVolumeInfo(totalVolume);
-        }
-        
-        function showVolumeInfo(totalVolume) {
-            const volumeInfo = document.getElementById('volumeInfo');
-            if (!volumeInfo) return;
-            
-            if (totalVolume > 0) {
-                volumeInfo.style.display = 'block';
-                
-                // Group by technical name for info
-                const technicalGroups = {};
-                workingLines.forEach(line => {
-                    const tech = line.technical_name || 'Uncategorized';
-                    if (!technicalGroups[tech]) {
-                        technicalGroups[tech] = 0;
-                    }
-                    technicalGroups[tech] += line.total_volume || 0;
-                });
-                
-                let techHtml = '';
-                Object.entries(technicalGroups).forEach(([tech, vol]) => {
-                    techHtml += `<span class="badge badge-purple" style="margin-right: 8px;">${tech}: ${vol.toFixed(2)} L</span>`;
-                });
-                
-                volumeInfo.innerHTML = `
-                    <strong>📊 Technical Volume Summary:</strong><br>
-                    ${techHtml || 'No technical data'}
-                `;
-            } else {
-                volumeInfo.style.display = 'none';
-            }
-        }
-        
-        function checkOverallInventory() {
-            const inventorySummary = document.getElementById('inventorySummary');
-            if (!inventorySummary) return;
-            
-            let insufficientItems = [];
-            let negativeItems = [];
-            
-            workingLines.forEach(line => {
-                const bottle = bottlesInventory.find(b => b.id === line.bottle_id);
-                const currentStock = bottle?.current_stock || 0;
-                
-                if (currentStock < line.total_bottles) {
-                    const shortage = line.total_bottles - currentStock;
-                    insufficientItems.push(`${line.bottle_name} (Need: ${line.total_bottles}, Have: ${currentStock}, Short: ${shortage})`);
-                    
-                    if (currentStock === 0) {
-                        negativeItems.push(`${line.bottle_name} - Completely out of stock`);
-                    }
-                }
-            });
-            
-            if (insufficientItems.length > 0) {
-                inventorySummary.className = 'inventory-check warning';
-                inventorySummary.innerHTML = `⚠️ Inventory Alert: ${insufficientItems.join('<br>')}`;
-                inventorySummary.style.display = 'block';
-            } else if (workingLines.length > 0) {
-                inventorySummary.className = 'inventory-check pass';
-                inventorySummary.innerHTML = '✅ All items have sufficient inventory';
-                inventorySummary.style.display = 'block';
-            } else {
-                inventorySummary.style.display = 'none';
-            }
         }
         
         // Remove line
         window.removeLine = function(lineId) {
+            if (!canCreateOrder()) {
+                showToast('Only Admin can remove items', 'error');
+                return;
+            }
             workingLines = workingLines.filter(line => line.id !== lineId);
             renderLines();
         };
@@ -1330,6 +1685,10 @@
         const clearOrderBtn = document.getElementById('clearOrder');
         if (clearOrderBtn) {
             clearOrderBtn.addEventListener('click', () => {
+                if (!canCreateOrder()) {
+                    showToast('Only Admin can clear orders', 'error');
+                    return;
+                }
                 if (workingLines.length > 0 && !confirm('Clear all items?')) return;
                 workingLines = [];
                 renderLines();
@@ -1337,16 +1696,10 @@
                 const orderNumber = document.getElementById('order_number');
                 const orderNotes = document.getElementById('order_notes');
                 const orderCustomer = document.getElementById('order_customer');
-                const inventorySummary = document.getElementById('inventorySummary');
-                const volumeInfo = document.getElementById('volumeInfo');
-                const negativeWarning = document.getElementById('negativeWarning');
                 
                 if (orderNumber) orderNumber.value = '';
                 if (orderNotes) orderNotes.value = '';
                 if (orderCustomer) orderCustomer.value = '';
-                if (inventorySummary) inventorySummary.style.display = 'none';
-                if (volumeInfo) volumeInfo.style.display = 'none';
-                if (negativeWarning) negativeWarning.style.display = 'none';
                 
                 showToast('Order draft cleared');
             });
@@ -1356,6 +1709,11 @@
         const saveOrderBtn = document.getElementById('saveOrder');
         if (saveOrderBtn) {
             saveOrderBtn.addEventListener('click', async () => {
+                if (!canCreateOrder()) {
+                    showToast('Only Admin can create orders', 'error');
+                    return;
+                }
+                
                 const orderNumber = document.getElementById('order_number')?.value.trim();
                 const orderDate = document.getElementById('order_date')?.value;
                 const customerId = document.getElementById('order_customer')?.value;
@@ -1380,44 +1738,14 @@
                 // Calculate total volume
                 const totalVolume = workingLines.reduce((sum, line) => sum + (line.total_volume || 0), 0);
                 
-                // Track inventory status for each bottle
-                const inventoryStatus = [];
-                let hasNegativeStock = false;
-                let negativeDetails = [];
+                // Determine if order has any bulk items
+                const hasBulkItems = workingLines.some(line => line.type === 'bulk');
+                const hasPackedItems = workingLines.some(line => line.type === 'packed');
                 
-                for (const line of workingLines) {
-                    const bottle = bottlesInventory.find(b => b.id === line.bottle_id);
-                    const currentStock = bottle?.current_stock || 0;
-                    const newStock = currentStock - line.total_bottles;
-                    
-                    inventoryStatus.push({
-                        bottle_name: line.bottle_name,
-                        size: line.size,
-                        current_stock: currentStock,
-                        required: line.total_bottles,
-                        new_stock: newStock,
-                        is_negative: newStock < 0
-                    });
-                    
-                    if (newStock < 0) {
-                        hasNegativeStock = true;
-                        negativeDetails.push(`${line.bottle_name} (${line.size}): ${currentStock} → ${newStock} (Need: ${line.total_bottles})`);
-                    }
-                }
+                // Set order type and visibility
+                const orderType = hasBulkItems && !hasPackedItems ? 'bulk' : (hasPackedItems && !hasBulkItems ? 'packed' : 'mixed');
                 
-                // Show warning if any items will go negative
-                if (hasNegativeStock) {
-                    const negativeItems = negativeDetails.join('\n');
-                    
-                    const confirmCreate = confirm(
-                        `⚠️ WARNING: The following items will have NEGATIVE inventory after this order:\n\n${negativeItems}\n\nThis means you are creating orders for bottles you don't have in stock.\n\nDo you want to continue with negative inventory?`
-                    );
-                    
-                    if (!confirmCreate) {
-                        return;
-                    }
-                }
-                
+                // Create order object
                 const newOrder = {
                     id: uid('ORD'),
                     order_number: orderNumber,
@@ -1426,64 +1754,77 @@
                     delivery_date: document.getElementById('order_delivery')?.value || orderDate,
                     notes: document.getElementById('order_notes')?.value.trim() || '',
                     status: 'pending',
+                    order_type: orderType,
                     lines: workingLines.map(line => ({
                         ...line,
-                        technical_name: line.technical_name,
-                        brand_name: line.brand_name,
-                        total_volume: line.total_volume,
-                        inventory_status: 'adjusted' // Mark that inventory was adjusted
+                        technical_name: line.technical_name
                     })),
                     created_at: new Date().toISOString(),
-                    total_boxes: parseInt(document.getElementById('totalBoxes')?.textContent || '0'),
-                    total_bottles: parseInt(document.getElementById('totalBottles')?.textContent || '0'),
                     total_volume: totalVolume,
                     packed_boxes: 0,
-                    dispatched_boxes: 0,
-                    has_negative_inventory: hasNegativeStock // Flag for negative inventory
+                    dispatched_boxes: 0
                 };
                 
+                // Add packed-specific fields
+                if (hasPackedItems) {
+                    newOrder.total_boxes = workingLines
+                        .filter(l => l.type === 'packed')
+                        .reduce((sum, line) => sum + (line.boxes || 0), 0);
+                    newOrder.total_bottles = workingLines
+                        .filter(l => l.type === 'packed')
+                        .reduce((sum, line) => sum + (line.total_bottles || 0), 0);
+                }
+                
                 try {
-                    // Deduct bottles from inventory (allow negative values)
+                    // For packed items, deduct bottles from inventory
                     for (const line of workingLines) {
-                        const bottleRef = db.collection(COLLECTIONS.BOTTLES).doc(line.bottle_id);
-                        const bottle = bottlesInventory.find(b => b.id === line.bottle_id);
-                        
-                        const newStock = (bottle.current_stock || 0) - line.total_bottles;
-                        
-                        await bottleRef.update({
-                            current_stock: newStock,
-                            updated_at: new Date().toISOString()
-                        });
-                        
-                        // Record bottle movement with negative flag if applicable
-                        const movement = {
-                            id: uid('MOV'),
-                            bottle_id: line.bottle_id,
-                            type: 'OUTWARD',
-                            quantity: line.total_bottles,
-                            order_id: newOrder.id,
-                            order_number: orderNumber,
-                            remarks: `Order ${orderNumber} - ${line.bottle_name} (${line.size})`,
-                            created_at: new Date().toISOString(),
-                            resulted_in_negative: newStock < 0 // Flag if this movement caused negative
-                        };
-                        
-                        await db.collection(COLLECTIONS.BOTTLE_MOVEMENTS).doc(movement.id).set(movement);
-                        
-                        // Update local inventory array
-                        const index = bottlesInventory.findIndex(b => b.id === line.bottle_id);
-                        if (index !== -1) {
-                            bottlesInventory[index].current_stock = newStock;
+                        if (line.type === 'packed') {
+                            const bottleRef = db.collection(COLLECTIONS.BOTTLES).doc(line.bottle_id);
+                            const bottle = bottlesInventory.find(b => b.id === line.bottle_id);
+                            
+                            const newStock = (bottle.current_stock || 0) - line.total_bottles;
+                            
+                            await bottleRef.update({
+                                current_stock: newStock,
+                                updated_at: new Date().toISOString()
+                            });
+                            
+                            // Record bottle movement
+                            const movement = {
+                                id: uid('MOV'),
+                                bottle_id: line.bottle_id,
+                                type: 'OUTWARD',
+                                quantity: line.total_bottles,
+                                order_id: newOrder.id,
+                                order_number: orderNumber,
+                                remarks: `Order ${orderNumber} - ${line.bottle_name} (${line.size})`,
+                                created_at: new Date().toISOString(),
+                                resulted_in_negative: newStock < 0
+                            };
+                            
+                            await db.collection(COLLECTIONS.BOTTLE_MOVEMENTS).doc(movement.id).set(movement);
+                            
+                            // Update local inventory array
+                            const index = bottlesInventory.findIndex(b => b.id === line.bottle_id);
+                            if (index !== -1) {
+                                bottlesInventory[index].current_stock = newStock;
+                            }
                         }
                     }
                     
                     // Save order
                     await db.collection(COLLECTIONS.ORDERS).doc(newOrder.id).set(newOrder);
                     
-                    if (hasNegativeStock) {
-                        showToast('Order created with NEGATIVE inventory. Please purchase bottles soon!', 'warning');
+                    let message = 'Order created successfully';
+                    if (orderType === 'bulk') {
+                        message = 'Bulk order created. Will appear in Formulation Department.';
+                        showToast(message, 'purple');
+                    } else if (orderType === 'packed') {
+                        message = 'Packed order created. Will appear in Packing Department.';
+                        showToast(message, 'success');
                     } else {
-                        showToast('Order created successfully and inventory updated', 'success');
+                        message = 'Mixed order created. Both Packing and Formulation teams will see relevant items.';
+                        showToast(message, 'info');
                     }
                     
                     // Clear form
@@ -1493,16 +1834,10 @@
                     const orderNumberInput = document.getElementById('order_number');
                     const orderNotesInput = document.getElementById('order_notes');
                     const orderCustomerSelect = document.getElementById('order_customer');
-                    const inventorySummaryDiv = document.getElementById('inventorySummary');
-                    const volumeInfoDiv = document.getElementById('volumeInfo');
-                    const negativeWarningDiv = document.getElementById('negativeWarning');
                     
                     if (orderNumberInput) orderNumberInput.value = '';
                     if (orderNotesInput) orderNotesInput.value = '';
                     if (orderCustomerSelect) orderCustomerSelect.value = '';
-                    if (inventorySummaryDiv) inventorySummaryDiv.style.display = 'none';
-                    if (volumeInfoDiv) volumeInfoDiv.style.display = 'none';
-                    if (negativeWarningDiv) negativeWarningDiv.style.display = 'none';
                     
                     // Refresh bottle inventory
                     const bottlesSnap = await db.collection(COLLECTIONS.BOTTLES).get();

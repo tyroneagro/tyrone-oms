@@ -62,6 +62,9 @@
             background: white;
             border-bottom: 1px solid var(--border);
             padding: 0 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 50;
         }
         
         .nav-container {
@@ -97,8 +100,25 @@
             border-bottom-color: var(--primary);
         }
         
-        .nav-item.hidden {
-            display: none;
+        .nav-item.admin {
+            color: var(--purple);
+            font-weight: 600;
+        }
+        
+        .nav-item.admin.active {
+            border-bottom-color: var(--purple);
+        }
+        
+        .nav-item.packing {
+            color: var(--teal);
+        }
+        
+        .nav-item.formulation {
+            color: var(--purple);
+        }
+        
+        .nav-item.dispatch {
+            color: var(--info);
         }
         
         .user-menu {
@@ -348,6 +368,14 @@
             color: var(--danger);
         }
         
+        .badge-viewer {
+            background: var(--info);
+            color: white;
+            font-size: 10px;
+            padding: 2px 6px;
+            margin-left: 8px;
+        }
+        
         .table-container {
             overflow-x: auto;
             border-radius: 8px;
@@ -415,6 +443,11 @@
             background: #0e7490;
         }
         
+        .view-btn:disabled {
+            background: var(--border);
+            cursor: not-allowed;
+        }
+        
         .toast {
             position: fixed;
             top: 20px;
@@ -435,6 +468,14 @@
         
         .toast.error {
             background: var(--danger);
+        }
+        
+        .toast.purple {
+            background: var(--purple);
+        }
+        
+        .toast.info {
+            background: var(--info);
         }
         
         /* Modal Styles */
@@ -632,6 +673,47 @@
             color: var(--danger);
         }
         
+        .view-only-notice {
+            background: #e0f2fe;
+            border: 1px solid var(--info);
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--info);
+        }
+        
+        .department-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+        
+        .department-badge.packing {
+            background: var(--teal);
+            color: white;
+        }
+        
+        .department-badge.formulation {
+            background: var(--purple);
+            color: white;
+        }
+        
+        .department-badge.dispatch {
+            background: var(--info);
+            color: white;
+        }
+        
+        .department-badge.admin {
+            background: var(--danger);
+            color: white;
+        }
+        
         @media (max-width: 768px) {
             .stats-grid {
                 grid-template-columns: 1fr;
@@ -662,9 +744,7 @@
         
         <nav class="nav">
             <div class="nav-container">
-                <div class="nav-links" id="navLinks">
-                    <!-- Navigation will be dynamically loaded -->
-                </div>
+                <div class="nav-links" id="navLinks"></div>
                 <div class="user-menu">
                     <div class="user-info">
                         <div class="user-avatar" id="userAvatar">U</div>
@@ -679,6 +759,18 @@
         </nav>
         
         <main class="main">
+            <!-- View Only Notice (for Viewers) -->
+            <div id="viewOnlyNotice" class="view-only-notice" style="display: none;">
+                <span>👁️</span>
+                <span><strong>View Only Mode:</strong> You are in view-only mode. You can see inventory but cannot make changes.</span>
+            </div>
+            
+            <!-- Department Notice (for non-Packing departments) -->
+            <div id="departmentNotice" class="view-only-notice" style="display: none; background: #fef3c7; border-color: var(--warning); color: var(--warning);">
+                <span>⚠️</span>
+                <span><strong>Read Only Access:</strong> You are viewing Bulk Inventory. This module is primarily for the Packing Department.</span>
+            </div>
+            
             <!-- Stats -->
             <div class="stats-grid">
                 <div class="stat-card">
@@ -787,8 +879,9 @@
         let inventory = [];
         let technicals = [];
         let allUsageRecords = [];
+        let currentUser = null;
         
-        // ==================== GLOBAL FUNCTIONS ====================
+        // ==================== ROLE-BASED ACCESS FUNCTIONS ====================
         
         function getCurrentUser() {
             try {
@@ -797,7 +890,37 @@
                 return null;
             }
         }
-        
+
+        function isAdmin() {
+            return currentUser && currentUser.role === 'admin';
+        }
+
+        function isPacking() {
+            return currentUser && currentUser.role === 'packing';
+        }
+
+        function isFormulation() {
+            return currentUser && currentUser.role === 'formulation';
+        }
+
+        function isDispatch() {
+            return currentUser && currentUser.role === 'dispatch';
+        }
+
+        function isViewer() {
+            return currentUser && currentUser.role === 'viewer';
+        }
+
+        function canEdit() {
+            // Only Admin and Packing can edit bulk inventory
+            return currentUser && (currentUser.role === 'admin' || currentUser.role === 'packing');
+        }
+
+        function canView() {
+            // All authenticated users can view
+            return currentUser != null;
+        }
+
         function showToast(message, type = 'success') {
             const toast = document.getElementById('toast');
             if (toast) {
@@ -821,19 +944,75 @@
                 return;
             }
 
+            currentUser = user;
+
+            // Define all navigation items with their allowed roles
             const navItems = [
-                { permission: 'canViewDashboard', url: 'dashboard.html', text: 'Dashboard' },
-                { permission: 'canAccessMasterData', url: 'master-data.html', text: 'Master Data' },
-                { permission: 'canAccessBottleInventory', url: 'bottle-inventory.html', text: 'Bottle Inventory' },
-                { permission: 'canCreateOrder', url: 'create-order.html', text: 'Create Order' },
-                { permission: 'canAccessPacking', url: 'packing.html', text: 'Packing' },
-                { permission: 'canAccessBulkInventory', url: 'bulk-inventory.html', text: 'Bulk Inventory' },
-                { permission: 'canAccessFinishedGoods', url: 'finished-goods-inventory.html', text: 'Finished Goods' },
-                { permission: 'canAccessDispatch', url: 'dispatch.html', text: 'Dispatch' },
-                { permission: 'canViewOrders', url: 'orders.html', text: 'Orders' },
-                { permission: 'canAccessFormulation', url: 'formulation.html', text: 'Formulation' },
-                { permission: 'canAccessFormulationInventory', url: 'formulation-inventory.html', text: 'Formulation Inventory' },
-                { permission: 'canAccessReports', url: 'reports.html', text: 'Reports' }
+                { 
+                    url: 'dashboard.html', 
+                    text: 'Dashboard',
+                    allowed: ['admin', 'packing', 'formulation', 'dispatch', 'viewer']
+                },
+                { 
+                    url: 'master-data.html', 
+                    text: 'Master Data',
+                    allowed: ['admin']
+                },
+                { 
+                    url: 'bottle-inventory.html', 
+                    text: 'Bottle Inventory',
+                    allowed: ['admin', 'packing']
+                },
+                { 
+                    url: 'create-order.html', 
+                    text: 'Create Order',
+                    allowed: ['admin']
+                },
+                { 
+                    url: 'packing.html', 
+                    text: 'Packing',
+                    allowed: ['admin', 'packing', 'viewer']
+                },
+                { 
+                    url: 'bulk-inventory.html', 
+                    text: 'Bulk Inventory',
+                    allowed: ['admin', 'packing', 'viewer']
+                },
+                { 
+                    url: 'finished-goods-inventory.html', 
+                    text: 'Finished Goods',
+                    allowed: ['admin', 'packing', 'viewer']
+                },
+                { 
+                    url: 'dispatch.html', 
+                    text: 'Dispatch',
+                    allowed: ['admin', 'dispatch', 'viewer']
+                },
+                { 
+                    url: 'orders.html', 
+                    text: 'Orders',
+                    allowed: ['admin', 'packing', 'formulation', 'dispatch', 'viewer']
+                },
+                { 
+                    url: 'formulation.html', 
+                    text: 'Formulation',
+                    allowed: ['admin', 'formulation', 'viewer']
+                },
+                { 
+                    url: 'formulation-inventory.html', 
+                    text: 'Formulation Inventory',
+                    allowed: ['admin', 'formulation', 'viewer']
+                },
+                { 
+                    url: 'reports.html', 
+                    text: 'Reports',
+                    allowed: ['admin', 'viewer']
+                },
+                { 
+                    url: 'user-management.html', 
+                    text: 'User Management',
+                    allowed: ['admin']
+                }
             ];
 
             const navContainer = document.getElementById('navLinks');
@@ -842,10 +1021,18 @@
             navContainer.innerHTML = '';
 
             navItems.forEach(item => {
-                if (user.permissions && user.permissions[item.permission]) {
+                // Check if user's role is allowed to see this page
+                if (item.allowed.includes(user.role)) {
                     const link = document.createElement('a');
                     link.href = item.url;
                     link.className = 'nav-item';
+                    
+                    // Add role-specific class for styling
+                    if (user.role === 'admin') link.classList.add('admin');
+                    else if (user.role === 'packing') link.classList.add('packing');
+                    else if (user.role === 'formulation') link.classList.add('formulation');
+                    else if (user.role === 'dispatch') link.classList.add('dispatch');
+                    
                     link.textContent = item.text;
                     
                     const currentPage = window.location.pathname.split('/').pop();
@@ -858,6 +1045,7 @@
             });
 
             updateUserInfo(user);
+            applyRoleBasedRestrictions();
         }
 
         function updateUserInfo(user) {
@@ -870,6 +1058,33 @@
             if (userAvatarEl) userAvatarEl.textContent = (user.name || 'U').charAt(0).toUpperCase();
         }
 
+        function applyRoleBasedRestrictions() {
+            const viewOnlyNotice = document.getElementById('viewOnlyNotice');
+            const departmentNotice = document.getElementById('departmentNotice');
+            
+            // Show view-only notice for viewers
+            if (isViewer()) {
+                if (viewOnlyNotice) viewOnlyNotice.style.display = 'flex';
+            }
+            
+            // Show department notice for non-packing users (except admin)
+            if (!isPacking() && !isAdmin() && !isViewer()) {
+                if (departmentNotice) {
+                    departmentNotice.style.display = 'flex';
+                    departmentNotice.innerHTML = `
+                        <span>⚠️</span>
+                        <span><strong>Read Only Access:</strong> You are viewing Bulk Inventory. This module is managed by the Packing Department.</span>
+                    `;
+                }
+            }
+            
+            // Disable any editing features for non-packing users
+            if (!canEdit()) {
+                // Disable any potential edit buttons (though this page doesn't have them)
+                // But we keep the view buttons enabled
+            }
+        }
+
         function checkPageAccess() {
             const user = getCurrentUser();
             
@@ -878,26 +1093,12 @@
                 return false;
             }
             
-            const pagePermissions = {
-                'master-data.html': 'canAccessMasterData',
-                'bottle-inventory.html': 'canAccessBottleInventory',
-                'create-order.html': 'canCreateOrder',
-                'packing.html': 'canAccessPacking',
-                'bulk-inventory.html': 'canAccessBulkInventory',
-                'finished-goods-inventory.html': 'canAccessFinishedGoods',
-                'dispatch.html': 'canAccessDispatch',
-                'orders.html': 'canViewOrders',
-                'formulation.html': 'canAccessFormulation',
-                'formulation-inventory.html': 'canAccessFormulationInventory',
-                'reports.html': 'canAccessReports'
-            };
+            // Define which roles can access this page
+            const allowedRoles = ['admin', 'packing', 'viewer'];
             
-            const currentPage = window.location.pathname.split('/').pop();
-            const requiredPermission = pagePermissions[currentPage];
-            
-            if (requiredPermission && (!user.permissions || !user.permissions[requiredPermission])) {
+            if (!allowedRoles.includes(user.role)) {
                 window.location.href = 'dashboard.html';
-                showToast('You do not have permission to access this page', 'error');
+                showToast('You do not have permission to access Bulk Inventory', 'error');
                 return false;
             }
             
@@ -1035,8 +1236,6 @@
             }).join('');
         }
         
-        // ==================== FIXED HISTORY FUNCTION ====================
-        
         window.viewBatchHistory = async function(itemId) {
             const item = inventory.find(i => i.id === itemId);
             if (!item) {
@@ -1045,30 +1244,25 @@
             }
             
             try {
-                // Show loading
                 document.getElementById('batchHistory').innerHTML = '<div class="text-center text-muted">Loading history...</div>';
                 document.getElementById('historyModal').classList.add('active');
                 
-                // Get usage records for this batch
                 const usageSnapshot = await db.collection(BULK_USAGE_COLLECTION)
                     .where('batchId', '==', itemId)
                     .get();
                 
                 const usages = usageSnapshot.docs.map(doc => doc.data());
                 
-                // Sort by date (newest first)
                 usages.sort((a, b) => {
                     const dateA = a.usedAt || a.createdAt || '';
                     const dateB = b.usedAt || b.createdAt || '';
                     return dateB.localeCompare(dateA);
                 });
                 
-                // Calculate totals
                 const totalReceived = item.originalQuantity || item.quantity || 0;
                 const totalUsed = usages.reduce((sum, u) => sum + (u.quantity || 0), 0);
                 const currentStock = item.quantity || 0;
                 
-                // Batch Info
                 document.getElementById('batchInfo').innerHTML = `
                     <div style="display: flex; justify-content: space-between; align-items: center;">
                         <div>
@@ -1083,10 +1277,8 @@
                     </div>
                 `;
                 
-                // Build timeline
                 let timelineHtml = '';
                 
-                // Received event
                 timelineHtml += `
                     <div class="timeline-item received">
                         <div class="timeline-date">${item.createdAt ? new Date(item.createdAt).toLocaleString() : 'N/A'}</div>
@@ -1120,7 +1312,6 @@
                     </div>
                 `;
                 
-                // Usage events
                 if (usages.length > 0) {
                     usages.forEach(usage => {
                         const usedDate = usage.usedAt ? new Date(usage.usedAt).toLocaleString() : 'N/A';
@@ -1169,7 +1360,6 @@
                 
                 document.getElementById('batchHistory').innerHTML = timelineHtml;
                 
-                // Summary
                 document.getElementById('batchSummary').innerHTML = `
                     <div class="summary-item">
                         <div class="summary-label">Total Received</div>

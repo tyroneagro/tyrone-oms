@@ -60,6 +60,9 @@
             background: white;
             border-bottom: 1px solid var(--border);
             padding: 0 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 50;
         }
         
         .nav-container {
@@ -93,6 +96,27 @@
         .nav-item.active {
             color: var(--primary);
             border-bottom-color: var(--primary);
+        }
+        
+        .nav-item.admin {
+            color: var(--purple);
+            font-weight: 600;
+        }
+        
+        .nav-item.admin.active {
+            border-bottom-color: var(--purple);
+        }
+        
+        .nav-item.packing {
+            color: var(--teal);
+        }
+        
+        .nav-item.formulation {
+            color: var(--purple);
+        }
+        
+        .nav-item.dispatch {
+            color: var(--info);
         }
         
         .user-menu {
@@ -214,6 +238,16 @@
             color: var(--purple);
         }
         
+        .badge-viewer {
+            background: var(--info);
+            color: white;
+        }
+        
+        .badge-warning {
+            background: #fef3c7;
+            color: var(--warning);
+        }
+        
         .order-card {
             background: white;
             border: 1px solid var(--border);
@@ -234,6 +268,15 @@
             background: #f0fdf4;
         }
         
+        .order-card.viewer-mode {
+            cursor: default;
+        }
+        
+        .order-card.viewer-mode:hover {
+            transform: none;
+            box-shadow: none;
+        }
+        
         .order-header {
             display: flex;
             justify-content: space-between;
@@ -244,6 +287,9 @@
         .order-number {
             font-weight: 600;
             font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
         
         .order-customer {
@@ -256,6 +302,8 @@
             gap: 16px;
             font-size: 13px;
             color: var(--text-muted);
+            margin-top: 8px;
+            flex-wrap: wrap;
         }
         
         .dispatch-area {
@@ -277,6 +325,12 @@
             border-radius: 8px;
             margin-bottom: 8px;
             border-left: 3px solid var(--success);
+        }
+        
+        .dispatch-item.dispatched {
+            background: #d1fae5;
+            border-left-color: var(--success);
+            opacity: 0.8;
         }
         
         .item-details {
@@ -337,6 +391,11 @@
             margin-right: 8px;
         }
         
+        .dispatch-input:disabled {
+            background: #f1f5f9;
+            cursor: not-allowed;
+        }
+        
         .btn {
             padding: 8px 16px;
             border: none;
@@ -352,7 +411,7 @@
             color: white;
         }
         
-        .btn-primary:hover {
+        .btn-primary:hover:not(:disabled) {
             background: var(--primary-dark);
         }
         
@@ -361,19 +420,29 @@
             color: white;
         }
         
+        .btn-success:hover:not(:disabled) {
+            background: #047857;
+        }
+        
         .btn-outline {
             background: transparent;
             border: 1px solid var(--border);
             color: var(--text);
         }
         
-        .btn-outline:hover {
+        .btn-outline:hover:not(:disabled) {
             background: #f8fafc;
         }
         
         .btn-sm {
             padding: 6px 12px;
             font-size: 12px;
+        }
+        
+        .btn:disabled {
+            background: var(--border);
+            cursor: not-allowed;
+            opacity: 0.7;
         }
         
         .grid-2 {
@@ -417,6 +486,10 @@
             background: var(--danger);
         }
         
+        .toast.info {
+            background: var(--info);
+        }
+        
         .ready-badge {
             background: var(--success);
             color: white;
@@ -424,6 +497,39 @@
             border-radius: 12px;
             font-size: 11px;
             margin-left: 8px;
+        }
+        
+        .view-only-notice {
+            background: #e0f2fe;
+            border: 1px solid var(--info);
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--info);
+        }
+        
+        .access-denied-notice {
+            background: #fee2e2;
+            border: 1px solid var(--danger);
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--danger);
+        }
+        
+        .bulk-badge {
+            background: var(--purple);
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 10px;
+            margin-left: 4px;
         }
         
         @media (max-width: 768px) {
@@ -457,9 +563,7 @@
         <!-- Navigation -->
         <nav class="nav">
             <div class="nav-container">
-                <div class="nav-links" id="navLinks">
-                    <!-- Navigation will be dynamically loaded by JavaScript -->
-                </div>
+                <div class="nav-links" id="navLinks"></div>
                 <div class="user-menu">
                     <div class="user-info">
                         <div class="user-avatar" id="userAvatar">U</div>
@@ -474,6 +578,18 @@
         </nav>
         
         <main class="main">
+            <!-- Access Denied Notice (for non-dispatch users) -->
+            <div id="accessDeniedNotice" class="access-denied-notice" style="display: none;">
+                <span>⛔</span>
+                <span><strong>Access Restricted:</strong> Only Admin and Dispatch Department can dispatch orders. You are in view-only mode.</span>
+            </div>
+            
+            <!-- Viewer Mode Notice -->
+            <div id="viewerNotice" class="view-only-notice" style="display: none;">
+                <span>👁️</span>
+                <span><strong>View Only Mode:</strong> You can see dispatch information but cannot perform any actions.</span>
+            </div>
+            
             <div class="grid-2">
                 <!-- Left Column - Orders Ready for Dispatch -->
                 <div class="card">
@@ -536,6 +652,11 @@
         
         // ==================== GLOBAL FUNCTIONS ====================
         
+        let currentUser = null;
+        let selectedOrder = null;
+        let customers = [];
+        let technicals = [];
+        
         // Get current user from storage
         function getCurrentUser() {
             try {
@@ -543,6 +664,57 @@
             } catch (e) {
                 console.error("Error parsing user data:", e);
                 return null;
+            }
+        }
+
+        // Role-based access functions
+        function isAdmin() {
+            return currentUser && currentUser.role === 'admin';
+        }
+
+        function isDispatch() {
+            return currentUser && currentUser.role === 'dispatch';
+        }
+
+        function isViewer() {
+            return currentUser && currentUser.role === 'viewer';
+        }
+
+        function canDispatch() {
+            // Only Admin and Dispatch can perform dispatch actions
+            return currentUser && (currentUser.role === 'admin' || currentUser.role === 'dispatch');
+        }
+
+        function canView() {
+            return currentUser != null;
+        }
+
+        // Apply role-based restrictions
+        function applyRoleRestrictions() {
+            const user = currentUser;
+            if (!user) return;
+            
+            const canPerformDispatch = canDispatch();
+            const accessDeniedNotice = document.getElementById('accessDeniedNotice');
+            const viewerNotice = document.getElementById('viewerNotice');
+            
+            if (isViewer()) {
+                if (viewerNotice) viewerNotice.style.display = 'flex';
+            } else if (!canPerformDispatch && !isViewer()) {
+                if (accessDeniedNotice) accessDeniedNotice.style.display = 'flex';
+            }
+            
+            // Disable all action buttons and inputs for non-dispatch users
+            if (!canPerformDispatch) {
+                // Disable all dispatch buttons and inputs
+                document.querySelectorAll('.dispatch-input, .btn-success').forEach(el => {
+                    el.disabled = true;
+                });
+                
+                // Add viewer-mode class to order cards
+                document.querySelectorAll('.order-card').forEach(el => {
+                    el.classList.add('viewer-mode');
+                });
             }
         }
 
@@ -565,7 +737,7 @@
             }
         }
 
-        // Update navigation based on user permissions
+        // Update navigation based on role
         function updateNavigation() {
             const user = getCurrentUser();
             if (!user) {
@@ -573,37 +745,96 @@
                 return;
             }
 
-            // Define all navigation items with their required permissions
+            currentUser = user;
+
+            // Define all navigation items with their allowed roles
             const navItems = [
-                { permission: 'canViewDashboard', url: 'dashboard.html', text: 'Dashboard' },
-                { permission: 'canAccessMasterData', url: 'master-data.html', text: 'Master Data' },
-                { permission: 'canAccessBottleInventory', url: 'bottle-inventory.html', text: 'Bottle Inventory' },
-                { permission: 'canCreateOrder', url: 'create-order.html', text: 'Create Order' },
-                { permission: 'canAccessPacking', url: 'packing.html', text: 'Packing' },
-                { permission: 'canAccessBulkInventory', url: 'bulk-inventory.html', text: 'Bulk Inventory' },
-                { permission: 'canAccessFinishedGoods', url: 'finished-goods-inventory.html', text: 'Finished Goods' },
-                { permission: 'canAccessDispatch', url: 'dispatch.html', text: 'Dispatch' },
-                { permission: 'canViewOrders', url: 'orders.html', text: 'Orders' },
-                { permission: 'canAccessFormulation', url: 'formulation.html', text: 'Formulation' },
-                { permission: 'canAccessFormulationInventory', url: 'formulation-inventory.html', text: 'Formulation Inventory' },
-                { permission: 'canAccessReports', url: 'reports.html', text: 'Reports' }
+                { 
+                    url: 'dashboard.html', 
+                    text: 'Dashboard',
+                    allowed: ['admin', 'packing', 'formulation', 'dispatch', 'viewer']
+                },
+                { 
+                    url: 'master-data.html', 
+                    text: 'Master Data',
+                    allowed: ['admin']
+                },
+                { 
+                    url: 'bottle-inventory.html', 
+                    text: 'Bottle Inventory',
+                    allowed: ['admin', 'packing']
+                },
+                { 
+                    url: 'create-order.html', 
+                    text: 'Create Order',
+                    allowed: ['admin', 'viewer']
+                },
+                { 
+                    url: 'packing.html', 
+                    text: 'Packing',
+                    allowed: ['admin', 'packing', 'viewer']
+                },
+                { 
+                    url: 'bulk-inventory.html', 
+                    text: 'Bulk Inventory',
+                    allowed: ['admin', 'packing', 'viewer']
+                },
+                { 
+                    url: 'finished-goods-inventory.html', 
+                    text: 'Finished Goods',
+                    allowed: ['admin', 'packing', 'viewer']
+                },
+                { 
+                    url: 'dispatch.html', 
+                    text: 'Dispatch',
+                    allowed: ['admin', 'dispatch', 'viewer']
+                },
+                { 
+                    url: 'orders.html', 
+                    text: 'Orders',
+                    allowed: ['admin', 'packing', 'formulation', 'dispatch', 'viewer']
+                },
+                { 
+                    url: 'formulation.html', 
+                    text: 'Formulation',
+                    allowed: ['admin', 'formulation', 'viewer']
+                },
+                { 
+                    url: 'formulation-inventory.html', 
+                    text: 'Formulation Inventory',
+                    allowed: ['admin', 'formulation', 'viewer']
+                },
+                { 
+                    url: 'reports.html', 
+                    text: 'Reports',
+                    allowed: ['admin', 'viewer']
+                },
+                { 
+                    url: 'user-management.html', 
+                    text: 'User Management',
+                    allowed: ['admin']
+                }
             ];
 
             const navContainer = document.getElementById('navLinks');
             if (!navContainer) return;
 
-            // Clear existing navigation
             navContainer.innerHTML = '';
 
-            // Add navigation items based on permissions
             navItems.forEach(item => {
-                if (user.permissions && user.permissions[item.permission]) {
+                if (item.allowed.includes(user.role)) {
                     const link = document.createElement('a');
                     link.href = item.url;
                     link.className = 'nav-item';
+                    
+                    // Add role-specific class for styling
+                    if (user.role === 'admin') link.classList.add('admin');
+                    else if (user.role === 'packing') link.classList.add('packing');
+                    else if (user.role === 'formulation') link.classList.add('formulation');
+                    else if (user.role === 'dispatch') link.classList.add('dispatch');
+                    
                     link.textContent = item.text;
                     
-                    // Highlight current page
                     const currentPage = window.location.pathname.split('/').pop();
                     if (currentPage === item.url) {
                         link.classList.add('active');
@@ -613,7 +844,6 @@
                 }
             });
 
-            // Update user info
             updateUserInfo(user);
         }
 
@@ -637,27 +867,12 @@
                 return false;
             }
             
-            // Define page permissions
-            const pagePermissions = {
-                'master-data.html': 'canAccessMasterData',
-                'bottle-inventory.html': 'canAccessBottleInventory',
-                'create-order.html': 'canCreateOrder',
-                'packing.html': 'canAccessPacking',
-                'bulk-inventory.html': 'canAccessBulkInventory',
-                'finished-goods-inventory.html': 'canAccessFinishedGoods',
-                'dispatch.html': 'canAccessDispatch',
-                'orders.html': 'canViewOrders',
-                'formulation.html': 'canAccessFormulation',
-                'formulation-inventory.html': 'canAccessFormulationInventory',
-                'reports.html': 'canAccessReports'
-            };
+            // Define which roles can access this page
+            const allowedRoles = ['admin', 'dispatch', 'viewer'];
             
-            const currentPage = window.location.pathname.split('/').pop();
-            const requiredPermission = pagePermissions[currentPage];
-            
-            if (requiredPermission && (!user.permissions || !user.permissions[requiredPermission])) {
+            if (!allowedRoles.includes(user.role)) {
                 window.location.href = 'dashboard.html';
-                showToast('You do not have permission to access this page', 'error');
+                showToast('Only Admin, Dispatch, and Viewers can access the Dispatch page', 'error');
                 return false;
             }
             
@@ -666,37 +881,31 @@
 
         // ==================== PAGE-SPECIFIC CODE ====================
         
-        let selectedOrder = null;
-        let customers = [];
-        let technicals = []; // Changed from products to technicals
-        
         // Load all data
         async function loadData() {
             try {
                 const [ordersSnap, customersSnap, technicalsSnap, packingsSnap, dispatchesSnap] = await Promise.all([
                     db.collection("orders").get(),
                     db.collection("customers").get(),
-                    db.collection("technicals").get(), // Changed from products to technicals
+                    db.collection("technicals").get(),
                     db.collection("packing").get(),
                     db.collection("dispatches").get()
                 ]);
                 
                 customers = customersSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                technicals = technicalsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })); // Changed
+                technicals = technicalsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 const packings = packingsSnap.docs.map(doc => doc.data());
                 const dispatches = dispatchesSnap.docs.map(doc => doc.data());
                 
-                // Process orders - only those that are fully packed
+                // Process orders - only those that are packed
                 let orders = ordersSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 
                 orders = orders.filter(order => {
                     const orderPackings = packings.filter(p => p.order_id === order.id);
                     const totalPacked = orderPackings.reduce((sum, p) => sum + (p.packed_boxes || 0), 0);
-                    const orderDispatches = dispatches.filter(d => d.order_id === order.id);
-                    const totalDispatched = orderDispatches.reduce((sum, d) => sum + d.dispatched_boxes, 0);
                     
-                    // Show if packed but not fully dispatched
-                    return totalPacked > 0 && totalDispatched < totalPacked;
+                    // Show if any items are packed
+                    return totalPacked > 0;
                 });
                 
                 // Add packing and dispatch info to each order
@@ -705,7 +914,22 @@
                     const totalPacked = orderPackings.reduce((sum, p) => sum + (p.packed_boxes || 0), 0);
                     
                     const orderDispatches = dispatches.filter(d => d.order_id === order.id);
-                    const totalDispatched = orderDispatches.reduce((sum, d) => sum + d.dispatched_boxes, 0);
+                    const totalDispatched = orderDispatches.reduce((sum, d) => sum + (d.dispatched_boxes || 0), 0);
+                    
+                    // Check if order has bulk items
+                    const hasBulk = order.lines?.some(l => l.type === 'bulk');
+                    
+                    // For bulk orders, use volume instead of boxes
+                    let bulkVolume = 0;
+                    let bulkDispatched = 0;
+                    
+                    if (hasBulk) {
+                        bulkVolume = order.lines?.filter(l => l.type === 'bulk').reduce((sum, l) => sum + (l.quantity || 0), 0) || 0;
+                        bulkDispatched = orderDispatches.filter(d => {
+                            const line = order.lines?.find(l => l.id === d.order_line_id);
+                            return line?.type === 'bulk';
+                        }).reduce((sum, d) => sum + (d.dispatched_quantity || d.dispatched_boxes || 0), 0);
+                    }
                     
                     const packedLines = {};
                     orderPackings.forEach(p => {
@@ -717,7 +941,11 @@
                         totalPacked, 
                         totalDispatched,
                         packedLines,
-                        remainingToDispatch: totalPacked - totalDispatched
+                        remainingToDispatch: totalPacked - totalDispatched,
+                        hasBulk,
+                        bulkVolume,
+                        bulkDispatched,
+                        bulkRemaining: bulkVolume - bulkDispatched
                     };
                 });
                 
@@ -725,6 +953,9 @@
                 
                 const readyCount = document.getElementById('readyOrdersCount');
                 if (readyCount) readyCount.textContent = orders.length;
+                
+                // Apply role restrictions after loading data
+                applyRoleRestrictions();
                 
             } catch (error) {
                 console.error("Error loading data:", error);
@@ -749,19 +980,35 @@
                 const customer = customers.find(c => c.id === order.customer_id) || {};
                 const customerName = customer.company || customer.name || 'Unknown';
                 const isSelected = selectedOrder?.id === order.id;
+                const canPerformDispatch = canDispatch();
+                
+                // Determine order type icon
+                const orderTypeIcon = order.hasBulk ? 
+                    (order.lines?.some(l => l.type === 'packed') ? '📦🛢️' : '🛢️') : '📦';
                 
                 return `
-                    <div class="order-card ${isSelected ? 'selected' : ''}" onclick="selectOrder('${order.id}')">
+                    <div class="order-card ${isSelected ? 'selected' : ''} ${!canPerformDispatch ? 'viewer-mode' : ''}" 
+                         onclick="${canPerformDispatch ? `selectOrder('${order.id}')` : ''}">
                         <div class="order-header">
-                            <span class="order-number">${order.order_number || 'Unknown'}</span>
+                            <span class="order-number">
+                                ${orderTypeIcon} ${order.order_number || 'Unknown'}
+                                ${order.hasBulk ? '<span class="bulk-badge">BULK</span>' : ''}
+                            </span>
                             <span class="badge badge-success">Ready</span>
                         </div>
                         <div class="order-customer">${customerName}</div>
-                        <div class="stats" style="margin-top: 8px;">
-                            <span>📦 Packed: ${order.totalPacked || 0} boxes</span>
-                            <span>🚚 Dispatched: ${order.totalDispatched || 0} boxes</span>
-                            <span>⏳ To Dispatch: ${order.remainingToDispatch || 0} boxes</span>
+                        <div class="stats">
+                            ${order.hasBulk ? `
+                                <span>🛢️ Bulk: ${order.bulkVolume?.toFixed(2) || 0} L</span>
+                                <span>🚚 Dispatched: ${order.bulkDispatched?.toFixed(2) || 0} L</span>
+                                <span>⏳ Remaining: ${order.bulkRemaining?.toFixed(2) || 0} L</span>
+                            ` : `
+                                <span>📦 Packed: ${order.totalPacked || 0} boxes</span>
+                                <span>🚚 Dispatched: ${order.totalDispatched || 0} boxes</span>
+                                <span>⏳ To Dispatch: ${order.remainingToDispatch || 0} boxes</span>
+                            `}
                         </div>
+                        ${!canPerformDispatch ? '<div style="margin-top: 8px; font-size: 11px; color: var(--info);">👁️ View Only</div>' : ''}
                     </div>
                 `;
             }).join('');
@@ -773,6 +1020,11 @@
         
         // Select order for dispatch
         window.selectOrder = async function(orderId) {
+            if (!canDispatch()) {
+                showToast('You do not have permission to dispatch orders', 'error');
+                return;
+            }
+            
             try {
                 const orderSnap = await db.collection("orders").doc(orderId).get();
                 selectedOrder = { id: orderSnap.id, ...orderSnap.data() };
@@ -794,7 +1046,7 @@
                 // Calculate dispatched quantities per line
                 const dispatchedPerLine = {};
                 dispatches.forEach(d => {
-                    dispatchedPerLine[d.order_line_id] = (dispatchedPerLine[d.order_line_id] || 0) + d.dispatched_boxes;
+                    dispatchedPerLine[d.order_line_id] = (dispatchedPerLine[d.order_line_id] || 0) + (d.dispatched_boxes || d.dispatched_quantity || 0);
                 });
                 
                 renderDispatchArea(selectedOrder, packings, packedPerLine, dispatchedPerLine);
@@ -822,15 +1074,13 @@
             return orders.filter(order => {
                 const orderPackings = packings.filter(p => p.order_id === order.id);
                 const totalPacked = orderPackings.reduce((sum, p) => sum + (p.packed_boxes || 0), 0);
-                const orderDispatches = dispatches.filter(d => d.order_id === order.id);
-                const totalDispatched = orderDispatches.reduce((sum, d) => sum + d.dispatched_boxes, 0);
                 
-                return totalPacked > 0 && totalDispatched < totalPacked;
+                return totalPacked > 0;
             }).map(order => {
                 const orderPackings = packings.filter(p => p.order_id === order.id);
                 const totalPacked = orderPackings.reduce((sum, p) => sum + (p.packed_boxes || 0), 0);
                 const orderDispatches = dispatches.filter(d => d.order_id === order.id);
-                const totalDispatched = orderDispatches.reduce((sum, d) => sum + d.dispatched_boxes, 0);
+                const totalDispatched = orderDispatches.reduce((sum, d) => sum + (d.dispatched_boxes || 0), 0);
                 
                 return { ...order, totalPacked, totalDispatched, remainingToDispatch: totalPacked - totalDispatched };
             });
@@ -839,6 +1089,7 @@
         function renderDispatchArea(order, packings, packedPerLine, dispatchedPerLine) {
             const container = document.getElementById('dispatchArea');
             const selectedOrderSpan = document.getElementById('selectedOrder');
+            const canPerformDispatch = canDispatch();
             
             if (selectedOrderSpan) {
                 selectedOrderSpan.textContent = `Order: ${order.order_number || 'Unknown'}`;
@@ -862,9 +1113,11 @@
             });
             
             order.lines.forEach(line => {
-                const technical = technicals.find(t => t.id === line.technical_id) || {}; // Changed from product to technical
-                const packed = packedPerLine[line.id] || 0;
-                const dispatched = dispatchedPerLine[line.id] || 0;
+                const technical = technicals.find(t => t.id === line.technical_id) || {};
+                const packed = line.type === 'bulk' ? (line.quantity || 0) : (packedPerLine[line.id] || 0);
+                const dispatched = line.type === 'bulk' ? 
+                    (dispatchedPerLine[line.id] || 0) : 
+                    (dispatchedPerLine[line.id] || 0);
                 const remaining = packed - dispatched;
                 const linePackings = packingsByLine[line.id] || [];
                 
@@ -876,48 +1129,84 @@
                 
                 if (remaining > 0) {
                     hasItemsToDispatch = true;
-                    html += `
-                        <div class="dispatch-item">
-                            <div class="item-details">
-                                <div class="item-name">
-                                    <strong>${line.brand_name || 'Unknown'}</strong>
-                                    <span class="technical-badge">${technical.name || 'N/A'}</span>
+                    
+                    if (line.type === 'bulk') {
+                        html += `
+                            <div class="dispatch-item">
+                                <div class="item-details">
+                                    <div class="item-name">
+                                        <strong>${technical.name || 'Unknown'}</strong>
+                                        <span class="technical-badge">BULK</span>
+                                    </div>
+                                    <div class="item-meta">
+                                        <span>Volume: ${line.quantity?.toFixed(2) || 0} L</span>
+                                        <span>Dispatched: ${dispatched?.toFixed(2) || 0} L</span>
+                                        <span style="background: #fef3c7; color: #d97706;">Remaining: ${remaining?.toFixed(2) || 0} L</span>
+                                    </div>
                                 </div>
-                                ${batchHtml}
-                                <div class="item-meta">
-                                    <span>Size: ${line.size || 'N/A'}</span>
-                                    <span>PCS/Box: ${line.pcs_per_box || 'N/A'}</span>
-                                    <span>Packed: ${packed} boxes</span>
-                                    <span>Dispatched: ${dispatched} boxes</span>
-                                    <span style="background: #fef3c7; color: #d97706;">Remaining: ${remaining} boxes</span>
+                                <div style="display: flex; align-items: center;">
+                                    <input type="number" 
+                                           class="dispatch-input" 
+                                           id="dispatch-${line.id}"
+                                           min="0.01" 
+                                           step="0.01"
+                                           max="${remaining}" 
+                                           value="${remaining > 0 ? remaining.toFixed(2) : 0}"
+                                           ${!canPerformDispatch ? 'disabled' : ''}>
+                                    <button class="btn btn-success btn-sm" 
+                                            onclick="dispatchLine('${order.id}', '${line.id}', ${remaining})"
+                                            ${!canPerformDispatch ? 'disabled' : ''}>
+                                        Dispatch
+                                    </button>
                                 </div>
                             </div>
-                            <div style="display: flex; align-items: center;">
-                                <input type="number" 
-                                       class="dispatch-input" 
-                                       id="dispatch-${line.id}"
-                                       min="1" 
-                                       max="${remaining}" 
-                                       value="${remaining}">
-                                <button class="btn btn-success btn-sm" onclick="dispatchLine('${order.id}', '${line.id}', ${remaining})">
-                                    Dispatch
-                                </button>
+                        `;
+                    } else {
+                        html += `
+                            <div class="dispatch-item">
+                                <div class="item-details">
+                                    <div class="item-name">
+                                        <strong>${line.brand_name || 'Unknown'}</strong>
+                                        <span class="technical-badge">${technical.name || 'N/A'}</span>
+                                    </div>
+                                    ${batchHtml}
+                                    <div class="item-meta">
+                                        <span>Size: ${line.size || 'N/A'}</span>
+                                        <span>PCS/Box: ${line.pcs_per_box || 'N/A'}</span>
+                                        <span>Packed: ${packed} boxes</span>
+                                        <span>Dispatched: ${dispatched} boxes</span>
+                                        <span style="background: #fef3c7; color: #d97706;">Remaining: ${remaining} boxes</span>
+                                    </div>
+                                </div>
+                                <div style="display: flex; align-items: center;">
+                                    <input type="number" 
+                                           class="dispatch-input" 
+                                           id="dispatch-${line.id}"
+                                           min="1" 
+                                           max="${remaining}" 
+                                           value="${remaining}"
+                                           ${!canPerformDispatch ? 'disabled' : ''}>
+                                    <button class="btn btn-success btn-sm" 
+                                            onclick="dispatchLine('${order.id}', '${line.id}', ${remaining})"
+                                            ${!canPerformDispatch ? 'disabled' : ''}>
+                                        Dispatch
+                                    </button>
+                                </div>
                             </div>
-                        </div>
-                    `;
+                        `;
+                    }
                 } else {
                     // Show already dispatched items
                     html += `
-                        <div class="dispatch-item" style="background: #d1fae5; border-left-color: var(--success);">
+                        <div class="dispatch-item dispatched">
                             <div class="item-details">
                                 <div class="item-name">
-                                    <strong>${line.brand_name || 'Unknown'}</strong>
-                                    <span class="technical-badge">${technical.name || 'N/A'}</span>
+                                    <strong>${line.brand_name || technical.name || 'Unknown'}</strong>
+                                    ${line.type === 'bulk' ? '<span class="technical-badge">BULK</span>' : `<span class="technical-badge">${technical.name || 'N/A'}</span>`}
                                 </div>
-                                ${batchHtml}
+                                ${!line.type === 'bulk' ? batchHtml : ''}
                                 <div class="item-meta">
-                                    <span>Size: ${line.size || 'N/A'}</span>
-                                    <span>✅ Fully dispatched (${dispatched} boxes)</span>
+                                    <span>✅ Fully dispatched (${dispatched} ${line.type === 'bulk' ? 'L' : 'boxes'})</span>
                                 </div>
                             </div>
                         </div>
@@ -928,32 +1217,48 @@
             if (!hasItemsToDispatch) {
                 html += `
                     <div class="text-center" style="padding: 20px;">
-                        <span class="badge badge-success">All packed items dispatched! Order complete</span>
+                        <span class="badge badge-success">All items dispatched! Order complete</span>
                     </div>
                 `;
             }
             
-            // Add LR Number field
-            html += `
-                <div style="margin-top: 20px;">
-                    <label for="lrNumber">LR Number (Optional)</label>
-                    <input type="text" id="lrNumber" class="filter-input" placeholder="Enter LR number" style="margin-top: 8px;">
-                </div>
-            `;
+            // Add LR Number field (only visible to those who can dispatch)
+            if (canPerformDispatch) {
+                html += `
+                    <div style="margin-top: 20px;">
+                        <label for="lrNumber">LR Number (Optional)</label>
+                        <input type="text" id="lrNumber" class="filter-input" placeholder="Enter LR number" style="margin-top: 8px;">
+                    </div>
+                `;
+            }
+            
+            // Add view-only message for non-dispatch users
+            if (!canPerformDispatch) {
+                html += `
+                    <div style="margin-top: 20px; padding: 12px; background: #e0f2fe; border-radius: 8px; text-align: center; color: var(--info);">
+                        👁️ You are in view-only mode. Only Admin and Dispatch Department can perform dispatch operations.
+                    </div>
+                `;
+            }
             
             container.innerHTML = html;
         }
         
         // Dispatch a line
         window.dispatchLine = async function(orderId, lineId, maxQty) {
+            if (!canDispatch()) {
+                showToast('You do not have permission to dispatch orders', 'error');
+                return;
+            }
+            
             const input = document.getElementById(`dispatch-${lineId}`);
             if (!input) return;
             
-            const qty = parseInt(input.value);
+            const qty = parseFloat(input.value);
             const lrNumber = document.getElementById('lrNumber')?.value.trim() || '';
             
-            if (!qty || qty < 1 || qty > maxQty) {
-                showToast(`Please enter quantity between 1 and ${maxQty}`, 'error');
+            if (!qty || qty <= 0 || qty > maxQty) {
+                showToast(`Please enter quantity between 0.01 and ${maxQty}`, 'error');
                 return;
             }
             
@@ -966,19 +1271,21 @@
                 id: 'DISP' + Date.now().toString(36) + Math.random().toString(36).substr(2, 4),
                 order_id: orderId,
                 order_line_id: lineId,
-                dispatched_boxes: qty,
+                dispatched_boxes: line.type === 'bulk' ? 0 : qty,
+                dispatched_quantity: line.type === 'bulk' ? qty : 0,
                 dispatch_date: new Date().toISOString().split('T')[0],
                 lr_number: lrNumber,
                 brand_name: line?.brand_name || 'Unknown',
-                technical_name: technical.name || 'Unknown',
+                technical_name: technical.name || line?.technical_name || 'Unknown',
                 size: line?.size || 'N/A',
-                dispatched_by: 'Dispatch Manager',
+                line_type: line?.type || 'packed',
+                dispatched_by: currentUser?.name || 'Dispatch Manager',
                 created_at: new Date().toISOString()
             };
             
             try {
                 await db.collection("dispatches").doc(dispatchRecord.id).set(dispatchRecord);
-                showToast(`Dispatched ${qty} boxes successfully`);
+                showToast(`Dispatched ${qty} ${line.type === 'bulk' ? 'L' : 'boxes'} successfully`);
                 
                 // Refresh the dispatch area
                 await selectOrder(orderId);

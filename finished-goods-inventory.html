@@ -14,6 +14,8 @@
             --info: #0891b2;
             --purple: #7c3aed;
             --purple-dark: #6d28d9;
+            --teal: #14b8a6;
+            --teal-dark: #0d9488;
             --bg: #f8fafc;
             --card: #ffffff;
             --border: #e2e8f0;
@@ -60,6 +62,9 @@
             background: white;
             border-bottom: 1px solid var(--border);
             padding: 0 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 50;
         }
         
         .nav-container {
@@ -93,6 +98,27 @@
         .nav-item.active {
             color: var(--primary);
             border-bottom-color: var(--primary);
+        }
+        
+        .nav-item.admin {
+            color: var(--purple);
+            font-weight: 600;
+        }
+        
+        .nav-item.admin.active {
+            border-bottom-color: var(--purple);
+        }
+        
+        .nav-item.packing {
+            color: var(--teal);
+        }
+        
+        .nav-item.formulation {
+            color: var(--purple);
+        }
+        
+        .nav-item.dispatch {
+            color: var(--info);
         }
         
         .nav-item.hidden {
@@ -266,7 +292,7 @@
             color: white;
         }
         
-        .btn-primary:hover {
+        .btn-primary:hover:not(:disabled) {
             background: var(--primary-dark);
         }
         
@@ -275,7 +301,7 @@
             color: white;
         }
         
-        .btn-success:hover {
+        .btn-success:hover:not(:disabled) {
             background: #047857;
         }
         
@@ -285,7 +311,7 @@
             color: var(--text);
         }
         
-        .btn-outline:hover {
+        .btn-outline:hover:not(:disabled) {
             background: #f8fafc;
         }
         
@@ -294,13 +320,19 @@
             color: white;
         }
         
-        .btn-purple:hover {
+        .btn-purple:hover:not(:disabled) {
             background: var(--purple-dark);
         }
         
         .btn-sm {
             padding: 6px 12px;
             font-size: 12px;
+        }
+        
+        .btn:disabled {
+            background: var(--border);
+            cursor: not-allowed;
+            opacity: 0.7;
         }
         
         .badge {
@@ -334,6 +366,19 @@
         .badge-pending {
             background: #fef3c7;
             color: #92400e;
+        }
+        
+        .badge-viewer {
+            background: var(--info);
+            color: white;
+            font-size: 10px;
+            padding: 2px 6px;
+            margin-left: 8px;
+        }
+        
+        .badge-packing {
+            background: var(--teal);
+            color: white;
         }
         
         .table-container {
@@ -390,7 +435,7 @@
             gap: 4px;
         }
         
-        .use-btn:hover {
+        .use-btn:hover:not(:disabled) {
             background: var(--purple-dark);
             transform: translateY(-1px);
         }
@@ -415,7 +460,7 @@
             gap: 4px;
         }
         
-        .view-btn:hover {
+        .view-btn:hover:not(:disabled) {
             background: #0e7490;
             transform: translateY(-1px);
         }
@@ -476,6 +521,14 @@
         
         .toast.purple {
             background: var(--purple);
+        }
+        
+        .toast.info {
+            background: var(--info);
+        }
+        
+        .toast.teal {
+            background: var(--teal);
         }
         
         /* Modal Styles */
@@ -580,6 +633,11 @@
             box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
         }
         
+        select:disabled, input:disabled {
+            background: #f1f5f9;
+            cursor: not-allowed;
+        }
+        
         .info-box {
             background: #ede9fe;
             padding: 16px;
@@ -612,6 +670,30 @@
             border-left: 4px solid var(--warning);
             font-size: 13px;
             color: #92400e;
+        }
+        
+        .view-only-notice {
+            background: #e0f2fe;
+            border: 1px solid var(--info);
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--info);
+        }
+        
+        .access-denied-notice {
+            background: #fee2e2;
+            border: 1px solid var(--danger);
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--danger);
         }
         
         .orders-history {
@@ -688,9 +770,7 @@
         
         <nav class="nav">
             <div class="nav-container">
-                <div class="nav-links" id="navLinks">
-                    <!-- Navigation will be dynamically loaded -->
-                </div>
+                <div class="nav-links" id="navLinks"></div>
                 <div class="user-menu">
                     <div class="user-info">
                         <div class="user-avatar" id="userAvatar">U</div>
@@ -705,6 +785,18 @@
         </nav>
         
         <main class="main">
+            <!-- Access Denied Notice (for non-packing users) -->
+            <div id="accessDeniedNotice" class="access-denied-notice" style="display: none;">
+                <span>⛔</span>
+                <span><strong>Access Restricted:</strong> Only Admin and Packing Department can use finished goods. You are in view-only mode.</span>
+            </div>
+            
+            <!-- Viewer Mode Notice -->
+            <div id="viewerNotice" class="view-only-notice" style="display: none;">
+                <span>👁️</span>
+                <span><strong>View Only Mode:</strong> You can see finished goods inventory but cannot use items in orders.</span>
+            </div>
+            
             <!-- Stats -->
             <div class="stats-grid">
                 <div class="stat-card">
@@ -802,10 +894,14 @@
                 <div id="orderLineInfo" class="warning-box" style="display: none;">
                     <!-- Will show matching order line info -->
                 </div>
+                
+                <div id="modalViewOnlyMessage" style="display: none; background: #e0f2fe; padding: 12px; border-radius: 8px; margin-top: 16px; text-align: center; color: var(--info);">
+                    👁️ You are in view-only mode. Only Admin and Packing Department can use finished goods.
+                </div>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
-                <button class="btn btn-purple" onclick="confirmUseInOrder()">Use in Order</button>
+                <button class="btn btn-purple" id="confirmUseBtn" onclick="confirmUseInOrder()">Use in Order</button>
             </div>
         </div>
     </div>
@@ -850,20 +946,73 @@
         const ORDERS_COLLECTION = 'orders';
         const PACKING_COLLECTION = 'packing';
         const FORMULATION_COLLECTION = 'formulation';
-        const TECHNICALS_COLLECTION = 'technicals'; // Added technicals collection
+        const TECHNICALS_COLLECTION = 'technicals';
         
         let inventory = [];
         let pendingOrders = [];
         let currentSelectedItem = null;
-        let technicals = []; // Store technical names
+        let technicals = [];
+        let currentUser = null;
         
-        // ==================== GLOBAL FUNCTIONS ====================
+        // ==================== ROLE-BASED ACCESS FUNCTIONS ====================
         
         function getCurrentUser() {
             try {
                 return JSON.parse(localStorage.getItem('currentUser') || sessionStorage.getItem('currentUser'));
             } catch (e) {
                 return null;
+            }
+        }
+
+        function isAdmin() {
+            return currentUser && currentUser.role === 'admin';
+        }
+
+        function isPacking() {
+            return currentUser && currentUser.role === 'packing';
+        }
+
+        function isFormulation() {
+            return currentUser && currentUser.role === 'formulation';
+        }
+
+        function isDispatch() {
+            return currentUser && currentUser.role === 'dispatch';
+        }
+
+        function isViewer() {
+            return currentUser && currentUser.role === 'viewer';
+        }
+
+        function canUseFinishedGoods() {
+            // Only Admin and Packing can use finished goods
+            return currentUser && (currentUser.role === 'admin' || currentUser.role === 'packing');
+        }
+
+        function canView() {
+            return currentUser != null;
+        }
+
+        function applyRoleRestrictions() {
+            const user = currentUser;
+            if (!user) return;
+            
+            const canUse = canUseFinishedGoods();
+            const accessDeniedNotice = document.getElementById('accessDeniedNotice');
+            const viewerNotice = document.getElementById('viewerNotice');
+            
+            if (isViewer()) {
+                if (viewerNotice) viewerNotice.style.display = 'flex';
+            } else if (!canUse && !isViewer()) {
+                if (accessDeniedNotice) accessDeniedNotice.style.display = 'flex';
+            }
+            
+            // Disable all use buttons for non-packing users
+            if (!canUse) {
+                document.querySelectorAll('.use-btn').forEach(btn => {
+                    btn.disabled = true;
+                    btn.title = 'Only Admin and Packing can use finished goods';
+                });
             }
         }
         
@@ -877,7 +1026,6 @@
             }
         }
         
-        // Logout function
         function logout() {
             console.log("Logging out...");
             localStorage.removeItem('currentUser');
@@ -885,13 +1033,7 @@
             window.location.href = 'index.html';
         }
         
-        // Check if user has permission to use finished goods (Admin and Packing Manager only)
-        function canUseFinishedGoods() {
-            const user = getCurrentUser();
-            return user && (user.role === 'admin' || user.role === 'packing');
-        }
-        
-        // Update navigation based on user permissions
+        // Update navigation based on role
         function updateNavigation() {
             const user = getCurrentUser();
             if (!user) {
@@ -899,37 +1041,96 @@
                 return;
             }
 
-            // Define all navigation items with their required permissions
+            currentUser = user;
+
+            // Define all navigation items with their allowed roles
             const navItems = [
-                { permission: 'canViewDashboard', url: 'dashboard.html', text: 'Dashboard' },
-                { permission: 'canAccessMasterData', url: 'master-data.html', text: 'Master Data' },
-                { permission: 'canAccessBottleInventory', url: 'bottle-inventory.html', text: 'Bottle Inventory' },
-                { permission: 'canCreateOrder', url: 'create-order.html', text: 'Create Order' },
-                { permission: 'canAccessPacking', url: 'packing.html', text: 'Packing' },
-                { permission: 'canAccessBulkInventory', url: 'bulk-inventory.html', text: 'Bulk Inventory' },
-                { permission: 'canAccessFinishedGoods', url: 'finished-goods-inventory.html', text: 'Finished Goods' },
-                { permission: 'canAccessDispatch', url: 'dispatch.html', text: 'Dispatch' },
-                { permission: 'canViewOrders', url: 'orders.html', text: 'Orders' },
-                { permission: 'canAccessFormulation', url: 'formulation.html', text: 'Formulation' },
-                { permission: 'canAccessFormulationInventory', url: 'formulation-inventory.html', text: 'Formulation Inventory' },
-                { permission: 'canAccessReports', url: 'reports.html', text: 'Reports' }
+                { 
+                    url: 'dashboard.html', 
+                    text: 'Dashboard',
+                    allowed: ['admin', 'packing', 'formulation', 'dispatch', 'viewer']
+                },
+                { 
+                    url: 'master-data.html', 
+                    text: 'Master Data',
+                    allowed: ['admin']
+                },
+                { 
+                    url: 'bottle-inventory.html', 
+                    text: 'Bottle Inventory',
+                    allowed: ['admin', 'packing']
+                },
+                { 
+                    url: 'create-order.html', 
+                    text: 'Create Order',
+                    allowed: ['admin', 'viewer']
+                },
+                { 
+                    url: 'packing.html', 
+                    text: 'Packing',
+                    allowed: ['admin', 'packing', 'viewer']
+                },
+                { 
+                    url: 'bulk-inventory.html', 
+                    text: 'Bulk Inventory',
+                    allowed: ['admin', 'packing', 'viewer']
+                },
+                { 
+                    url: 'finished-goods-inventory.html', 
+                    text: 'Finished Goods',
+                    allowed: ['admin', 'packing', 'viewer']
+                },
+                { 
+                    url: 'dispatch.html', 
+                    text: 'Dispatch',
+                    allowed: ['admin', 'dispatch', 'viewer']
+                },
+                { 
+                    url: 'orders.html', 
+                    text: 'Orders',
+                    allowed: ['admin', 'packing', 'formulation', 'dispatch', 'viewer']
+                },
+                { 
+                    url: 'formulation.html', 
+                    text: 'Formulation',
+                    allowed: ['admin', 'formulation', 'viewer']
+                },
+                { 
+                    url: 'formulation-inventory.html', 
+                    text: 'Formulation Inventory',
+                    allowed: ['admin', 'formulation', 'viewer']
+                },
+                { 
+                    url: 'reports.html', 
+                    text: 'Reports',
+                    allowed: ['admin', 'viewer']
+                },
+                { 
+                    url: 'user-management.html', 
+                    text: 'User Management',
+                    allowed: ['admin']
+                }
             ];
 
             const navContainer = document.getElementById('navLinks');
             if (!navContainer) return;
 
-            // Clear existing navigation
             navContainer.innerHTML = '';
 
-            // Add navigation items based on permissions
             navItems.forEach(item => {
-                if (user.permissions && user.permissions[item.permission]) {
+                if (item.allowed.includes(user.role)) {
                     const link = document.createElement('a');
                     link.href = item.url;
                     link.className = 'nav-item';
+                    
+                    // Add role-specific class for styling
+                    if (user.role === 'admin') link.classList.add('admin');
+                    else if (user.role === 'packing') link.classList.add('packing');
+                    else if (user.role === 'formulation') link.classList.add('formulation');
+                    else if (user.role === 'dispatch') link.classList.add('dispatch');
+                    
                     link.textContent = item.text;
                     
-                    // Highlight current page
                     const currentPage = window.location.pathname.split('/').pop();
                     if (currentPage === item.url) {
                         link.classList.add('active');
@@ -939,8 +1140,8 @@
                 }
             });
 
-            // Update user info
             updateUserInfo(user);
+            applyRoleRestrictions();
         }
 
         // Update user info in header
@@ -963,27 +1164,12 @@
                 return false;
             }
             
-            // Define page permissions
-            const pagePermissions = {
-                'master-data.html': 'canAccessMasterData',
-                'bottle-inventory.html': 'canAccessBottleInventory',
-                'create-order.html': 'canCreateOrder',
-                'packing.html': 'canAccessPacking',
-                'bulk-inventory.html': 'canAccessBulkInventory',
-                'finished-goods-inventory.html': 'canAccessFinishedGoods',
-                'dispatch.html': 'canAccessDispatch',
-                'orders.html': 'canViewOrders',
-                'formulation.html': 'canAccessFormulation',
-                'formulation-inventory.html': 'canAccessFormulationInventory',
-                'reports.html': 'canAccessReports'
-            };
+            // Define which roles can access this page
+            const allowedRoles = ['admin', 'packing', 'viewer'];
             
-            const currentPage = window.location.pathname.split('/').pop();
-            const requiredPermission = pagePermissions[currentPage];
-            
-            if (requiredPermission && (!user.permissions || !user.permissions[requiredPermission])) {
+            if (!allowedRoles.includes(user.role)) {
                 window.location.href = 'dashboard.html';
-                showToast('You do not have permission to access this page', 'error');
+                showToast('Only Admin, Packing, and Viewers can access Finished Goods', 'error');
                 return false;
             }
             
@@ -1014,6 +1200,7 @@
                 
                 updateStats();
                 renderTable();
+                applyRoleRestrictions();
                 
             } catch (error) {
                 console.error("Error loading inventory:", error);
@@ -1078,9 +1265,6 @@
         function updateStats() {
             const totalBoxes = inventory.reduce((sum, item) => sum + (item.quantity || 0), 0);
             const usedBoxes = inventory.reduce((sum, item) => sum + (item.usedQuantity || 0), 0);
-            const uniqueProducts = new Set(inventory.map(item => 
-                `${item.brandName}-${item.technicalName}-${item.size}`
-            )).size;
             const activeBatches = inventory.filter(item => (item.quantity || 0) > 0).length;
             
             // Count unique orders served
@@ -1101,6 +1285,7 @@
             const tbody = document.getElementById('inventoryTableBody');
             const searchTerm = document.getElementById('searchInventory')?.value.toLowerCase() || '';
             const sizeFilter = document.getElementById('filterSize')?.value || '';
+            const canUse = canUseFinishedGoods();
             
             let filtered = inventory.filter(item => {
                 const matchesSearch = 
@@ -1126,7 +1311,6 @@
             
             tbody.innerHTML = filtered.map(item => {
                 const available = item.quantity || 0;
-                const canUse = available > 0 && canUseFinishedGoods();
                 
                 // Create order tags for used orders
                 const orderTags = (item.usedInOrders || []).map(order => 
@@ -1154,7 +1338,11 @@
                                 <button class="use-btn" onclick="openUseModal('${item.id}')" ${available === 0 ? 'disabled' : ''}>
                                     📦 Use
                                 </button>
-                            ` : ''}
+                            ` : `
+                                <button class="use-btn" disabled title="Only Admin and Packing can use finished goods">
+                                    📦 Use
+                                </button>
+                            `}
                             ${(item.usedInOrders || []).length > 0 ? `
                                 <button class="view-btn" onclick="viewOrders('${item.id}')">
                                     👁️ View
@@ -1173,6 +1361,11 @@
         
         // Open modal to use finished goods in order
         window.openUseModal = async function(itemId) {
+            if (!canUseFinishedGoods()) {
+                showToast('You do not have permission to use finished goods', 'error');
+                return;
+            }
+            
             const item = inventory.find(i => i.id === itemId);
             if (!item) return;
             
@@ -1181,6 +1374,22 @@
             await loadPendingOrders();
             
             const orderSelect = document.getElementById('orderSelect');
+            const confirmBtn = document.getElementById('confirmUseBtn');
+            const modalViewOnlyMessage = document.getElementById('modalViewOnlyMessage');
+            const canUse = canUseFinishedGoods();
+            
+            if (!canUse) {
+                orderSelect.disabled = true;
+                document.getElementById('useQuantity').disabled = true;
+                confirmBtn.disabled = true;
+                modalViewOnlyMessage.style.display = 'block';
+            } else {
+                orderSelect.disabled = false;
+                document.getElementById('useQuantity').disabled = false;
+                confirmBtn.disabled = false;
+                modalViewOnlyMessage.style.display = 'none';
+            }
+            
             orderSelect.innerHTML = '<option value="">Select Order & Product Line</option>';
             
             let hasMatchingOrders = false;
@@ -1317,6 +1526,12 @@
         };
         
         window.confirmUseInOrder = async function() {
+            if (!canUseFinishedGoods()) {
+                showToast('You do not have permission to use finished goods', 'error');
+                closeModal();
+                return;
+            }
+            
             if (!currentSelectedItem) {
                 showToast('No item selected', 'error');
                 return;
@@ -1386,7 +1601,7 @@
                     technical_name: currentSelectedItem.technicalName,
                     pcs_per_box: currentSelectedItem.pcsPerBox || 0,
                     size: currentSelectedItem.size,
-                    packed_by: 'Finished Goods',
+                    packed_by: currentUser?.name || 'Finished Goods',
                     packed_date: new Date().toISOString().split('T')[0],
                     created_at: new Date().toISOString(),
                     from_finished_goods: true,
@@ -1406,7 +1621,7 @@
                     remarks: `Used from Finished Goods - Order ${order.order_number} - Brand: ${currentSelectedItem.brandName}`,
                     formulated_date: new Date().toISOString().split('T')[0],
                     created_at: new Date().toISOString(),
-                    formulated_by: 'Finished Goods',
+                    formulated_by: currentUser?.name || 'Finished Goods',
                     from_finished_goods: true,
                     finished_goods_id: currentSelectedItem.id
                 };

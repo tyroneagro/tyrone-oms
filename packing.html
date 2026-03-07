@@ -243,6 +243,16 @@
             border-color: var(--text-muted);
         }
 
+        .order-card.viewer-mode {
+            cursor: default;
+        }
+
+        .order-card.viewer-mode:hover {
+            transform: none;
+            box-shadow: var(--shadow);
+            border-color: var(--border);
+        }
+
         .order-card:hover {
             transform: translateY(-2px);
             box-shadow: var(--shadow-lg);
@@ -1211,6 +1221,17 @@
             return currentUser && (currentUser.role === 'admin' || currentUser.role === 'Admin');
         }
 
+        function canEdit() {
+            const user = getCurrentUser();
+            // Viewers cannot edit, all other roles can
+            return user && user.role !== 'viewer';
+        }
+
+        function isViewer() {
+            const user = getCurrentUser();
+            return user && user.role === 'viewer';
+        }
+
         function logout() {
             localStorage.removeItem('currentUser');
             sessionStorage.removeItem('currentUser');
@@ -1257,7 +1278,36 @@
             navContainer.innerHTML = '';
 
             navItems.forEach(item => {
-                if (user.permissions && user.permissions[item.permission]) {
+                // Admin can see everything
+                if (user.role === 'admin') {
+                    const link = document.createElement('a');
+                    link.href = item.url;
+                    link.className = 'nav-item';
+                    link.textContent = item.text;
+                    
+                    const currentPage = window.location.pathname.split('/').pop();
+                    if (currentPage === item.url) {
+                        link.classList.add('active');
+                    }
+                    
+                    navContainer.appendChild(link);
+                }
+                // Viewers can see all pages
+                else if (user.role === 'viewer') {
+                    const link = document.createElement('a');
+                    link.href = item.url;
+                    link.className = 'nav-item';
+                    link.textContent = item.text;
+                    
+                    const currentPage = window.location.pathname.split('/').pop();
+                    if (currentPage === item.url) {
+                        link.classList.add('active');
+                    }
+                    
+                    navContainer.appendChild(link);
+                }
+                // Regular users see based on permissions
+                else if (user.permissions && user.permissions[item.permission]) {
                     const link = document.createElement('a');
                     link.href = item.url;
                     link.className = 'nav-item';
@@ -1309,6 +1359,11 @@
             
             const currentPage = window.location.pathname.split('/').pop();
             const requiredPermission = pagePermissions[currentPage];
+            
+            // Viewers can access all pages
+            if (user.role === 'viewer') {
+                return true;
+            }
             
             if (requiredPermission && (!user.permissions || !user.permissions[requiredPermission])) {
                 window.location.href = 'dashboard.html';
@@ -1577,6 +1632,7 @@
                 const totalBoxes = order.totalBoxes || 0;
                 const remainingForOrder = Math.max(0, totalBoxes - orderBoxes);
                 const isLocked = order.isLocked || false;
+                const viewerMode = isViewer();
                 
                 // Determine status based ONLY on order fulfillment
                 let statusClass = 'status-pending';
@@ -1594,11 +1650,13 @@
                 }
                 
                 return `
-                    <div class="order-card ${isLocked ? 'locked' : ''}" onclick="${!isLocked ? `openOrderModal('${order.id}')` : ''}">
+                    <div class="order-card ${isLocked ? 'locked' : ''} ${viewerMode ? 'viewer-mode' : ''}" 
+                         onclick="${!isLocked && !viewerMode ? `openOrderModal('${order.id}')` : ''}">
                         <div class="order-header">
                             <span class="order-number">
                                 ${order.order_number || 'Unknown'}
                                 ${isLocked ? '<span class="lock-badge">🔒 Locked</span>' : ''}
+                                ${viewerMode ? '<span class="view-only-badge">👁️ View Only</span>' : ''}
                             </span>
                             <span class="order-status ${statusClass}">${statusText}</span>
                         </div>
@@ -1630,7 +1688,7 @@
                             </div>` : 
                             ''}
                         
-                        ${isAdmin() ? `
+                        ${isAdmin() && !viewerMode ? `
                             <div class="admin-controls">
                                 ${isLocked ? 
                                     `<button class="unlock-btn" onclick="event.stopPropagation(); toggleOrderLock('${order.id}', true)">
@@ -1650,6 +1708,12 @@
         // ==================== MODAL FUNCTIONS ====================
         
         window.openOrderModal = async function(orderId) {
+            // Viewers cannot open modal with editing capabilities
+            if (isViewer()) {
+                showToast('Viewers cannot view order details', 'info');
+                return;
+            }
+            
             try {
                 const orderSnap = await db.collection(COLLECTIONS.ORDERS).doc(orderId).get();
                 selectedOrder = { id: orderSnap.id, ...orderSnap.data() };
@@ -1685,7 +1749,8 @@
         async function renderOrderDetails(order, packings = []) {
             const container = document.getElementById('modalBody');
             const isLocked = order.isLocked || false;
-            const canEdit = !isLocked || isAdmin();
+            const canEdit = (!isLocked || isAdmin()) && !isViewer();
+            const viewerMode = isViewer();
             
             const customer = customers.find(c => c.id === order.customer_id) || {};
             
@@ -1710,8 +1775,14 @@
             const isOrderCompleted = totalPackedOrderBoxes >= totalOrderBoxes && totalOrderBoxes > 0;
             
             let html = `
-                ${isLocked && !isAdmin() ? `
+                ${viewerMode ? `
                     <div class="view-only-overlay">
+                        <span class="view-only-icon">👁️</span>
+                        <span class="view-only-text">You are in view-only mode. You can see details but cannot pack.</span>
+                    </div>
+                ` : ''}
+                ${isLocked && !isAdmin() && !viewerMode ? `
+                    <div class="view-only-overlay" style="border-color: var(--danger); color: var(--danger);">
                         <span class="view-only-icon">🔒</span>
                         <span class="view-only-text">This order is locked by Admin. View only mode.</span>
                     </div>
@@ -1859,100 +1930,104 @@
                         `;
                     }
                     
-                    // Available Batches - Show but disable if locked
-                    if (availableStock.length > 0 && canEdit) {
-                        html += `
-                            <div class="history-section">
-                                <div class="history-title">
-                                    <span>🏷️</span> Available Batches (Click to Auto-fill)
+                    // Available Batches - Show but disable if can't edit
+                    if (availableStock.length > 0) {
+                        if (canEdit) {
+                            html += `
+                                <div class="history-section">
+                                    <div class="history-title">
+                                        <span>🏷️</span> Available Batches (Click to Auto-fill)
+                                    </div>
+                                    <div class="batch-grid">
+                                        ${availableStock.map(item => `
+                                            <div class="batch-card ${selectedBatch?.id === item.id && selectedBatch?.lineId === line.id ? 'selected' : ''}" 
+                                                 data-id="${item.id}"
+                                                 data-line="${line.id}"
+                                                 onclick="${canEdit ? `selectBatch('${item.id}', '${item.batchNumber}', '${item.mfgDate || ''}', '${item.expDate || ''}', ${item.quantity || 0}, '${line.id}')` : ''}">
+                                                <div class="batch-number">${item.batchNumber}</div>
+                                                <div class="batch-detail">MFG: ${item.mfgDate || 'N/A'}</div>
+                                                <div class="batch-detail">EXP: ${item.expDate || 'N/A'}</div>
+                                                <div class="batch-qty">Available: <span>${(item.quantity || 0).toFixed(2)} L</span></div>
+                                            </div>
+                                        `).join('')}
+                                    </div>
                                 </div>
-                                <div class="batch-grid">
-                                    ${availableStock.map(item => `
-                                        <div class="batch-card ${selectedBatch?.id === item.id && selectedBatch?.lineId === line.id ? 'selected' : ''}" 
-                                             data-id="${item.id}"
-                                             data-line="${line.id}"
-                                             onclick="${canEdit ? `selectBatch('${item.id}', '${item.batchNumber}', '${item.mfgDate || ''}', '${item.expDate || ''}', ${item.quantity || 0}, '${line.id}')` : ''}">
-                                            <div class="batch-number">${item.batchNumber}</div>
-                                            <div class="batch-detail">MFG: ${item.mfgDate || 'N/A'}</div>
-                                            <div class="batch-detail">EXP: ${item.expDate || 'N/A'}</div>
-                                            <div class="batch-qty">Available: <span>${(item.quantity || 0).toFixed(2)} L</span></div>
-                                        </div>
-                                    `).join('')}
+                            `;
+                        } else {
+                            html += `
+                                <div class="history-section">
+                                    <div class="history-title">
+                                        <span>🏷️</span> Available Batches
+                                    </div>
+                                    <div class="batch-grid">
+                                        ${availableStock.map(item => `
+                                            <div class="batch-card disabled">
+                                                <div class="batch-number">${item.batchNumber}</div>
+                                                <div class="batch-detail">MFG: ${item.mfgDate || 'N/A'}</div>
+                                                <div class="batch-detail">EXP: ${item.expDate || 'N/A'}</div>
+                                                <div class="batch-qty">Available: <span>${(item.quantity || 0).toFixed(2)} L</span></div>
+                                            </div>
+                                        `).join('')}
+                                    </div>
                                 </div>
-                            </div>
-                        `;
-                    } else if (availableStock.length > 0 && !canEdit) {
-                        html += `
-                            <div class="history-section">
-                                <div class="history-title">
-                                    <span>🏷️</span> Available Batches
-                                </div>
-                                <div class="batch-grid">
-                                    ${availableStock.map(item => `
-                                        <div class="batch-card disabled">
-                                            <div class="batch-number">${item.batchNumber}</div>
-                                            <div class="batch-detail">MFG: ${item.mfgDate || 'N/A'}</div>
-                                            <div class="batch-detail">EXP: ${item.expDate || 'N/A'}</div>
-                                            <div class="batch-qty">Available: <span>${(item.quantity || 0).toFixed(2)} L</span></div>
-                                        </div>
-                                    `).join('')}
-                                </div>
-                            </div>
-                        `;
+                            `;
+                        }
                     }
                     
-                    // Packing Form - Show only if editable
-                    if (availableStock.length > 0 && canEdit) {
-                        html += `
-                            <div class="packing-form">
-                                <div class="form-title">
-                                    <span>📦</span> Pack Boxes
-                                </div>
-                                <div class="form-grid">
-                                    <div class="form-field">
-                                        <label>Boxes to Pack</label>
-                                        <input type="number" class="form-control" id="qty-${line.id}" 
-                                               min="1" value="1"
-                                               onchange="calculateConsumedQty('${line.id}')"
-                                               ${!canEdit ? 'disabled' : ''}>
+                    // Packing Form - Show only if can edit
+                    if (availableStock.length > 0) {
+                        if (canEdit) {
+                            html += `
+                                <div class="packing-form">
+                                    <div class="form-title">
+                                        <span>📦</span> Pack Boxes
                                     </div>
-                                    <div class="form-field">
-                                        <label>Batch Number</label>
-                                        <input type="text" class="form-control" id="batch-${line.id}" 
-                                               placeholder="Click batch to select" readonly>
+                                    <div class="form-grid">
+                                        <div class="form-field">
+                                            <label>Boxes to Pack</label>
+                                            <input type="number" class="form-control" id="qty-${line.id}" 
+                                                   min="1" value="1"
+                                                   onchange="calculateConsumedQty('${line.id}')"
+                                                   ${!canEdit ? 'disabled' : ''}>
+                                        </div>
+                                        <div class="form-field">
+                                            <label>Batch Number</label>
+                                            <input type="text" class="form-control" id="batch-${line.id}" 
+                                                   placeholder="Click batch to select" readonly>
+                                        </div>
+                                        <div class="form-field">
+                                            <label>MFG Date</label>
+                                            <input type="date" class="form-control" id="mfg-${line.id}" readonly>
+                                        </div>
+                                        <div class="form-field">
+                                            <label>EXP Date</label>
+                                            <input type="date" class="form-control" id="exp-${line.id}" readonly>
+                                        </div>
+                                        <div class="form-field">
+                                            <label>Stock to Use (L)</label>
+                                            <input type="number" class="form-control calculated-field" id="stock-${line.id}" readonly>
+                                        </div>
+                                        <button class="btn-pack" onclick="packBatch('${order.id}', '${line.id}')" ${!canEdit ? 'disabled' : ''}>
+                                            <span>📦</span> Pack
+                                        </button>
                                     </div>
-                                    <div class="form-field">
-                                        <label>MFG Date</label>
-                                        <input type="date" class="form-control" id="mfg-${line.id}" readonly>
+                                    <div class="calculation-hint" id="calculation-${line.id}">
+                                        Enter number of boxes to calculate required stock
                                     </div>
-                                    <div class="form-field">
-                                        <label>EXP Date</label>
-                                        <input type="date" class="form-control" id="exp-${line.id}" readonly>
+                                </div>
+                            `;
+                        } else {
+                            html += `
+                                <div class="packing-form disabled">
+                                    <div class="form-title">
+                                        <span>📦</span> Packing ${viewerMode ? 'Disabled for Viewers' : 'Disabled'}
                                     </div>
-                                    <div class="form-field">
-                                        <label>Stock to Use (L)</label>
-                                        <input type="number" class="form-control calculated-field" id="stock-${line.id}" readonly>
+                                    <div style="text-align: center; padding: 1rem; color: var(--text-muted);">
+                                        ${viewerMode ? 'Viewers cannot pack orders.' : 'This order is locked. Packing not allowed.'}
                                     </div>
-                                    <button class="btn-pack" onclick="packBatch('${order.id}', '${line.id}')" ${!canEdit ? 'disabled' : ''}>
-                                        <span>📦</span> Pack
-                                    </button>
                                 </div>
-                                <div class="calculation-hint" id="calculation-${line.id}">
-                                    Enter number of boxes to calculate required stock
-                                </div>
-                            </div>
-                        `;
-                    } else if (availableStock.length > 0 && !canEdit) {
-                        html += `
-                            <div class="packing-form disabled">
-                                <div class="form-title">
-                                    <span>📦</span> Packing Disabled
-                                </div>
-                                <div style="text-align: center; padding: 1rem; color: var(--text-muted);">
-                                    This order is locked. Packing not allowed.
-                                </div>
-                            </div>
-                        `;
+                            `;
+                        }
                     } else {
                         html += `
                             <div style="background: #fee2e2; border: 1px solid var(--danger); border-radius: 8px; padding: 1rem; color: var(--danger); text-align: center;">
@@ -1972,6 +2047,12 @@
         // ==================== BATCH SELECTION ====================
         
         window.selectBatch = function(batchId, batchNumber, mfgDate, expDate, availableQty, lineId) {
+            // Viewers cannot select batches
+            if (isViewer()) {
+                showToast('Viewers cannot select batches', 'error');
+                return;
+            }
+            
             // Check if order is locked and user is not admin
             if (selectedOrder?.isLocked && !isAdmin()) {
                 showToast('This order is locked. Cannot select batch.', 'error');
@@ -2005,6 +2086,11 @@
         // ==================== CALCULATION ====================
         
         window.calculateConsumedQty = function(lineId) {
+            // Viewers cannot calculate
+            if (isViewer()) {
+                return;
+            }
+            
             // Check if order is locked and user is not admin
             if (selectedOrder?.isLocked && !isAdmin()) {
                 return;
@@ -2064,6 +2150,12 @@
         // ==================== PACK BATCH ====================
         
         window.packBatch = async function(orderId, lineId) {
+            // Viewers cannot pack
+            if (isViewer()) {
+                showToast('Viewers cannot pack orders', 'error');
+                return;
+            }
+            
             // Check if order is locked
             if (selectedOrder?.isLocked && !isAdmin()) {
                 showToast('This order is locked. Only Admin can pack.', 'error');

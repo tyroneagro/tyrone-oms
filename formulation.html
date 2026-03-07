@@ -14,6 +14,10 @@
             --info: #0891b2;
             --purple: #7c3aed;
             --purple-dark: #6d28d9;
+            --teal: #14b8a6;
+            --teal-dark: #0d9488;
+            --bulk: #9333ea;
+            --bulk-dark: #7e22ce;
             --bg: #f8fafc;
             --card: #ffffff;
             --border: #e2e8f0;
@@ -44,6 +48,9 @@
             background: linear-gradient(135deg, #1a5f23, #2d8c3a);
             color: white;
             padding: 1.5rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 50;
         }
         
         .header h1 {
@@ -93,6 +100,27 @@
         .nav-item.active {
             color: var(--primary);
             border-bottom-color: var(--primary);
+        }
+        
+        .nav-item.admin {
+            color: var(--purple);
+            font-weight: 600;
+        }
+        
+        .nav-item.admin.active {
+            border-bottom-color: var(--purple);
+        }
+        
+        .nav-item.packing {
+            color: var(--teal);
+        }
+        
+        .nav-item.formulation {
+            color: var(--purple);
+        }
+        
+        .nav-item.dispatch {
+            color: var(--info);
         }
         
         .nav-item.hidden {
@@ -216,6 +244,10 @@
             background: linear-gradient(135deg, var(--info), #0e7490);
         }
         
+        .stat-card.bulk {
+            background: linear-gradient(135deg, var(--bulk), var(--bulk-dark));
+        }
+        
         .stat-label {
             font-size: 14px;
             opacity: 0.9;
@@ -273,7 +305,7 @@
             color: var(--text);
         }
         
-        .btn-outline:hover {
+        .btn-outline:hover:not(:disabled) {
             background: #f8fafc;
         }
         
@@ -282,7 +314,7 @@
             color: white;
         }
         
-        .btn-success:hover {
+        .btn-success:hover:not(:disabled) {
             background: #047857;
         }
         
@@ -296,13 +328,28 @@
             color: white;
         }
         
-        .btn-purple:hover {
+        .btn-purple:hover:not(:disabled) {
             background: var(--purple-dark);
+        }
+        
+        .btn-bulk {
+            background: var(--bulk);
+            color: white;
+        }
+        
+        .btn-bulk:hover:not(:disabled) {
+            background: var(--bulk-dark);
         }
         
         .btn-sm {
             padding: 6px 12px;
             font-size: 12px;
+        }
+        
+        .btn:disabled {
+            background: var(--border);
+            cursor: not-allowed;
+            opacity: 0.7;
         }
         
         .badge {
@@ -318,6 +365,32 @@
         .badge-partial { background: #e0f2fe; color: #0369a1; }
         .badge-purple { background: #ede9fe; color: #7c3aed; }
         .badge-extra { background: #fef9c3; color: #854d0e; }
+        .badge-bulk { background: #f3e8ff; color: #9333ea; }
+        .badge-viewer { background: var(--info); color: white; }
+        
+        .order-type-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+        
+        .order-type-badge.packed {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .order-type-badge.bulk {
+            background: var(--bulk);
+            color: white;
+        }
+        
+        .order-type-badge.mixed {
+            background: var(--purple);
+            color: white;
+        }
         
         .technical-card {
             background: white;
@@ -327,6 +400,10 @@
             margin-bottom: 16px;
             transition: all 0.2s;
             border-left: 4px solid var(--purple);
+        }
+        
+        .technical-card.bulk-card {
+            border-left-color: var(--bulk);
         }
         
         .technical-card:hover {
@@ -349,6 +426,10 @@
             display: flex;
             align-items: center;
             gap: 8px;
+        }
+        
+        .technical-name.bulk {
+            color: var(--bulk);
         }
         
         .technical-stats {
@@ -386,6 +467,10 @@
             overflow: hidden;
         }
         
+        .order-item.bulk-order {
+            background: #faf5ff;
+        }
+        
         .order-header {
             display: flex;
             justify-content: space-between;
@@ -396,20 +481,33 @@
             transition: all 0.2s;
         }
         
+        .order-item.bulk-order .order-header {
+            background: #e9d8fd;
+        }
+        
         .order-header:hover {
             background: #d1d5db;
+        }
+        
+        .order-item.bulk-order .order-header:hover {
+            background: #d8b4fe;
         }
         
         .order-header-left {
             display: flex;
             align-items: center;
             gap: 12px;
+            flex-wrap: wrap;
         }
         
         .order-number {
             font-weight: 600;
             color: var(--purple);
             font-size: 16px;
+        }
+        
+        .bulk-order .order-number {
+            color: var(--bulk);
         }
         
         .order-total {
@@ -454,11 +552,28 @@
             border-radius: 4px;
         }
         
+        .bulk-product-info {
+            display: flex;
+            gap: 16px;
+            font-size: 13px;
+        }
+        
+        .bulk-product-info span {
+            background: #f3e8ff;
+            padding: 4px 12px;
+            border-radius: 20px;
+            color: var(--bulk-dark);
+        }
+        
         .formulation-summary {
             background: #ede9fe;
             padding: 16px;
             border-radius: 8px;
             margin-top: 12px;
+        }
+        
+        .formulation-summary.bulk {
+            background: #f3e8ff;
         }
         
         .formulation-row {
@@ -490,6 +605,14 @@
             margin-left: 4px;
         }
         
+        .bulk-badge {
+            background: var(--bulk);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+        }
+        
         .progress-bar {
             width: 100%;
             height: 8px;
@@ -506,16 +629,15 @@
             transition: width 0.3s ease;
         }
         
+        .progress-fill.bulk {
+            background: var(--bulk);
+        }
+        
         .progress-fill-extra {
             height: 100%;
             background: var(--warning);
             border-radius: 4px;
             transition: width 0.3s ease;
-        }
-        
-        .action-buttons {
-            display: flex;
-            gap: 8px;
         }
         
         .toast {
@@ -550,6 +672,34 @@
         
         .toast.warning {
             background: var(--warning);
+        }
+        
+        .toast.bulk {
+            background: var(--bulk);
+        }
+        
+        .view-only-notice {
+            background: #e0f2fe;
+            border: 1px solid var(--info);
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--info);
+        }
+        
+        .access-denied-notice {
+            background: #fee2e2;
+            border: 1px solid var(--danger);
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--danger);
         }
         
         /* Modal Styles */
@@ -603,6 +753,10 @@
             border-radius: 12px 12px 0 0;
         }
         
+        .modal-header.bulk {
+            background: linear-gradient(135deg, var(--bulk), var(--bulk-dark));
+        }
+        
         .modal-header h3 {
             color: white;
             margin: 0;
@@ -653,6 +807,11 @@
             box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
         }
         
+        input:disabled, textarea:disabled, select:disabled {
+            background: #f1f5f9;
+            cursor: not-allowed;
+        }
+        
         .form-row {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -665,6 +824,11 @@
             border-radius: 8px;
             margin-bottom: 16px;
             border-left: 4px solid var(--purple);
+        }
+        
+        .info-box.bulk {
+            background: #f3e8ff;
+            border-left-color: var(--bulk);
         }
         
         .warning-box {
@@ -709,6 +873,24 @@
             border-radius: 12px;
             font-size: 10px;
             margin-left: 8px;
+        }
+        
+        .priority-badge {
+            background: var(--danger);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            margin-left: 8px;
+        }
+        
+        .modal-view-only {
+            background: #e0f2fe;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 16px;
+            text-align: center;
+            color: var(--info);
         }
         
         @media (max-width: 768px) {
@@ -756,9 +938,7 @@
         <!-- Navigation -->
         <nav class="nav">
             <div class="nav-container">
-                <div class="nav-links" id="navLinks">
-                    <!-- Navigation will be dynamically loaded by JavaScript -->
-                </div>
+                <div class="nav-links" id="navLinks"></div>
                 <div class="user-menu">
                     <div class="user-info">
                         <div class="user-avatar" id="userAvatar">U</div>
@@ -773,6 +953,18 @@
         </nav>
         
         <main class="main">
+            <!-- Access Denied Notice (for non-formulation users) -->
+            <div id="accessDeniedNotice" class="access-denied-notice" style="display: none;">
+                <span>⛔</span>
+                <span><strong>Access Restricted:</strong> Only Admin and Formulation Department can add formulation batches. You are in view-only mode.</span>
+            </div>
+            
+            <!-- Viewer Mode Notice -->
+            <div id="viewerNotice" class="view-only-notice" style="display: none;">
+                <span>👁️</span>
+                <span><strong>View Only Mode:</strong> You can see formulation requirements but cannot add batches.</span>
+            </div>
+            
             <!-- Stats -->
             <div class="stats-grid">
                 <div class="stat-card">
@@ -790,24 +982,32 @@
                     <div class="stat-value" id="pendingTechnical">0</div>
                     <div class="stat-unit">Technicals</div>
                 </div>
-                <div class="stat-card info">
-                    <div class="stat-label">Orders to Process</div>
-                    <div class="stat-value" id="affectedOrders">0</div>
-                    <div class="stat-unit">Pending orders</div>
+                <div class="stat-card bulk">
+                    <div class="stat-label">Bulk Orders</div>
+                    <div class="stat-value" id="bulkOrdersCount">0</div>
+                    <div class="stat-unit">Pending bulk orders</div>
                 </div>
             </div>
             
             <!-- Filters -->
             <div class="card">
                 <div class="filter-bar">
-                    <input type="text" class="filter-input" id="searchTechnical" placeholder="Search technical name...">
+                    <input type="text" class="filter-input" id="searchTechnical" placeholder="Search technical name or order number...">
                     <select class="filter-select" id="filterStatus">
                         <option value="all">All Technicals</option>
                         <option value="pending">Pending</option>
-                        <option value="formulated">Formulated</option>
                         <option value="partial">Partial</option>
+                        <option value="formulated">Formulated</option>
+                        <option value="extra">Extra Stock</option>
+                    </select>
+                    <select class="filter-select" id="filterOrderType">
+                        <option value="all">All Order Types</option>
+                        <option value="packed">Packed Orders</option>
+                        <option value="bulk">Bulk Orders</option>
+                        <option value="mixed">Mixed Orders</option>
                     </select>
                     <select class="filter-select" id="sortBy">
+                        <option value="priority">Priority (Pending First)</option>
                         <option value="volume-desc">Highest Volume</option>
                         <option value="volume-asc">Lowest Volume</option>
                         <option value="name">Technical Name</option>
@@ -826,7 +1026,7 @@
     <!-- Formulation Modal with Batch Details -->
     <div id="formulationModal" class="modal">
         <div class="modal-content">
-            <div class="modal-header">
+            <div class="modal-header" id="modalHeader">
                 <h3 id="modalTitle">Add Formulation Batch</h3>
                 <button class="close-btn" onclick="closeFormulationModal()">✕</button>
             </div>
@@ -843,6 +1043,11 @@
                 <div class="form-group">
                     <label for="modalOrderNumber">Order Number</label>
                     <input type="text" id="modalOrderNumber" readonly>
+                </div>
+                
+                <div class="form-group">
+                    <label for="modalOrderType">Order Type</label>
+                    <input type="text" id="modalOrderType" readonly>
                 </div>
                 
                 <div class="form-group">
@@ -899,6 +1104,10 @@
                 <div id="existingBatches" class="batch-list">
                     <!-- Existing batches will be shown here -->
                 </div>
+                
+                <div id="modalViewOnlyMessage" class="modal-view-only" style="display: none;">
+                    👁️ You are in view-only mode. Only Admin and Formulation Department can add formulation batches.
+                </div>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-outline" onclick="closeFormulationModal()">Cancel</button>
@@ -929,6 +1138,8 @@
         
         // ==================== GLOBAL FUNCTIONS ====================
         
+        let currentUser = null;
+        
         // Get current user from storage
         function getCurrentUser() {
             try {
@@ -936,6 +1147,57 @@
             } catch (e) {
                 console.error("Error parsing user data:", e);
                 return null;
+            }
+        }
+
+        // Role-based access functions
+        function isAdmin() {
+            return currentUser && currentUser.role === 'admin';
+        }
+
+        function isFormulation() {
+            return currentUser && currentUser.role === 'formulation';
+        }
+
+        function isPacking() {
+            return currentUser && currentUser.role === 'packing';
+        }
+
+        function isDispatch() {
+            return currentUser && currentUser.role === 'dispatch';
+        }
+
+        function isViewer() {
+            return currentUser && currentUser.role === 'viewer';
+        }
+
+        function canFormulate() {
+            // Only Admin and Formulation can add formulation batches
+            return currentUser && (currentUser.role === 'admin' || currentUser.role === 'formulation');
+        }
+
+        function applyRoleRestrictions() {
+            const user = currentUser;
+            if (!user) return;
+            
+            const canAdd = canFormulate();
+            const accessDeniedNotice = document.getElementById('accessDeniedNotice');
+            const viewerNotice = document.getElementById('viewerNotice');
+            
+            if (isViewer()) {
+                if (viewerNotice) viewerNotice.style.display = 'flex';
+            } else if (!canAdd && !isViewer()) {
+                if (accessDeniedNotice) accessDeniedNotice.style.display = 'flex';
+            }
+            
+            // Disable all add buttons for non-formulation users
+            if (!canAdd) {
+                document.querySelectorAll('.btn-purple, .btn-bulk').forEach(btn => {
+                    if (btn.id !== 'refreshData' && !btn.classList.contains('btn-outline')) {
+                        btn.disabled = true;
+                        btn.title = 'Only Admin and Formulation can add batches';
+                    }
+                });
             }
         }
 
@@ -958,7 +1220,7 @@
             }
         }
 
-        // Update navigation based on user permissions
+        // Update navigation based on role
         function updateNavigation() {
             const user = getCurrentUser();
             if (!user) {
@@ -966,37 +1228,96 @@
                 return;
             }
 
-            // Define all navigation items with their required permissions
+            currentUser = user;
+
+            // Define all navigation items with their allowed roles
             const navItems = [
-                { permission: 'canViewDashboard', url: 'dashboard.html', text: 'Dashboard' },
-                { permission: 'canAccessMasterData', url: 'master-data.html', text: 'Master Data' },
-                { permission: 'canAccessBottleInventory', url: 'bottle-inventory.html', text: 'Bottle Inventory' },
-                { permission: 'canCreateOrder', url: 'create-order.html', text: 'Create Order' },
-                { permission: 'canAccessPacking', url: 'packing.html', text: 'Packing' },
-                { permission: 'canAccessBulkInventory', url: 'bulk-inventory.html', text: 'Bulk Inventory' },
-                { permission: 'canAccessFinishedGoods', url: 'finished-goods-inventory.html', text: 'Finished Goods' },
-                { permission: 'canAccessDispatch', url: 'dispatch.html', text: 'Dispatch' },
-                { permission: 'canViewOrders', url: 'orders.html', text: 'Orders' },
-                { permission: 'canAccessFormulation', url: 'formulation.html', text: 'Formulation' },
-                { permission: 'canAccessFormulationInventory', url: 'formulation-inventory.html', text: 'Formulation Inventory' },
-                { permission: 'canAccessReports', url: 'reports.html', text: 'Reports' }
+                { 
+                    url: 'dashboard.html', 
+                    text: 'Dashboard',
+                    allowed: ['admin', 'packing', 'formulation', 'dispatch', 'viewer']
+                },
+                { 
+                    url: 'master-data.html', 
+                    text: 'Master Data',
+                    allowed: ['admin']
+                },
+                { 
+                    url: 'bottle-inventory.html', 
+                    text: 'Bottle Inventory',
+                    allowed: ['admin', 'packing']
+                },
+                { 
+                    url: 'create-order.html', 
+                    text: 'Create Order',
+                    allowed: ['admin', 'viewer']
+                },
+                { 
+                    url: 'packing.html', 
+                    text: 'Packing',
+                    allowed: ['admin', 'packing', 'viewer']
+                },
+                { 
+                    url: 'bulk-inventory.html', 
+                    text: 'Bulk Inventory',
+                    allowed: ['admin', 'packing', 'viewer']
+                },
+                { 
+                    url: 'finished-goods-inventory.html', 
+                    text: 'Finished Goods',
+                    allowed: ['admin', 'packing', 'viewer']
+                },
+                { 
+                    url: 'dispatch.html', 
+                    text: 'Dispatch',
+                    allowed: ['admin', 'dispatch', 'viewer']
+                },
+                { 
+                    url: 'orders.html', 
+                    text: 'Orders',
+                    allowed: ['admin', 'packing', 'formulation', 'dispatch', 'viewer']
+                },
+                { 
+                    url: 'formulation.html', 
+                    text: 'Formulation',
+                    allowed: ['admin', 'formulation', 'viewer']
+                },
+                { 
+                    url: 'formulation-inventory.html', 
+                    text: 'Formulation Inventory',
+                    allowed: ['admin', 'formulation', 'viewer']
+                },
+                { 
+                    url: 'reports.html', 
+                    text: 'Reports',
+                    allowed: ['admin', 'viewer']
+                },
+                { 
+                    url: 'user-management.html', 
+                    text: 'User Management',
+                    allowed: ['admin']
+                }
             ];
 
             const navContainer = document.getElementById('navLinks');
             if (!navContainer) return;
 
-            // Clear existing navigation
             navContainer.innerHTML = '';
 
-            // Add navigation items based on permissions
             navItems.forEach(item => {
-                if (user.permissions && user.permissions[item.permission]) {
+                if (item.allowed.includes(user.role)) {
                     const link = document.createElement('a');
                     link.href = item.url;
                     link.className = 'nav-item';
+                    
+                    // Add role-specific class for styling
+                    if (user.role === 'admin') link.classList.add('admin');
+                    else if (user.role === 'packing') link.classList.add('packing');
+                    else if (user.role === 'formulation') link.classList.add('formulation');
+                    else if (user.role === 'dispatch') link.classList.add('dispatch');
+                    
                     link.textContent = item.text;
                     
-                    // Highlight current page
                     const currentPage = window.location.pathname.split('/').pop();
                     if (currentPage === item.url) {
                         link.classList.add('active');
@@ -1006,8 +1327,8 @@
                 }
             });
 
-            // Update user info
             updateUserInfo(user);
+            applyRoleRestrictions();
         }
 
         // Update user info in header
@@ -1030,27 +1351,12 @@
                 return false;
             }
             
-            // Define page permissions
-            const pagePermissions = {
-                'master-data.html': 'canAccessMasterData',
-                'bottle-inventory.html': 'canAccessBottleInventory',
-                'create-order.html': 'canCreateOrder',
-                'packing.html': 'canAccessPacking',
-                'bulk-inventory.html': 'canAccessBulkInventory',
-                'finished-goods-inventory.html': 'canAccessFinishedGoods',
-                'dispatch.html': 'canAccessDispatch',
-                'orders.html': 'canViewOrders',
-                'formulation.html': 'canAccessFormulation',
-                'formulation-inventory.html': 'canAccessFormulationInventory',
-                'reports.html': 'canAccessReports'
-            };
+            // Define which roles can access this page
+            const allowedRoles = ['admin', 'formulation', 'viewer'];
             
-            const currentPage = window.location.pathname.split('/').pop();
-            const requiredPermission = pagePermissions[currentPage];
-            
-            if (requiredPermission && (!user.permissions || !user.permissions[requiredPermission])) {
+            if (!allowedRoles.includes(user.role)) {
                 window.location.href = 'dashboard.html';
-                showToast('You do not have permission to access this page', 'error');
+                showToast('Only Admin, Formulation, and Viewers can access Formulation page', 'error');
                 return false;
             }
             
@@ -1122,7 +1428,7 @@
         }
 
         // Add to formulation inventory
-        async function addToFormulationInventory(technicalName, batchNumber, quantity, mfgDate, expDate, sourceOrderId, sourceOrderNumber, partyName, isExtra) {
+        async function addToFormulationInventory(technicalName, batchNumber, quantity, mfgDate, expDate, sourceOrderId, sourceOrderNumber, partyName, isExtra, orderType) {
             try {
                 const inventoryItem = {
                     technicalName: technicalName,
@@ -1136,6 +1442,7 @@
                     expDate: expDate,
                     location: 'formulation',
                     isExtra: isExtra || false,
+                    orderType: orderType || 'packed',
                     createdAt: new Date().toISOString(),
                     updatedAt: new Date().toISOString()
                 };
@@ -1149,7 +1456,7 @@
             }
         }
         
-        // Load formulation requirements - UPDATED to work with new structure (removed extraStock reference)
+        // Load formulation requirements
         async function loadFormulation() {
             try {
                 showToast('Loading formulation data...', 'info');
@@ -1169,41 +1476,79 @@
                 // First, group by technical name and order
                 const technicalRequirements = {};
                 let totalVolume = 0;
-                let affectedOrders = new Set();
+                let bulkOrdersCount = 0;
                 
                 // Process each order
                 orders.forEach(order => {
                     if (!order.lines) return;
                     
+                    // Check order type
+                    const orderType = order.order_type || 
+                        (order.lines.some(l => l.type === 'bulk') ? 
+                         (order.lines.some(l => l.type === 'packed') ? 'mixed' : 'bulk') : 
+                         'packed');
+                    
+                    if (orderType === 'bulk') bulkOrdersCount++;
+                    
                     // Group lines by technical name for this order
                     const orderTechnicals = {};
                     
                     order.lines.forEach(line => {
+                        // Handle both packed and bulk lines
                         const technical = line.technical_name;
                         if (!technical) return;
                         
-                        const size = line.size;
-                        const totalBottles = (line.pcs_per_box || 1) * (line.boxes || line.qty || 0);
-                        const volumePerBottle = convertToLiters(size);
-                        const totalVolumeRequired = totalBottles * volumePerBottle;
+                        const lineType = line.type || 'packed';
                         
-                        if (!orderTechnicals[technical]) {
-                            orderTechnicals[technical] = {
-                                technicalName: technical,
-                                brands: [],
-                                totalVolume: 0
-                            };
+                        if (lineType === 'bulk') {
+                            // Bulk order line
+                            const totalVolumeRequired = line.quantity || 0;
+                            
+                            if (!orderTechnicals[technical]) {
+                                orderTechnicals[technical] = {
+                                    technicalName: technical,
+                                    brands: [],
+                                    bulkItems: [],
+                                    totalVolume: 0,
+                                    isBulk: true
+                                };
+                            }
+                            
+                            orderTechnicals[technical].bulkItems.push({
+                                quantity: totalVolumeRequired,
+                                notes: line.notes || 'Bulk order',
+                                volume: totalVolumeRequired
+                            });
+                            
+                            orderTechnicals[technical].totalVolume += totalVolumeRequired;
+                            orderTechnicals[technical].isBulk = true;
+                        } else {
+                            // Packed order line
+                            const size = line.size;
+                            const totalBottles = (line.pcs_per_box || 1) * (line.boxes || line.qty || 0);
+                            const volumePerBottle = convertToLiters(size);
+                            const totalVolumeRequired = totalBottles * volumePerBottle;
+                            
+                            if (!orderTechnicals[technical]) {
+                                orderTechnicals[technical] = {
+                                    technicalName: technical,
+                                    brands: [],
+                                    bulkItems: [],
+                                    totalVolume: 0,
+                                    isBulk: false
+                                };
+                            }
+                            
+                            // Store brand name with the product
+                            orderTechnicals[technical].brands.push({
+                                brand_name: line.brand_name || 'Unknown',
+                                size: size,
+                                bottles: totalBottles,
+                                volume: totalVolumeRequired
+                            });
+                            
+                            orderTechnicals[technical].totalVolume += totalVolumeRequired;
                         }
-                        
-                        // Store brand name with the product
-                        orderTechnicals[technical].brands.push({
-                            brand_name: line.brand_name || 'Unknown',
-                            size: size,
-                            bottles: totalBottles,
-                            volume: totalVolumeRequired
-                        });
-                        
-                        orderTechnicals[technical].totalVolume += totalVolumeRequired;
                     });
                     
                     // Now process each technical for this order
@@ -1225,12 +1570,20 @@
                                 orders: [],
                                 formulations: [],
                                 extraBatches: [],
-                                status: 'pending'
+                                status: 'pending',
+                                hasBulk: false,
+                                hasPacked: false
                             };
                         }
                         
                         technicalRequirements[technical].totalRequired += data.totalVolume;
                         technicalRequirements[technical].totalFormulated += totalFormulated;
+                        
+                        if (data.isBulk) {
+                            technicalRequirements[technical].hasBulk = true;
+                        } else {
+                            technicalRequirements[technical].hasPacked = true;
+                        }
                         
                         // Add formulations to technical
                         orderFormulations.forEach(f => {
@@ -1244,7 +1597,9 @@
                         technicalRequirements[technical].orders.push({
                             order_id: order.id,
                             order_number: order.order_number,
+                            order_type: orderType,
                             brands: data.brands,
+                            bulkItems: data.bulkItems,
                             totalVolume: data.totalVolume,
                             formulated: totalFormulated,
                             remaining: remainingQty,
@@ -1253,9 +1608,6 @@
                         });
                         
                         totalVolume += data.totalVolume;
-                        if (remainingQty > 0) {
-                            affectedOrders.add(order.id);
-                        }
                     });
                 });
                 
@@ -1271,7 +1623,9 @@
                                 orders: [],
                                 formulations: [],
                                 extraBatches: [],
-                                status: 'extra'
+                                status: 'extra',
+                                hasBulk: false,
+                                hasPacked: false
                             };
                         }
                         
@@ -1284,14 +1638,32 @@
                             quantity: item.quantity,
                             mfgDate: item.mfgDate,
                             expDate: item.expDate,
-                            sourceOrder: item.sourceOrderNumber
+                            sourceOrder: item.sourceOrderNumber,
+                            orderType: item.orderType || 'packed'
                         });
                     }
                 });
                 
-                // Calculate pending for each technical
+                // Calculate pending for each technical and sort orders
                 Object.values(technicalRequirements).forEach(tech => {
                     tech.pending = tech.totalRequired - tech.totalFormulated;
+                    
+                    // Sort orders by status (pending first, then partial, then formulated)
+                    if (tech.orders) {
+                        tech.orders.sort((a, b) => {
+                            // Priority order: pending > partial > formulated
+                            const statusPriority = { 'pending': 1, 'partial': 2, 'formulated': 3 };
+                            const priorityA = statusPriority[a.status] || 4;
+                            const priorityB = statusPriority[b.status] || 4;
+                            
+                            if (priorityA !== priorityB) {
+                                return priorityA - priorityB;
+                            }
+                            
+                            // If same status, sort by volume desc
+                            return b.totalVolume - a.totalVolume;
+                        });
+                    }
                     
                     // Determine overall status
                     if (tech.pending <= 0 && tech.totalFormulated > 0) {
@@ -1303,26 +1675,18 @@
                     } else {
                         tech.status = 'pending';
                     }
-                    
-                    // Sort orders by status
-                    if (tech.orders) {
-                        tech.orders.sort((a, b) => {
-                            if (a.status === 'pending' && b.status !== 'pending') return -1;
-                            if (a.status !== 'pending' && b.status === 'pending') return 1;
-                            return b.totalVolume - a.totalVolume;
-                        });
-                    }
                 });
                 
                 // Update stats
                 document.getElementById('totalTechnical').textContent = Object.keys(technicalRequirements).length;
                 document.getElementById('totalVolume').textContent = totalVolume.toFixed(2);
-                document.getElementById('affectedOrders').textContent = affectedOrders.size;
+                document.getElementById('bulkOrdersCount').textContent = bulkOrdersCount;
                 
-                const pendingCount = Object.values(technicalRequirements).filter(t => t.status !== 'formulated' && t.status !== 'extra').length;
+                const pendingCount = Object.values(technicalRequirements).filter(t => t.status === 'pending' || t.status === 'partial').length;
                 document.getElementById('pendingTechnical').textContent = pendingCount;
                 
                 renderTechnicalRequirements(technicalRequirements);
+                applyRoleRestrictions();
                 
             } catch (error) {
                 console.error("Error loading formulation:", error);
@@ -1334,23 +1698,60 @@
             const container = document.getElementById('technicalContainer');
             const searchTerm = document.getElementById('searchTechnical')?.value.toLowerCase() || '';
             const filter = document.getElementById('filterStatus')?.value || 'all';
-            const sortBy = document.getElementById('sortBy')?.value || 'volume-desc';
+            const orderTypeFilter = document.getElementById('filterOrderType')?.value || 'all';
+            const sortBy = document.getElementById('sortBy')?.value || 'priority';
+            const canAdd = canFormulate();
             
             let technicals = Object.values(technicalRequirements);
             
             // Filter
             technicals = technicals.filter(tech => {
-                const matchesSearch = tech.name.toLowerCase().includes(searchTerm);
+                // Search filter
+                const matchesSearch = tech.name.toLowerCase().includes(searchTerm) ||
+                    tech.orders?.some(o => o.order_number.toLowerCase().includes(searchTerm));
                 
-                if (filter === 'all') return matchesSearch;
-                if (filter === 'extra') return matchesSearch && tech.extraBatches && tech.extraBatches.length > 0;
-                return matchesSearch && tech.status === filter;
+                if (!matchesSearch) return false;
+                
+                // Status filter
+                if (filter !== 'all') {
+                    if (filter === 'extra') {
+                        if (!(tech.extraBatches && tech.extraBatches.length > 0)) return false;
+                    } else if (tech.status !== filter) return false;
+                }
+                
+                // Order type filter
+                if (orderTypeFilter !== 'all') {
+                    if (orderTypeFilter === 'bulk' && !tech.hasBulk) return false;
+                    if (orderTypeFilter === 'packed' && !tech.hasPacked) return false;
+                    if (orderTypeFilter === 'mixed' && !(tech.hasBulk && tech.hasPacked)) return false;
+                }
+                
+                return true;
             });
             
             // Sort
             technicals.sort((a, b) => {
-                if (sortBy === 'volume-desc') return (b.totalRequired + (b.extraBatches?.reduce((s, e) => s + e.quantity, 0) || 0)) - (a.totalRequired + (a.extraBatches?.reduce((s, e) => s + e.quantity, 0) || 0));
-                if (sortBy === 'volume-asc') return (a.totalRequired + (a.extraBatches?.reduce((s, e) => s + e.quantity, 0) || 0)) - (b.totalRequired + (b.extraBatches?.reduce((s, e) => s + e.quantity, 0) || 0));
+                if (sortBy === 'priority') {
+                    // Priority: pending (with pending orders) > partial > extra > formulated
+                    const getPriority = (tech) => {
+                        if (tech.orders?.some(o => o.status === 'pending')) return 1;
+                        if (tech.status === 'partial') return 2;
+                        if (tech.status === 'extra') return 3;
+                        if (tech.status === 'formulated') return 4;
+                        return 5;
+                    };
+                    return getPriority(a) - getPriority(b);
+                }
+                if (sortBy === 'volume-desc') {
+                    const totalA = a.totalRequired + (a.extraBatches?.reduce((s, e) => s + e.quantity, 0) || 0);
+                    const totalB = b.totalRequired + (b.extraBatches?.reduce((s, e) => s + e.quantity, 0) || 0);
+                    return totalB - totalA;
+                }
+                if (sortBy === 'volume-asc') {
+                    const totalA = a.totalRequired + (a.extraBatches?.reduce((s, e) => s + e.quantity, 0) || 0);
+                    const totalB = b.totalRequired + (b.extraBatches?.reduce((s, e) => s + e.quantity, 0) || 0);
+                    return totalA - totalB;
+                }
                 if (sortBy === 'name') return a.name.localeCompare(b.name);
                 return 0;
             });
@@ -1366,19 +1767,35 @@
                 
                 let statusClass = 'badge-pending';
                 let statusText = tech.status.toUpperCase();
+                let cardClass = '';
                 
-                if (tech.status === 'formulated') statusClass = 'badge-formulated';
-                else if (tech.status === 'partial') statusClass = 'badge-partial';
-                else if (tech.extraBatches && tech.extraBatches.length > 0) statusClass = 'badge-extra';
+                if (tech.status === 'formulated') {
+                    statusClass = 'badge-formulated';
+                } else if (tech.status === 'partial') {
+                    statusClass = 'badge-partial';
+                } else if (tech.extraBatches && tech.extraBatches.length > 0) {
+                    statusClass = 'badge-extra';
+                    statusText = 'EXTRA STOCK';
+                }
+                
+                if (tech.hasBulk && !tech.hasPacked) {
+                    cardClass = 'bulk-card';
+                } else if (tech.hasBulk && tech.hasPacked) {
+                    cardClass = ''; // Mixed, use default
+                }
                 
                 return `
-                    <div class="technical-card">
+                    <div class="technical-card ${cardClass}">
                         <div class="technical-header">
-                            <div class="technical-name">
+                            <div class="technical-name ${tech.hasBulk && !tech.hasPacked ? 'bulk' : ''}">
                                 <span>🧪 ${tech.name}</span>
                                 <span class="badge ${statusClass}">${statusText}</span>
+                                ${tech.hasBulk ? '<span class="badge badge-bulk">BULK</span>' : ''}
+                                ${tech.hasPacked ? '<span class="badge badge-primary">PACKED</span>' : ''}
                                 ${tech.extraBatches && tech.extraBatches.length > 0 ? 
                                     `<span class="extra-indicator">+${tech.extraBatches.reduce((s, e) => s + e.quantity, 0).toFixed(2)} L Extra</span>` : ''}
+                                ${tech.orders?.some(o => o.status === 'pending') ? 
+                                    '<span class="priority-badge">PENDING</span>' : ''}
                             </div>
                             <div class="technical-stats">
                                 <div class="technical-stat">
@@ -1397,7 +1814,7 @@
                         </div>
                         
                         <div class="progress-bar">
-                            <div class="progress-fill" style="width: ${progress}%"></div>
+                            <div class="progress-fill ${tech.hasBulk && !tech.hasPacked ? 'bulk' : ''}" style="width: ${progress}%"></div>
                         </div>
                         
                         ${tech.extraBatches && tech.extraBatches.length > 0 ? `
@@ -1410,6 +1827,7 @@
                                             <div style="font-size: 12px; color: var(--text-muted);">
                                                 MFG: ${batch.mfgDate} | EXP: ${batch.expDate}
                                                 ${batch.sourceOrder ? ` | From: ${batch.sourceOrder}` : ''}
+                                                ${batch.orderType === 'bulk' ? '<span class="badge-bulk" style="margin-left: 8px;">BULK</span>' : ''}
                                             </div>
                                         </div>
                                         <div style="font-weight: 600; color: var(--warning);">${batch.quantity.toFixed(2)} L</div>
@@ -1424,13 +1842,16 @@
                                 const orderStatusClass = order.status === 'formulated' ? 'badge-formulated' : 
                                                          order.status === 'partial' ? 'badge-partial' : 'badge-pending';
                                 const orderProgress = order.totalVolume > 0 ? (order.formulated / order.totalVolume) * 100 : 0;
+                                const isBulkOrder = order.order_type === 'bulk';
+                                const isMixedOrder = order.order_type === 'mixed';
                                 
                                 return `
-                                    <div class="order-item">
+                                    <div class="order-item ${isBulkOrder ? 'bulk-order' : ''}">
                                         <div class="order-header" onclick="toggleOrder('${tech.name}-${order.order_id}')">
                                             <div class="order-header-left">
                                                 <span class="order-number">Order #${order.order_number}</span>
                                                 <span class="badge ${orderStatusClass}">${order.status}</span>
+                                                <span class="order-type-badge ${order.order_type}">${order.order_type}</span>
                                             </div>
                                             <div class="order-total">
                                                 ${order.formulated.toFixed(2)} / ${order.totalVolume.toFixed(2)} L
@@ -1438,8 +1859,8 @@
                                         </div>
                                         <div class="order-content" id="${tech.name}-${order.order_id}">
                                             <div class="order-products">
-                                                <h5 style="margin-bottom: 8px;">Brands in this Order:</h5>
-                                                ${order.brands.map(brand => `
+                                                <h5 style="margin-bottom: 8px;">Products in this Order:</h5>
+                                                ${order.brands && order.brands.length > 0 ? order.brands.map(brand => `
                                                     <div class="product-row">
                                                         <div class="product-info">
                                                             <span>📦 ${brand.brand_name}</span>
@@ -1448,10 +1869,18 @@
                                                             <span>📊 ${brand.volume.toFixed(2)} L</span>
                                                         </div>
                                                     </div>
-                                                `).join('')}
+                                                `).join('') : ''}
+                                                ${order.bulkItems && order.bulkItems.length > 0 ? order.bulkItems.map(item => `
+                                                    <div class="product-row">
+                                                        <div class="bulk-product-info">
+                                                            <span>🛢️ Bulk Quantity: ${item.quantity.toFixed(2)} L</span>
+                                                            ${item.notes ? `<span>📝 ${item.notes}</span>` : ''}
+                                                        </div>
+                                                    </div>
+                                                `).join('') : ''}
                                             </div>
                                             
-                                            <div class="formulation-summary">
+                                            <div class="formulation-summary ${isBulkOrder ? 'bulk' : ''}">
                                                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                                                     <h5>Formulation Batches:</h5>
                                                     <span class="formulated-badge">Total: ${order.formulated.toFixed(2)} L</span>
@@ -1462,6 +1891,7 @@
                                                             <strong>Batch: ${f.batch_number || 'N/A'}</strong>
                                                             <div style="font-size: 12px; color: var(--text-muted);">
                                                                 MFG: ${f.mfg_date || 'N/A'} | EXP: ${f.exp_date || 'N/A'}
+                                                                ${f.is_extra ? '<span class="extra-badge">EXTRA</span>' : ''}
                                                             </div>
                                                         </div>
                                                         <div style="font-weight: 600;">${f.formulated_qty.toFixed(2)} L</div>
@@ -1470,9 +1900,12 @@
                                             </div>
                                             
                                             <div style="margin-top: 12px; text-align: right;">
-                                                <button class="btn btn-purple btn-sm" onclick="openFormulationModal('${order.order_id}', '${order.order_number}', '${tech.name}', ${order.totalVolume}, ${order.formulated}, event)">
+                                                <button class="btn ${isBulkOrder ? 'btn-bulk' : 'btn-purple'} btn-sm" 
+                                                        onclick="openFormulationModal('${order.order_id}', '${order.order_number}', '${tech.name}', ${order.totalVolume}, ${order.formulated}, '${order.order_type}', event)"
+                                                        ${!canAdd ? 'disabled' : ''}>
                                                     + Add Formulation Batch
                                                 </button>
+                                                ${!canAdd ? '<div style="font-size: 11px; color: var(--info); margin-top: 4px;">👁️ View Only</div>' : ''}
                                             </div>
                                         </div>
                                     </div>
@@ -1493,23 +1926,60 @@
         };
         
         // Open formulation modal
-        window.openFormulationModal = function(orderId, orderNumber, technicalName, totalVolume, formulatedSoFar, event) {
+        window.openFormulationModal = function(orderId, orderNumber, technicalName, totalVolume, formulatedSoFar, orderType, event) {
             if (event) {
                 event.stopPropagation();
             }
             
+            if (!canFormulate()) {
+                showToast('You do not have permission to add formulation batches', 'error');
+                return;
+            }
+            
             const remaining = Math.max(0, totalVolume - formulatedSoFar);
+            const canAdd = canFormulate();
+            const modalViewOnlyMessage = document.getElementById('modalViewOnlyMessage');
+            const confirmBtn = document.getElementById('confirmFormulationBtn');
+            
+            if (!canAdd) {
+                modalViewOnlyMessage.style.display = 'block';
+                confirmBtn.disabled = true;
+                document.getElementById('formulatedVolume').disabled = true;
+                document.getElementById('batchNumber').disabled = true;
+                document.getElementById('mfgDate').disabled = true;
+                document.getElementById('expDate').disabled = true;
+                document.getElementById('formulationRemarks').disabled = true;
+            } else {
+                modalViewOnlyMessage.style.display = 'none';
+                confirmBtn.disabled = false;
+            }
             
             document.getElementById('modalTechnicalName').value = technicalName;
             document.getElementById('modalOrderNumber').value = orderNumber;
+            document.getElementById('modalOrderType').value = orderType.toUpperCase();
             document.getElementById('modalRequiredVolume').value = totalVolume.toFixed(2) + ' L';
             document.getElementById('modalFormulatedSoFar').value = formulatedSoFar.toFixed(2) + ' L';
             document.getElementById('modalRemainingVolume').value = remaining.toFixed(2) + ' L';
-            document.getElementById('formulatedVolume').value = ''; // Empty by default
+            document.getElementById('formulatedVolume').value = '';
             document.getElementById('formulatedVolume').min = 0.01;
-            document.getElementById('formulatedVolume').max = ''; // No max limit
+            document.getElementById('formulatedVolume').max = '';
             document.getElementById('batchNumber').value = '';
             document.getElementById('formulationRemarks').value = '';
+            
+            // Update modal header based on order type
+            const modalHeader = document.getElementById('modalHeader');
+            modalHeader.className = `modal-header ${orderType === 'bulk' ? 'bulk' : ''}`;
+            
+            const modalTitle = document.getElementById('modalTitle');
+            modalTitle.textContent = `Add Formulation Batch - ${orderType.toUpperCase()} Order`;
+            
+            const modalInfo = document.getElementById('modalInfo');
+            modalInfo.className = `info-box ${orderType === 'bulk' ? 'bulk' : ''}`;
+            if (orderType === 'bulk') {
+                modalInfo.innerHTML = '🛢️ This is a BULK order. Formulated product will go directly to dispatch.';
+            } else {
+                modalInfo.innerHTML = '📦 This is a PACKED order. Formulated product will go to formulation inventory for packing.';
+            }
             
             // Show warning if formulating more than required
             const extraWarning = document.getElementById('extraWarning');
@@ -1539,7 +2009,8 @@
                 technicalName: technicalName,
                 requiredVolume: totalVolume,
                 formulatedSoFar: formulatedSoFar,
-                orderNumber: orderNumber
+                orderNumber: orderNumber,
+                orderType: orderType
             };
             
             document.getElementById('formulationModal').classList.add('active');
@@ -1551,8 +2022,14 @@
             window.currentFormulationData = null;
         };
         
-        // Confirm formulation - UPDATED with no max limit
+        // Confirm formulation
         document.getElementById('confirmFormulationBtn').addEventListener('click', async () => {
+            if (!canFormulate()) {
+                showToast('You do not have permission to add formulation batches', 'error');
+                closeFormulationModal();
+                return;
+            }
+            
             if (!window.currentFormulationData) {
                 closeFormulationModal();
                 return;
@@ -1564,7 +2041,7 @@
             const expDate = document.getElementById('expDate').value;
             const remarks = document.getElementById('formulationRemarks').value.trim();
             
-            const { orderId, technicalName, requiredVolume, formulatedSoFar, orderNumber } = window.currentFormulationData;
+            const { orderId, technicalName, requiredVolume, formulatedSoFar, orderNumber, orderType } = window.currentFormulationData;
             
             // Validation - only check minimum, not maximum
             if (!volume || volume <= 0) {
@@ -1588,7 +2065,6 @@
             }
             
             // Validate dates
-           // Validate dates - FIXED VERSION
             const mfg = new Date(mfgDate);
             const exp = new Date(expDate);
             const today = new Date();
@@ -1599,13 +2075,13 @@
             today.setHours(0, 0, 0, 0);
 
             if (mfg > today) {
-            showToast('Manufacturing date cannot be in the future', 'error');
-            return;
-        }
+                showToast('Manufacturing date cannot be in the future', 'error');
+                return;
+            }
 
             if (exp <= mfg) {
                 showToast('Expiry date must be after manufacturing date', 'error');
-            return;
+                return;
             }
             
             // Check if this is extra production
@@ -1625,8 +2101,9 @@
                 remarks: remarks + (isExtra ? ' (Includes extra production)' : ''),
                 formulated_date: new Date().toISOString().split('T')[0],
                 created_at: new Date().toISOString(),
-                formulated_by: getCurrentUser()?.name || 'Formulation Team',
-                is_extra: isExtra
+                formulated_by: currentUser?.name || 'Formulation Team',
+                is_extra: isExtra,
+                order_type: orderType
             };
             
             try {
@@ -1650,13 +2127,14 @@
                     orderId,
                     orderNumber,
                     partyName,
-                    isExtra
+                    isExtra,
+                    orderType
                 );
                 
                 if (isExtra) {
                     showToast(`✅ Allocated ${allocatedToOrder.toFixed(2)} L to order and added ${extraVolume.toFixed(2)} L extra to inventory`, 'warning');
                 } else {
-                    showToast(`✅ Marked ${volume.toFixed(2)} L of ${technicalName} as formulated`, 'purple');
+                    showToast(`✅ Marked ${volume.toFixed(2)} L of ${technicalName} as formulated`, orderType === 'bulk' ? 'bulk' : 'purple');
                 }
                 
                 closeFormulationModal();
@@ -1699,6 +2177,11 @@
         const filterSelect = document.getElementById('filterStatus');
         if (filterSelect) {
             filterSelect.addEventListener('change', () => loadFormulation());
+        }
+        
+        const orderTypeFilter = document.getElementById('filterOrderType');
+        if (orderTypeFilter) {
+            orderTypeFilter.addEventListener('change', () => loadFormulation());
         }
         
         const sortSelect = document.getElementById('sortBy');

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tyrone - Orders</title>
+    <title>Tyrone - Orders Management</title>
     <style>
         :root {
             --primary: #2563eb;
@@ -14,6 +14,8 @@
             --info: #0891b2;
             --purple: #7c3aed;
             --purple-dark: #6d28d9;
+            --bulk: #9333ea;
+            --bulk-dark: #7e22ce;
             --bg: #f8fafc;
             --card: #ffffff;
             --border: #e2e8f0;
@@ -274,6 +276,15 @@
             background: var(--purple-dark);
         }
         
+        .btn-bulk {
+            background: var(--bulk);
+            color: white;
+        }
+        
+        .btn-bulk:hover {
+            background: var(--bulk-dark);
+        }
+        
         .badge {
             display: inline-block;
             padding: 4px 10px;
@@ -287,6 +298,32 @@
         .badge-dispatched { background: #d1fae5; color: #065f46; }
         .badge-partial { background: #fef9c3; color: #854d0e; }
         .badge-purple { background: #ede9fe; color: var(--purple); }
+        .badge-bulk { background: #f3e8ff; color: var(--bulk-dark); }
+        .badge-mixed { background: #c084fc; color: white; }
+        
+        .order-type-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+        
+        .order-type-badge.packed {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .order-type-badge.bulk {
+            background: var(--bulk);
+            color: white;
+        }
+        
+        .order-type-badge.mixed {
+            background: var(--purple);
+            color: white;
+        }
         
         .order-card {
             background: white;
@@ -296,6 +333,18 @@
             margin-bottom: 16px;
             transition: all 0.2s;
             position: relative;
+        }
+        
+        .order-card.bulk-order {
+            border-left: 4px solid var(--bulk);
+        }
+        
+        .order-card.mixed-order {
+            border-left: 4px solid var(--purple);
+        }
+        
+        .order-card.packed-order {
+            border-left: 4px solid var(--primary);
         }
         
         .order-card:hover {
@@ -335,7 +384,7 @@
         
         .order-details {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
             gap: 16px;
             margin: 16px 0;
             padding: 16px;
@@ -350,10 +399,24 @@
         .detail-label {
             color: var(--text-muted);
             margin-bottom: 4px;
+            font-size: 12px;
         }
         
         .detail-value {
             font-weight: 600;
+            font-size: 16px;
+        }
+        
+        .detail-value.bulk {
+            color: var(--bulk);
+        }
+        
+        .detail-value.success {
+            color: var(--success);
+        }
+        
+        .detail-value.warning {
+            color: var(--warning);
         }
         
         .items-table {
@@ -392,12 +455,25 @@
             transition: width 0.3s ease;
         }
         
+        .progress-fill.packed {
+            background: var(--primary);
+        }
+        
         .size-badge {
             background: #e0f2fe;
             color: #0369a1;
             padding: 2px 8px;
             border-radius: 12px;
             font-size: 11px;
+        }
+        
+        .bulk-badge {
+            background: #f3e8ff;
+            color: var(--bulk-dark);
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
         }
         
         .toast {
@@ -430,32 +506,8 @@
             background: var(--purple);
         }
         
-        .debug-info {
-            font-size: 11px;
-            color: var(--text-muted);
-            padding: 4px;
-            background: #f1f5f9;
-            border-radius: 4px;
-            margin-top: 4px;
-        }
-        
-        .pdf-download-btn {
-            background: var(--primary);
-            color: white;
-            border: none;
-            border-radius: 6px;
-            padding: 6px 12px;
-            font-size: 12px;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            transition: all 0.2s;
-        }
-        
-        .pdf-download-btn:hover {
-            background: var(--primary-dark);
-            transform: translateY(-1px);
+        .toast.bulk {
+            background: var(--bulk);
         }
         
         .batch-info {
@@ -478,6 +530,49 @@
             border-radius: 12px;
             font-size: 11px;
             margin-right: 4px;
+        }
+        
+        .summary-stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 2px dashed var(--border);
+        }
+        
+        .stat-box {
+            background: #f8fafc;
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .stat-box.bulk {
+            background: #f3e8ff;
+        }
+        
+        .stat-label {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+        
+        .stat-number {
+            font-size: 18px;
+            font-weight: 700;
+        }
+        
+        .stat-number.bulk {
+            color: var(--bulk);
+        }
+        
+        .stat-number.success {
+            color: var(--success);
+        }
+        
+        .stat-number.warning {
+            color: var(--warning);
         }
         
         @media (max-width: 768px) {
@@ -506,6 +601,10 @@
             .order-number {
                 flex-direction: column;
                 align-items: flex-start;
+            }
+            
+            .summary-stats {
+                grid-template-columns: repeat(2, 1fr);
             }
         }
     </style>
@@ -551,13 +650,21 @@
                         <option value="all">All Orders</option>
                         <option value="pending">Pending</option>
                         <option value="packing">In Packing</option>
+                        <option value="ready">Ready for Dispatch</option>
                         <option value="dispatched">Dispatched</option>
                         <option value="completed">Completed</option>
+                    </select>
+                    <select class="filter-select" id="filterOrderType">
+                        <option value="all">All Types</option>
+                        <option value="packed">Packed Orders</option>
+                        <option value="bulk">Bulk Orders</option>
+                        <option value="mixed">Mixed Orders</option>
                     </select>
                     <select class="filter-select" id="sortBy">
                         <option value="date-desc">Newest First</option>
                         <option value="date-asc">Oldest First</option>
                         <option value="order">Order Number</option>
+                        <option value="status">Status</option>
                     </select>
                 </div>
                 
@@ -721,25 +828,44 @@
             return true;
         }
 
+        // ==================== HELPER FUNCTIONS ====================
+        
+        // Convert size string to liters
+        function convertToLiters(size) {
+            if (!size) return 0;
+            
+            const sizeStr = size.toString().toUpperCase();
+            const value = parseFloat(sizeStr) || 0;
+            
+            if (sizeStr.includes('ML')) {
+                return value / 1000;
+            } else if (sizeStr.includes('LTR') || sizeStr.includes('L')) {
+                return value;
+            }
+            return 0;
+        }
+
         // ==================== PAGE-SPECIFIC CODE ====================
         
-        // Load all orders with details - UPDATED for Technical Names
+        // Load all orders with details - UPDATED for Bulk Orders
         async function loadOrders() {
             try {
                 console.log("Loading orders...");
                 
-                const [ordersSnap, customersSnap, technicalsSnap, packingsSnap, dispatchesSnap] = await Promise.all([
+                const [ordersSnap, customersSnap, technicalsSnap, packingsSnap, dispatchesSnap, formulationSnap] = await Promise.all([
                     db.collection("orders").get(),
                     db.collection("customers").get(),
                     db.collection("technicals").get(),
                     db.collection("packing").get(),
-                    db.collection("dispatches").get()
+                    db.collection("dispatches").get(),
+                    db.collection("formulation").get()
                 ]);
                 
                 const customers = customersSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 const technicals = technicalsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 const packings = packingsSnap.docs.map(doc => doc.data());
                 const dispatches = dispatchesSnap.docs.map(doc => doc.data());
+                const formulations = formulationSnap.docs.map(doc => doc.data());
                 
                 let orders = ordersSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 
@@ -747,66 +873,147 @@
                 orders = orders.map(order => {
                     const customer = customers.find(c => c.id === order.customer_id) || {};
                     
-                    // Calculate packing and dispatch progress
-                    const orderPackings = packings.filter(p => p.order_id === order.id);
-                    const totalPacked = orderPackings.reduce((sum, p) => sum + (p.packed_boxes || 0), 0);
+                    // Determine order type
+                    const hasBulk = order.lines?.some(l => l.type === 'bulk');
+                    const hasPacked = order.lines?.some(l => l.type === 'packed' || !l.type);
+                    const orderType = hasBulk && hasPacked ? 'mixed' : (hasBulk ? 'bulk' : 'packed');
                     
-                    const orderDispatches = dispatches.filter(d => d.order_id === order.id);
-                    const totalDispatched = orderDispatches.reduce((sum, d) => sum + d.dispatched_boxes, 0);
+                    // Calculate totals
+                    let totalBoxes = 0;
+                    let totalPackedBoxes = 0;
+                    let totalDispatchedBoxes = 0;
+                    let totalBulkVolume = 0;
+                    let totalFormulatedBulk = 0;
+                    let totalDispatchedBulk = 0;
                     
-                    // Determine status
+                    // Process lines
+                    const enhancedLines = order.lines ? order.lines.map(line => {
+                        const technical = technicals.find(t => t.id === line.technical_id) || {};
+                        
+                        if (line.type === 'bulk') {
+                            // Bulk line
+                            const bulkQty = line.quantity || 0;
+                            totalBulkVolume += bulkQty;
+                            
+                            // Find formulations for this line
+                            const lineFormulations = formulations.filter(f => 
+                                f.order_id === order.id && 
+                                f.technical_name === line.technical_name
+                            );
+                            const formulated = lineFormulations.reduce((sum, f) => sum + f.formulated_qty, 0);
+                            totalFormulatedBulk += formulated;
+                            
+                            // Find dispatches for bulk
+                            const lineDispatches = dispatches.filter(d => 
+                                d.order_id === order.id && 
+                                d.order_line_id === line.id
+                            );
+                            const dispatched = lineDispatches.reduce((sum, d) => sum + d.dispatched_quantity, 0);
+                            totalDispatchedBulk += dispatched;
+                            
+                            return {
+                                ...line,
+                                type: 'bulk',
+                                technicalName: technical.name || line.technical_name || 'Unknown',
+                                quantity: bulkQty,
+                                formulated: formulated,
+                                dispatched: dispatched,
+                                remaining: bulkQty - dispatched,
+                                formulations: lineFormulations,
+                                dispatches: lineDispatches
+                            };
+                        } else {
+                            // Packed line
+                            const boxQuantity = line.boxes || line.qty || 0;
+                            const pcsPerBox = line.pcs_per_box || 1;
+                            const totalBottles = boxQuantity * pcsPerBox;
+                            const volumePerBottle = convertToLiters(line.size);
+                            const totalVolume = totalBottles * volumePerBottle;
+                            
+                            totalBoxes += boxQuantity;
+                            
+                            // Find packings for this line
+                            const linePackings = packings.filter(p => p.order_id === order.id && p.order_line_id === line.id);
+                            const packed = linePackings.reduce((sum, p) => sum + p.packed_boxes, 0);
+                            totalPackedBoxes += packed;
+                            
+                            // Find dispatches for this line
+                            const lineDispatches = dispatches.filter(d => d.order_id === order.id && d.order_line_id === line.id);
+                            const dispatched = lineDispatches.reduce((sum, d) => sum + d.dispatched_boxes, 0);
+                            totalDispatchedBoxes += dispatched;
+                            
+                            return {
+                                ...line,
+                                type: 'packed',
+                                technicalName: technical.name || line.technical_name || 'Unknown',
+                                boxQuantity: boxQuantity,
+                                pcsPerBox: pcsPerBox,
+                                totalBottles: totalBottles,
+                                totalVolume: totalVolume,
+                                packed: packed,
+                                dispatched: dispatched,
+                                remaining: boxQuantity - packed,
+                                remainingToDispatch: packed - dispatched,
+                                packings: linePackings,
+                                dispatches: lineDispatches
+                            };
+                        }
+                    }) : [];
+                    
+                    // Determine overall status
                     let status = 'pending';
                     let statusClass = 'badge-pending';
                     
-                    if (totalDispatched >= order.total_boxes) {
-                        status = 'completed';
-                        statusClass = 'badge-dispatched';
-                    } else if (totalPacked >= order.total_boxes) {
-                        status = 'ready for dispatch';
-                        statusClass = 'badge-success';
-                    } else if (totalPacked > 0) {
-                        status = 'packing';
-                        statusClass = 'badge-packing';
+                    if (orderType === 'bulk') {
+                        // Bulk order status
+                        if (totalDispatchedBulk >= totalBulkVolume) {
+                            status = 'completed';
+                            statusClass = 'badge-dispatched';
+                        } else if (totalFormulatedBulk >= totalBulkVolume) {
+                            status = 'ready for dispatch';
+                            statusClass = 'badge-success';
+                        } else if (totalFormulatedBulk > 0) {
+                            status = 'formulating';
+                            statusClass = 'badge-packing';
+                        }
+                    } else {
+                        // Packed order status
+                        if (totalDispatchedBoxes >= totalBoxes) {
+                            status = 'completed';
+                            statusClass = 'badge-dispatched';
+                        } else if (totalPackedBoxes >= totalBoxes) {
+                            status = 'ready for dispatch';
+                            statusClass = 'badge-success';
+                        } else if (totalPackedBoxes > 0) {
+                            status = 'packing';
+                            statusClass = 'badge-packing';
+                        }
                     }
                     
-                    // Enhance lines with technical details
-                    const enhancedLines = order.lines ? order.lines.map(line => {
-                        const technical = technicals.find(t => t.id === line.technical_id) || {};
-                        const linePackings = packings.filter(p => p.order_id === order.id && p.order_line_id === line.id);
-                        const linePacked = linePackings.reduce((sum, p) => sum + (p.packed_boxes || 0), 0);
-                        
-                        const lineDispatches = dispatches.filter(d => d.order_id === order.id && d.order_line_id === line.id);
-                        const lineDispatched = lineDispatches.reduce((sum, d) => sum + d.dispatched_boxes, 0);
-                        
-                        // Get the box quantity - it could be 'boxes' or 'qty'
-                        const boxQuantity = line.boxes || line.qty || 0;
-                        
-                        return {
-                            ...line,
-                            technicalName: technical.name || 'Unknown',
-                            technicalCategory: technical.category || '',
-                            brandName: line.brand_name || 'Unknown',
-                            boxQuantity: boxQuantity,
-                            packed: linePacked,
-                            dispatched: lineDispatched,
-                            remaining: boxQuantity - linePacked,
-                            remainingToDispatch: linePacked - lineDispatched,
-                            packings: linePackings // Store packing details
-                        };
-                    }) : [];
+                    // Calculate progress
+                    let progress = 0;
+                    if (orderType === 'bulk') {
+                        progress = totalBulkVolume > 0 ? (totalDispatchedBulk / totalBulkVolume) * 100 : 0;
+                    } else {
+                        progress = totalBoxes > 0 ? (totalDispatchedBoxes / totalBoxes) * 100 : 0;
+                    }
                     
                     return {
+                        id: order.id,
                         ...order,
+                        orderType: order.order_type || orderType,
                         customerDetails: customer,
                         customerName: customer.company || customer.name || 'Unknown',
-                        totalPacked,
-                        totalDispatched,
+                        lines: enhancedLines,
+                        totalBoxes,
+                        totalPackedBoxes,
+                        totalDispatchedBoxes,
+                        totalBulkVolume,
+                        totalFormulatedBulk,
+                        totalDispatchedBulk,
                         status,
                         statusClass,
-                        progress: order.total_boxes > 0 ? (totalDispatched / order.total_boxes) * 100 : 0,
-                        lines: enhancedLines,
-                        packings: orderPackings,
-                        dispatches: orderDispatches
+                        progress
                     };
                 });
                 
@@ -824,6 +1031,7 @@
             
             const searchTerm = document.getElementById('searchOrders')?.value.toLowerCase() || '';
             const filter = document.getElementById('filterStatus')?.value || 'all';
+            const orderTypeFilter = document.getElementById('filterOrderType')?.value || 'all';
             const sortBy = document.getElementById('sortBy')?.value || 'date-desc';
             
             // Filter orders
@@ -831,11 +1039,21 @@
                 const matchesSearch = (order.order_number || '').toLowerCase().includes(searchTerm) ||
                                      (order.customerName || '').toLowerCase().includes(searchTerm);
                 
-                if (filter === 'all') return matchesSearch;
-                if (filter === 'dispatched') return matchesSearch && (order.status === 'dispatched' || order.status === 'completed' || order.status === 'ready for dispatch');
-                if (filter === 'packing') return matchesSearch && order.status === 'packing';
-                if (filter === 'pending') return matchesSearch && order.status === 'pending';
-                return matchesSearch;
+                if (!matchesSearch) return false;
+                
+                // Status filter
+                if (filter !== 'all') {
+                    if (filter === 'pending' && order.status !== 'pending') return false;
+                    if (filter === 'packing' && !['packing', 'formulating'].includes(order.status)) return false;
+                    if (filter === 'ready' && order.status !== 'ready for dispatch') return false;
+                    if (filter === 'dispatched' && order.status !== 'dispatched' && order.status !== 'completed') return false;
+                    if (filter === 'completed' && order.status !== 'completed') return false;
+                }
+                
+                // Order type filter
+                if (orderTypeFilter !== 'all' && order.orderType !== orderTypeFilter) return false;
+                
+                return true;
             });
             
             // Sort orders
@@ -843,6 +1061,10 @@
                 if (sortBy === 'date-desc') return new Date(b.created_at || 0) - new Date(a.created_at || 0);
                 if (sortBy === 'date-asc') return new Date(a.created_at || 0) - new Date(b.created_at || 0);
                 if (sortBy === 'order') return (a.order_number || '').localeCompare(b.order_number || '');
+                if (sortBy === 'status') {
+                    const statusOrder = { 'pending': 1, 'packing': 2, 'formulating': 2, 'ready for dispatch': 3, 'dispatched': 4, 'completed': 5 };
+                    return (statusOrder[a.status] || 99) - (statusOrder[b.status] || 99);
+                }
                 return 0;
             });
             
@@ -854,16 +1076,18 @@
             const user = getCurrentUser();
             
             container.innerHTML = filteredOrders.map(order => {
-                const totalBoxes = order.total_boxes || (order.lines ? order.lines.reduce((sum, line) => sum + (line.boxQuantity || 0), 0) : 0);
+                const orderClass = order.orderType === 'bulk' ? 'bulk-order' : 
+                                  order.orderType === 'mixed' ? 'mixed-order' : 'packed-order';
                 
                 return `
-                <div class="order-card">
+                <div class="order-card ${orderClass}">
                     <div class="order-header">
                         <div class="order-number">
                             <span>${order.order_number || 'Unknown'}</span>
                             <span class="badge ${order.statusClass}">${(order.status || 'pending').toUpperCase()}</span>
-                            <button class="pdf-download-btn" onclick="downloadOrderPDF('${order.id}')">
-                                📄 Download PDF
+                            <span class="order-type-badge ${order.orderType}">${order.orderType.toUpperCase()}</span>
+                            <button class="pdf-download-btn btn btn-sm btn-primary" onclick="downloadOrderPDF('${order.id}')">
+                                📄 PDF
                             </button>
                         </div>
                         <div style="font-size: 14px; color: var(--text-muted);">
@@ -886,6 +1110,7 @@
                     <div class="order-customer">
                         <strong>Customer:</strong> ${order.customerName}
                         ${order.customerDetails.phone ? ` | 📞 ${order.customerDetails.phone}` : ''}
+                        ${order.customerDetails.email ? ` | 📧 ${order.customerDetails.email}` : ''}
                     </div>
                     
                     <div class="progress-bar">
@@ -901,18 +1126,34 @@
                             <div class="detail-label">Delivery Date</div>
                             <div class="detail-value">${order.delivery_date || 'N/A'}</div>
                         </div>
+                        ${order.orderType !== 'bulk' ? `
                         <div class="detail-item">
                             <div class="detail-label">Total Boxes</div>
-                            <div class="detail-value">${totalBoxes}</div>
+                            <div class="detail-value">${order.totalBoxes || 0}</div>
                         </div>
                         <div class="detail-item">
                             <div class="detail-label">Packed Boxes</div>
-                            <div class="detail-value">${order.totalPacked || 0}</div>
+                            <div class="detail-value success">${order.totalPackedBoxes || 0}</div>
                         </div>
                         <div class="detail-item">
-                            <div class="detail-label">Dispatched</div>
-                            <div class="detail-value">${order.totalDispatched || 0}</div>
+                            <div class="detail-label">Dispatched Boxes</div>
+                            <div class="detail-value success">${order.totalDispatchedBoxes || 0}</div>
                         </div>
+                        ` : ''}
+                        ${order.orderType !== 'packed' ? `
+                        <div class="detail-item">
+                            <div class="detail-label">Bulk Volume</div>
+                            <div class="detail-value bulk">${(order.totalBulkVolume || 0).toFixed(2)} L</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Formulated</div>
+                            <div class="detail-value warning">${(order.totalFormulatedBulk || 0).toFixed(2)} L</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Dispatched Bulk</div>
+                            <div class="detail-value success">${(order.totalDispatchedBulk || 0).toFixed(2)} L</div>
+                        </div>
+                        ` : ''}
                     </div>
                     
                     ${order.lines && order.lines.length > 0 ? `
@@ -921,47 +1162,100 @@
                         <table class="items-table">
                             <thead>
                                 <tr>
-                                    <th>Brand Name</th>
-                                    <th>Technical Name</th>
-                                    <th>Size</th>
-                                    <th>PCS/Box</th>
-                                    <th>Boxes</th>
-                                    <th>Total Bottles</th>
-                                    <th>Packed</th>
-                                    <th>Dispatched</th>
+                                    <th>Type</th>
+                                    <th>Brand/Details</th>
+                                    <th>Technical</th>
+                                    <th>Specifications</th>
+                                    <th>Ordered</th>
+                                    <th>Progress</th>
                                     <th>Status</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 ${order.lines.map(line => {
-                                    const totalBottles = (line.pcs_per_box || 0) * (line.boxQuantity || 0);
-                                    const linePackings = line.packings || [];
-                                    
-                                    // Create batch info HTML
-                                    const batchHtml = linePackings.length > 0 ? 
-                                        '<div class="batch-info">' + linePackings.map(p => 
-                                            `<span>Batch: ${p.batch_number} (${p.packed_boxes} boxes, MFG: ${p.mfg_date || 'N/A'})</span>`
-                                        ).join('') + '</div>' : '';
-                                    
-                                    return `
-                                    <tr>
-                                        <td><strong>${line.brandName}${batchHtml}</strong></td>
-                                        <td><span class="technical-badge">${line.technicalName}</span></td>
-                                        <td><span class="size-badge">${line.size || 'N/A'}</span></td>
-                                        <td>${line.pcs_per_box || 'N/A'}</td>
-                                        <td><strong>${line.boxQuantity || 0}</strong></td>
-                                        <td>${totalBottles}</td>
-                                        <td>${line.packed || 0}</td>
-                                        <td>${line.dispatched || 0}</td>
-                                        <td>
-                                            ${line.dispatched >= line.boxQuantity ? '✓ Dispatched' : 
-                                              line.packed >= line.boxQuantity ? '📦 Packed' : 
-                                              line.packed > 0 ? '📦 Partial' : '⏳ Pending'}
-                                        </td>
-                                    </tr>
-                                `}).join('')}
+                                    if (line.type === 'bulk') {
+                                        return `
+                                        <tr>
+                                            <td><span class="bulk-badge">BULK</span></td>
+                                            <td>${line.notes || 'Bulk Order'}</td>
+                                            <td><span class="technical-badge">${line.technicalName}</span></td>
+                                            <td>—</td>
+                                            <td>${(line.quantity || 0).toFixed(2)} L</td>
+                                            <td>
+                                                <div style="display: flex; align-items: center; gap: 8px;">
+                                                    <div style="flex: 1; height: 4px; background: #e2e8f0; border-radius: 2px;">
+                                                        <div style="width: ${line.quantity > 0 ? (line.dispatched / line.quantity) * 100 : 0}%; height: 100%; background: var(--success); border-radius: 2px;"></div>
+                                                    </div>
+                                                    <span style="font-size: 11px;">${(line.dispatched || 0).toFixed(2)}/${(line.quantity || 0).toFixed(2)} L</span>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                ${line.dispatched >= line.quantity ? '✓ Dispatched' : 
+                                                  line.formulated >= line.quantity ? '🧪 Formulated' : 
+                                                  line.formulated > 0 ? '🧪 Partial' : '⏳ Pending'}
+                                            </td>
+                                        </tr>
+                                        `;
+                                    } else {
+                                        return `
+                                        <tr>
+                                            <td><span class="size-badge">PACKED</span></td>
+                                            <td><strong>${line.brand_name || 'Unknown'}</strong></td>
+                                            <td><span class="technical-badge">${line.technicalName}</span></td>
+                                            <td>${line.size || 'N/A'} | ${line.pcsPerBox || 0} PCS/Box</td>
+                                            <td>${line.boxQuantity || 0} boxes</td>
+                                            <td>
+                                                <div style="display: flex; align-items: center; gap: 8px;">
+                                                    <div style="flex: 1; height: 4px; background: #e2e8f0; border-radius: 2px;">
+                                                        <div style="width: ${line.boxQuantity > 0 ? (line.dispatched / line.boxQuantity) * 100 : 0}%; height: 100%; background: var(--success); border-radius: 2px;"></div>
+                                                    </div>
+                                                    <span style="font-size: 11px;">${line.dispatched || 0}/${line.boxQuantity || 0}</span>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                ${line.dispatched >= line.boxQuantity ? '✓ Dispatched' : 
+                                                  line.packed >= line.boxQuantity ? '📦 Packed' : 
+                                                  line.packed > 0 ? '📦 Partial' : '⏳ Pending'}
+                                            </td>
+                                        </tr>
+                                        `;
+                                    }
+                                }).join('')}
                             </tbody>
                         </table>
+                        
+                        <!-- Batch Details -->
+                        ${order.lines.some(l => l.packings?.length > 0 || l.formulations?.length > 0) ? `
+                        <div style="margin-top: 16px;">
+                            <h5 style="margin-bottom: 8px;">Batch Details:</h5>
+                            ${order.lines.map(line => {
+                                if (line.type === 'bulk' && line.formulations?.length > 0) {
+                                    return `
+                                        <div style="background: #f3e8ff; padding: 8px; border-radius: 4px; margin-bottom: 4px;">
+                                            <strong>${line.technicalName}:</strong>
+                                            ${line.formulations.map(f => `
+                                                <span style="display: inline-block; background: white; padding: 2px 6px; border-radius: 4px; margin: 2px; font-size: 11px;">
+                                                    Batch: ${f.batch_number} (${f.formulated_qty.toFixed(2)} L, MFG: ${f.mfg_date || 'N/A'})
+                                                </span>
+                                            `).join('')}
+                                        </div>
+                                    `;
+                                } else if (line.packings?.length > 0) {
+                                    return `
+                                        <div style="background: #f1f5f9; padding: 8px; border-radius: 4px; margin-bottom: 4px;">
+                                            <strong>${line.brand_name}:</strong>
+                                            ${line.packings.map(p => `
+                                                <span style="display: inline-block; background: white; padding: 2px 6px; border-radius: 4px; margin: 2px; font-size: 11px;">
+                                                    Batch: ${p.batch_number} (${p.packed_boxes} boxes, MFG: ${p.mfg_date || 'N/A'})
+                                                </span>
+                                            `).join('')}
+                                        </div>
+                                    `;
+                                }
+                                return '';
+                            }).join('')}
+                        </div>
+                        ` : ''}
                     </details>
                     ` : '<div class="debug-info">No items in this order</div>'}
                     
@@ -970,6 +1264,46 @@
                             <strong>Notes:</strong> ${order.notes}
                         </div>
                     ` : ''}
+                    
+                    <!-- Summary Stats -->
+                    <div class="summary-stats">
+                        <div class="stat-box">
+                            <div class="stat-label">Total Ordered</div>
+                            <div class="stat-number">
+                                ${order.orderType === 'bulk' ? 
+                                    `${(order.totalBulkVolume || 0).toFixed(2)} L` : 
+                                    `${order.totalBoxes || 0} boxes`
+                                }
+                            </div>
+                        </div>
+                        <div class="stat-box ${order.orderType === 'bulk' ? 'bulk' : ''}">
+                            <div class="stat-label">${order.orderType === 'bulk' ? 'Formulated' : 'Packed'}</div>
+                            <div class="stat-number ${order.orderType === 'bulk' ? 'bulk' : 'success'}">
+                                ${order.orderType === 'bulk' ? 
+                                    `${(order.totalFormulatedBulk || 0).toFixed(2)} L` : 
+                                    `${order.totalPackedBoxes || 0} boxes`
+                                }
+                            </div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-label">Dispatched</div>
+                            <div class="stat-number success">
+                                ${order.orderType === 'bulk' ? 
+                                    `${(order.totalDispatchedBulk || 0).toFixed(2)} L` : 
+                                    `${order.totalDispatchedBoxes || 0} boxes`
+                                }
+                            </div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-label">Remaining</div>
+                            <div class="stat-number warning">
+                                ${order.orderType === 'bulk' ? 
+                                    `${((order.totalBulkVolume || 0) - (order.totalDispatchedBulk || 0)).toFixed(2)} L` : 
+                                    `${(order.totalBoxes || 0) - (order.totalDispatchedBoxes || 0)} boxes`
+                                }
+                            </div>
+                        </div>
+                    </div>
                 </div>
             `}).join('');
         }
@@ -998,7 +1332,7 @@
                 return;
             }
             
-            if (!confirm('⚠️ Are you sure you want to delete this order?\n\nThis action cannot be undone and will also delete all associated packing, dispatch, and formulation records.')) {
+            if (!confirm('⚠️ Are you sure you want to delete this order?\n\nThis action cannot be undone and will also delete all associated packing, dispatch, formulation, and bottle movement records.')) {
                 return;
             }
             
@@ -1040,18 +1374,19 @@
             }
         };
         
-        // Download Order PDF - UPDATED for Technical Names
+        // Download Order PDF - UPDATED for Bulk Orders
         window.downloadOrderPDF = async function(orderId) {
             try {
                 showToast('Generating PDF...', 'info');
                 
                 // Fetch complete order details with all related data
-                const [orderSnap, customersSnap, technicalsSnap, packingsSnap, dispatchesSnap] = await Promise.all([
+                const [orderSnap, customersSnap, technicalsSnap, packingsSnap, dispatchesSnap, formulationSnap] = await Promise.all([
                     db.collection("orders").doc(orderId).get(),
                     db.collection("customers").get(),
                     db.collection("technicals").get(),
                     db.collection("packing").where("order_id", "==", orderId).get(),
-                    db.collection("dispatches").where("order_id", "==", orderId).get()
+                    db.collection("dispatches").where("order_id", "==", orderId).get(),
+                    db.collection("formulation").where("order_id", "==", orderId).get()
                 ]);
                 
                 const order = { id: orderSnap.id, ...orderSnap.data() };
@@ -1059,28 +1394,50 @@
                 const technicals = technicalsSnap.docs.map(doc => doc.data());
                 const packings = packingsSnap.docs.map(doc => doc.data());
                 const dispatches = dispatchesSnap.docs.map(doc => doc.data());
+                const formulations = formulationSnap.docs.map(doc => doc.data());
                 
                 const customer = customers.find(c => c.id === order.customer_id) || {};
                 
+                // Determine order type
+                const hasBulk = order.lines?.some(l => l.type === 'bulk');
+                const hasPacked = order.lines?.some(l => l.type === 'packed' || !l.type);
+                const orderType = hasBulk && hasPacked ? 'mixed' : (hasBulk ? 'bulk' : 'packed');
+                
                 // Calculate totals
+                const totalBoxes = order.lines?.filter(l => l.type !== 'bulk').reduce((sum, l) => sum + (l.boxes || l.qty || 0), 0) || 0;
                 const totalPacked = packings.reduce((sum, p) => sum + p.packed_boxes, 0);
-                const totalDispatched = dispatches.reduce((sum, d) => sum + d.dispatched_boxes, 0);
-                const remainingToPack = order.total_boxes - totalPacked;
-                const remainingToDispatch = totalPacked - totalDispatched;
+                const totalDispatchedBoxes = dispatches.reduce((sum, d) => sum + (d.dispatched_boxes || 0), 0);
+                
+                const totalBulkVolume = order.lines?.filter(l => l.type === 'bulk').reduce((sum, l) => sum + (l.quantity || 0), 0) || 0;
+                const totalFormulated = formulations.reduce((sum, f) => sum + f.formulated_qty, 0);
+                const totalDispatchedBulk = dispatches.reduce((sum, d) => sum + (d.dispatched_quantity || 0), 0);
                 
                 // Determine status
                 let orderStatus = 'PENDING';
                 let statusColor = [255, 193, 7]; // Warning yellow
                 
-                if (totalDispatched >= order.total_boxes) {
-                    orderStatus = 'COMPLETED';
-                    statusColor = [5, 150, 105]; // Success green
-                } else if (totalPacked >= order.total_boxes) {
-                    orderStatus = 'READY FOR DISPATCH';
-                    statusColor = [33, 150, 243]; // Info blue
-                } else if (totalPacked > 0) {
-                    orderStatus = 'PARTIALLY PACKED';
-                    statusColor = [255, 152, 0]; // Orange
+                if (orderType === 'bulk') {
+                    if (totalDispatchedBulk >= totalBulkVolume) {
+                        orderStatus = 'COMPLETED';
+                        statusColor = [5, 150, 105];
+                    } else if (totalFormulated >= totalBulkVolume) {
+                        orderStatus = 'READY FOR DISPATCH';
+                        statusColor = [147, 51, 234]; // Purple for bulk
+                    } else if (totalFormulated > 0) {
+                        orderStatus = 'PARTIALLY FORMULATED';
+                        statusColor = [255, 152, 0];
+                    }
+                } else {
+                    if (totalDispatchedBoxes >= totalBoxes) {
+                        orderStatus = 'COMPLETED';
+                        statusColor = [5, 150, 105];
+                    } else if (totalPacked >= totalBoxes) {
+                        orderStatus = 'READY FOR DISPATCH';
+                        statusColor = [33, 150, 243];
+                    } else if (totalPacked > 0) {
+                        orderStatus = 'PARTIALLY PACKED';
+                        statusColor = [255, 152, 0];
+                    }
                 }
                 
                 // Create PDF
@@ -1109,13 +1466,14 @@
                 doc.setFontSize(18);
                 doc.setFont('helvetica', 'bold');
                 doc.text(`Order #${order.order_number || 'N/A'}`, 20, 60);
+                doc.text(`Type: ${orderType.toUpperCase()}`, 20, 68);
                 
                 // Status badge
                 doc.setFillColor(statusColor[0], statusColor[1], statusColor[2]);
-                doc.rect(140, 50, 50, 10, 'F');
+                doc.rect(140, 55, 50, 10, 'F');
                 doc.setTextColor(255, 255, 255);
                 doc.setFontSize(10);
-                doc.text(orderStatus, 165, 57, { align: 'center' });
+                doc.text(orderStatus, 165, 62, { align: 'center' });
                 
                 // Reset text color
                 doc.setTextColor(0, 0, 0);
@@ -1125,126 +1483,172 @@
                 // Customer Information
                 doc.setFontSize(14);
                 doc.setFont('helvetica', 'bold');
-                doc.text('Customer Information', 20, 75);
+                doc.text('Customer Information', 20, 85);
                 
                 doc.setFontSize(11);
                 doc.setFont('helvetica', 'normal');
-                doc.text(`Company: ${customer.company || 'N/A'}`, 20, 85);
-                doc.text(`Contact: ${customer.contact || 'N/A'}`, 20, 92);
-                doc.text(`Phone: ${customer.phone || 'N/A'}`, 20, 99);
-                doc.text(`Email: ${customer.email || 'N/A'}`, 20, 106);
-                doc.text(`Address: ${customer.address || 'N/A'}`, 20, 113);
+                doc.text(`Company: ${customer.company || 'N/A'}`, 20, 95);
+                doc.text(`Contact: ${customer.contact || 'N/A'}`, 20, 102);
+                doc.text(`Phone: ${customer.phone || 'N/A'}`, 20, 109);
+                doc.text(`Email: ${customer.email || 'N/A'}`, 20, 116);
+                doc.text(`Address: ${customer.address || 'N/A'}`, 20, 123);
                 
                 // Order Information
                 doc.setFontSize(14);
                 doc.setFont('helvetica', 'bold');
-                doc.text('Order Information', 120, 75);
+                doc.text('Order Information', 120, 85);
                 
                 doc.setFontSize(11);
                 doc.setFont('helvetica', 'normal');
-                doc.text(`Order Date: ${order.order_date || 'N/A'}`, 120, 85);
-                doc.text(`Delivery Date: ${order.delivery_date || 'N/A'}`, 120, 92);
-                doc.text(`Created: ${order.created_at ? new Date(order.created_at).toLocaleDateString() : 'N/A'}`, 120, 99);
+                doc.text(`Order Date: ${order.order_date || 'N/A'}`, 120, 95);
+                doc.text(`Delivery Date: ${order.delivery_date || 'N/A'}`, 120, 102);
+                doc.text(`Created: ${order.created_at ? new Date(order.created_at).toLocaleDateString() : 'N/A'}`, 120, 109);
                 
                 // Progress Summary
                 doc.setFillColor(240, 240, 240);
-                doc.rect(20, 125, 170, 30, 'F');
+                doc.rect(20, 135, 170, 30, 'F');
                 
                 doc.setFontSize(12);
                 doc.setFont('helvetica', 'bold');
-                doc.text('Progress Summary', 25, 135);
+                doc.text('Progress Summary', 25, 145);
                 
                 doc.setFontSize(10);
                 doc.setFont('helvetica', 'normal');
-                doc.text(`Total Boxes: ${order.total_boxes}`, 25, 145);
-                doc.text(`Packed: ${totalPacked}`, 70, 145);
-                doc.text(`Dispatched: ${totalDispatched}`, 115, 145);
-                doc.text(`Remaining: ${remainingToPack}`, 160, 145);
                 
-                // Order Items Table - UPDATED columns
+                if (orderType === 'bulk') {
+                    doc.text(`Total Volume: ${totalBulkVolume.toFixed(2)} L`, 25, 155);
+                    doc.text(`Formulated: ${totalFormulated.toFixed(2)} L`, 80, 155);
+                    doc.text(`Dispatched: ${totalDispatchedBulk.toFixed(2)} L`, 135, 155);
+                } else {
+                    doc.text(`Total Boxes: ${totalBoxes}`, 25, 155);
+                    doc.text(`Packed: ${totalPacked}`, 80, 155);
+                    doc.text(`Dispatched: ${totalDispatchedBoxes}`, 135, 155);
+                }
+                
+                // Order Items Table
                 doc.setFontSize(14);
                 doc.setFont('helvetica', 'bold');
-                doc.text('Order Items', 20, 170);
+                doc.text('Order Items', 20, 180);
                 
-                // Prepare table data
-                const tableData = order.lines.map(line => {
-                    const technical = technicals.find(t => t.id === line.technical_id) || {};
-                    const boxQuantity = line.boxes || line.qty || 0;
-                    const totalBottles = (line.pcs_per_box || 0) * boxQuantity;
-                    
-                    // Find packings for this line
-                    const linePackings = packings.filter(p => p.order_line_id === line.id);
-                    const packed = linePackings.reduce((sum, p) => sum + p.packed_boxes, 0);
-                    
-                    // Find dispatches for this line
-                    const lineDispatches = dispatches.filter(d => d.order_line_id === line.id);
-                    const dispatched = lineDispatches.reduce((sum, d) => sum + d.dispatched_boxes, 0);
-                    
-                    return [
-                        line.brand_name || 'Unknown',
-                        technical.name || 'Unknown',
-                        line.size || 'N/A',
-                        line.pcs_per_box || 'N/A',
-                        boxQuantity.toString(),
-                        totalBottles.toString(),
-                        packed.toString(),
-                        dispatched.toString()
-                    ];
-                });
+                // Prepare table data based on order type
+                let tableHeaders = [];
+                let tableData = [];
+                
+                if (orderType === 'bulk') {
+                    tableHeaders = [['Technical', 'Quantity (L)', 'Formulated', 'Dispatched', 'Status']];
+                    tableData = order.lines?.filter(l => l.type === 'bulk').map(line => {
+                        const technical = technicals.find(t => t.id === line.technical_id) || {};
+                        const lineFormulated = formulations.filter(f => f.technical_name === line.technical_name).reduce((sum, f) => sum + f.formulated_qty, 0);
+                        const lineDispatched = dispatches.filter(d => d.order_line_id === line.id).reduce((sum, d) => sum + (d.dispatched_quantity || 0), 0);
+                        
+                        let status = 'Pending';
+                        if (lineDispatched >= line.quantity) status = 'Dispatched';
+                        else if (lineFormulated >= line.quantity) status = 'Formulated';
+                        else if (lineFormulated > 0) status = 'Partial';
+                        
+                        return [
+                            technical.name || line.technical_name || 'Unknown',
+                            line.quantity.toFixed(2),
+                            lineFormulated.toFixed(2),
+                            lineDispatched.toFixed(2),
+                            status
+                        ];
+                    }) || [];
+                } else {
+                    tableHeaders = [['Brand', 'Technical', 'Size', 'PCS/Box', 'Boxes', 'Packed', 'Dispatched', 'Status']];
+                    tableData = order.lines?.filter(l => l.type !== 'bulk').map(line => {
+                        const technical = technicals.find(t => t.id === line.technical_id) || {};
+                        const boxQuantity = line.boxes || line.qty || 0;
+                        const linePackings = packings.filter(p => p.order_line_id === line.id);
+                        const packed = linePackings.reduce((sum, p) => sum + p.packed_boxes, 0);
+                        const lineDispatches = dispatches.filter(d => d.order_line_id === line.id);
+                        const dispatched = lineDispatches.reduce((sum, d) => sum + d.dispatched_boxes, 0);
+                        
+                        let status = 'Pending';
+                        if (dispatched >= boxQuantity) status = 'Dispatched';
+                        else if (packed >= boxQuantity) status = 'Packed';
+                        else if (packed > 0) status = 'Partial';
+                        
+                        return [
+                            line.brand_name || 'Unknown',
+                            technical.name || 'Unknown',
+                            line.size || 'N/A',
+                            line.pcs_per_box || 'N/A',
+                            boxQuantity.toString(),
+                            packed.toString(),
+                            dispatched.toString(),
+                            status
+                        ];
+                    }) || [];
+                }
                 
                 doc.autoTable({
-                    startY: 175,
-                    head: [['Brand Name', 'Technical Name', 'Size', 'PCS/Box', 'Boxes', 'Total Bottles', 'Packed', 'Dispatched']],
+                    startY: 185,
+                    head: tableHeaders,
                     body: tableData,
                     theme: 'grid',
-                    headStyles: { fillColor: [26, 95, 35], textColor: [255, 255, 255], fontStyle: 'bold' },
-                    styles: { fontSize: 8, cellPadding: 2 },
-                    columnStyles: {
-                        0: { cellWidth: 35 },
-                        1: { cellWidth: 35 },
-                        2: { cellWidth: 20 },
-                        3: { cellWidth: 20 },
-                        4: { cellWidth: 20 },
-                        5: { cellWidth: 20 },
-                        6: { cellWidth: 20 },
-                        7: { cellWidth: 20 }
-                    }
+                    headStyles: { fillColor: orderType === 'bulk' ? [147, 51, 234] : [26, 95, 35], textColor: [255, 255, 255], fontStyle: 'bold' },
+                    styles: { fontSize: 8, cellPadding: 2 }
                 });
                 
-                // Batch Details Table (if any packings exist)
-                if (packings.length > 0) {
+                // Batch Details Table
+                if (packings.length > 0 || formulations.length > 0) {
                     const finalY = doc.lastAutoTable.finalY + 10;
                     
                     doc.setFontSize(14);
                     doc.setFont('helvetica', 'bold');
                     doc.text('Batch Details', 20, finalY);
                     
-                    const batchData = packings.map(p => {
-                        const line = order.lines.find(l => l.id === p.order_line_id);
-                        const technical = technicals.find(t => t.id === line?.technical_id);
-                        return [
-                            line?.brand_name || 'Unknown',
-                            technical?.name || 'Unknown',
-                            p.batch_number || 'N/A',
-                            p.packed_boxes.toString(),
-                            p.mfg_date || 'N/A',
-                            p.exp_date || 'N/A'
-                        ];
-                    });
+                    if (formulations.length > 0) {
+                        const batchData = formulations.map(f => {
+                            return [
+                                f.technical_name || 'Unknown',
+                                f.batch_number || 'N/A',
+                                f.formulated_qty.toFixed(2) + ' L',
+                                f.mfg_date || 'N/A',
+                                f.exp_date || 'N/A',
+                                f.is_extra ? 'Extra' : 'Order'
+                            ];
+                        });
+                        
+                        doc.autoTable({
+                            startY: finalY + 5,
+                            head: [['Technical', 'Batch No.', 'Quantity', 'MFG Date', 'EXP Date', 'Type']],
+                            body: batchData,
+                            theme: 'grid',
+                            headStyles: { fillColor: [147, 51, 234], textColor: [255, 255, 255], fontStyle: 'bold' },
+                            styles: { fontSize: 8, cellPadding: 2 }
+                        });
+                    }
                     
-                    doc.autoTable({
-                        startY: finalY + 5,
-                        head: [['Brand', 'Technical', 'Batch No.', 'Boxes', 'MFG Date', 'EXP Date']],
-                        body: batchData,
-                        theme: 'grid',
-                        headStyles: { fillColor: [33, 150, 243], textColor: [255, 255, 255], fontStyle: 'bold' },
-                        styles: { fontSize: 8, cellPadding: 2 }
-                    });
+                    if (packings.length > 0) {
+                        const startY = formulations.length > 0 ? doc.lastAutoTable.finalY + 10 : finalY + 5;
+                        
+                        const batchData = packings.map(p => {
+                            const line = order.lines.find(l => l.id === p.order_line_id);
+                            return [
+                                line?.brand_name || 'Unknown',
+                                p.batch_number || 'N/A',
+                                p.packed_boxes.toString(),
+                                p.mfg_date || 'N/A',
+                                p.exp_date || 'N/A'
+                            ];
+                        });
+                        
+                        doc.autoTable({
+                            startY: startY,
+                            head: [['Brand', 'Batch No.', 'Boxes', 'MFG Date', 'EXP Date']],
+                            body: batchData,
+                            theme: 'grid',
+                            headStyles: { fillColor: [33, 150, 243], textColor: [255, 255, 255], fontStyle: 'bold' },
+                            styles: { fontSize: 8, cellPadding: 2 }
+                        });
+                    }
                 }
                 
-                // Dispatch Details Table (if any dispatches exist)
+                // Dispatch Details
                 if (dispatches.length > 0) {
-                    const finalY = doc.lastAutoTable ? doc.lastAutoTable.finalY + 10 : 200;
+                    const finalY = doc.lastAutoTable.finalY + 10;
                     
                     doc.setFontSize(14);
                     doc.setFont('helvetica', 'bold');
@@ -1252,19 +1656,18 @@
                     
                     const dispatchData = dispatches.map(d => {
                         const line = order.lines.find(l => l.id === d.order_line_id);
-                        const technical = technicals.find(t => t.id === line?.technical_id);
                         return [
-                            line?.brand_name || 'Unknown',
-                            technical?.name || 'Unknown',
-                            d.dispatched_boxes.toString(),
+                            line?.brand_name || (line?.type === 'bulk' ? 'Bulk' : 'Unknown'),
+                            d.dispatched_boxes || d.dispatched_quantity || 0,
                             d.dispatch_date || 'N/A',
-                            d.lr_number || 'N/A'
+                            d.lr_number || 'N/A',
+                            d.transporter || 'N/A'
                         ];
                     });
                     
                     doc.autoTable({
                         startY: finalY + 5,
-                        head: [['Brand', 'Technical', 'Boxes', 'Dispatch Date', 'LR Number']],
+                        head: [['Product', 'Quantity', 'Date', 'LR No.', 'Transporter']],
                         body: dispatchData,
                         theme: 'grid',
                         headStyles: { fillColor: [5, 150, 105], textColor: [255, 255, 255], fontStyle: 'bold' },
@@ -1284,12 +1687,22 @@
                 
                 doc.setFontSize(10);
                 doc.setFont('helvetica', 'normal');
-                doc.text(`Total Boxes Ordered: ${order.total_boxes}`, 25, finalY + 15);
-                doc.text(`Total Boxes Packed: ${totalPacked}`, 80, finalY + 15);
-                doc.text(`Total Boxes Dispatched: ${totalDispatched}`, 135, finalY + 15);
                 
-                doc.text(`Remaining to Pack: ${remainingToPack}`, 25, finalY + 25);
-                doc.text(`Remaining to Dispatch: ${remainingToDispatch}`, 80, finalY + 25);
+                if (orderType === 'bulk') {
+                    doc.text(`Total Volume: ${totalBulkVolume.toFixed(2)} L`, 25, finalY + 15);
+                    doc.text(`Formulated: ${totalFormulated.toFixed(2)} L`, 80, finalY + 15);
+                    doc.text(`Dispatched: ${totalDispatchedBulk.toFixed(2)} L`, 135, finalY + 15);
+                    
+                    doc.text(`Remaining to Formulate: ${(totalBulkVolume - totalFormulated).toFixed(2)} L`, 25, finalY + 25);
+                    doc.text(`Remaining to Dispatch: ${(totalFormulated - totalDispatchedBulk).toFixed(2)} L`, 80, finalY + 25);
+                } else {
+                    doc.text(`Total Boxes: ${totalBoxes}`, 25, finalY + 15);
+                    doc.text(`Packed: ${totalPacked}`, 80, finalY + 15);
+                    doc.text(`Dispatched: ${totalDispatchedBoxes}`, 135, finalY + 15);
+                    
+                    doc.text(`Remaining to Pack: ${totalBoxes - totalPacked}`, 25, finalY + 25);
+                    doc.text(`Remaining to Dispatch: ${totalPacked - totalDispatchedBoxes}`, 80, finalY + 25);
+                }
                 
                 // Footer
                 doc.setFontSize(8);
@@ -1339,6 +1752,11 @@
         const filterSelect = document.getElementById('filterStatus');
         if (filterSelect) {
             filterSelect.addEventListener('change', () => loadOrders());
+        }
+        
+        const orderTypeFilter = document.getElementById('filterOrderType');
+        if (orderTypeFilter) {
+            orderTypeFilter.addEventListener('change', () => loadOrders());
         }
         
         const sortSelect = document.getElementById('sortBy');

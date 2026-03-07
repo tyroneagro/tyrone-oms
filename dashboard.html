@@ -62,6 +62,9 @@
             background: white;
             border-bottom: 1px solid var(--border);
             padding: 0 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 50;
         }
         
         .nav-container {
@@ -95,6 +98,27 @@
         .nav-item.active {
             color: var(--primary);
             border-bottom-color: var(--primary);
+        }
+        
+        .nav-item.admin {
+            color: var(--purple);
+            font-weight: 600;
+        }
+        
+        .nav-item.admin.active {
+            border-bottom-color: var(--purple);
+        }
+        
+        .nav-item.packing {
+            color: var(--teal);
+        }
+        
+        .nav-item.formulation {
+            color: var(--purple);
+        }
+        
+        .nav-item.dispatch {
+            color: var(--info);
         }
         
         .nav-item.hidden {
@@ -147,7 +171,7 @@
         
         .logout-btn {
             padding: 0.5rem 1rem;
-            background: var(--white);
+            background: white;
             border: 1px solid var(--border);
             border-radius: 6px;
             color: var(--text);
@@ -188,6 +212,16 @@
             opacity: 0.9;
         }
         
+        .role-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            margin-top: 8px;
+        }
+        
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -215,6 +249,26 @@
             color: var(--primary);
         }
         
+        .stat-value.success {
+            color: var(--success);
+        }
+        
+        .stat-value.warning {
+            color: var(--warning);
+        }
+        
+        .stat-value.teal {
+            color: var(--teal);
+        }
+        
+        .stat-value.purple {
+            color: var(--purple);
+        }
+        
+        .stat-value.info {
+            color: var(--info);
+        }
+        
         .quick-actions {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -237,6 +291,19 @@
         .action-card:hover {
             transform: translateY(-2px);
             box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+            border-color: var(--primary);
+        }
+        
+        .action-card.packing:hover {
+            border-color: var(--teal);
+        }
+        
+        .action-card.formulation:hover {
+            border-color: var(--purple);
+        }
+        
+        .action-card.dispatch:hover {
+            border-color: var(--info);
         }
         
         .action-icon {
@@ -273,12 +340,28 @@
             font-weight: 600;
         }
         
+        .view-link {
+            color: var(--primary);
+            text-decoration: none;
+            font-size: 14px;
+        }
+        
+        .view-link:hover {
+            text-decoration: underline;
+        }
+        
         .order-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 1rem;
             border-bottom: 1px solid var(--border);
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .order-item:hover {
+            background: #f8fafc;
         }
         
         .order-item:last-child {
@@ -305,6 +388,7 @@
         .status-pending { background: #fef3c7; color: #92400e; }
         .status-packing { background: #e0f2fe; color: #0369a1; }
         .status-dispatched { background: #d1fae5; color: #065f46; }
+        .status-formulating { background: #ede9fe; color: #6d28d9; }
         
         .toast {
             position: fixed;
@@ -326,6 +410,18 @@
         
         .toast.error {
             background: var(--danger);
+        }
+        
+        .toast.info {
+            background: var(--info);
+        }
+        
+        .toast.purple {
+            background: var(--purple);
+        }
+        
+        .toast.teal {
+            background: var(--teal);
         }
         
         @media (max-width: 768px) {
@@ -355,9 +451,7 @@
         <!-- Navigation -->
         <nav class="nav">
             <div class="nav-container">
-                <div class="nav-links" id="navLinks">
-                    <!-- Navigation will be dynamically loaded by JavaScript -->
-                </div>
+                <div class="nav-links" id="navLinks"></div>
                 <div class="user-menu">
                     <div class="user-info">
                         <div class="user-avatar" id="userAvatar">U</div>
@@ -376,6 +470,7 @@
             <div class="welcome-section">
                 <div class="welcome-title" id="welcomeMessage">Welcome back!</div>
                 <div class="welcome-subtitle" id="roleMessage">Here's what's happening with your orders today.</div>
+                <div class="role-badge" id="roleBadge"></div>
             </div>
             
             <!-- Stats Grid -->
@@ -392,7 +487,7 @@
             <div class="recent-orders">
                 <div class="section-header">
                     <h2 class="section-title">Recent Orders</h2>
-                    <a href="orders.html" class="view-link" style="color: var(--primary); text-decoration: none;">View All →</a>
+                    <a href="orders.html" class="view-link">View All →</a>
                 </div>
                 <div id="recentOrdersList">
                     <!-- Orders will be loaded here -->
@@ -423,6 +518,8 @@
         
         // ==================== GLOBAL FUNCTIONS ====================
         
+        let currentUser = null;
+        
         // Get current user from storage
         function getCurrentUser() {
             try {
@@ -431,6 +528,27 @@
                 console.error("Error parsing user data:", e);
                 return null;
             }
+        }
+        
+        // Role-based access functions
+        function isAdmin() {
+            return currentUser && currentUser.role === 'admin';
+        }
+
+        function isPacking() {
+            return currentUser && currentUser.role === 'packing';
+        }
+
+        function isFormulation() {
+            return currentUser && currentUser.role === 'formulation';
+        }
+
+        function isDispatch() {
+            return currentUser && currentUser.role === 'dispatch';
+        }
+
+        function isViewer() {
+            return currentUser && currentUser.role === 'viewer';
         }
         
         // Check authentication
@@ -442,6 +560,7 @@
                 return null;
             }
             
+            currentUser = user;
             return user;
         }
         
@@ -464,40 +583,96 @@
             }
         }
         
-        // Update navigation based on permissions - UPDATED with new sections
+        // Update navigation based on role
         function updateNavigation(user) {
-            // Define all navigation items with their IDs and permissions
+            // Define all navigation items with their allowed roles
             const navItems = [
-                { id: 'navDashboard', permission: 'canViewDashboard', url: 'dashboard.html', text: 'Dashboard' },
-                { id: 'navMasterData', permission: 'canAccessMasterData', url: 'master-data.html', text: 'Master Data' },
-                { id: 'navBottleInventory', permission: 'canAccessBottleInventory', url: 'bottle-inventory.html', text: 'Bottle Inventory' },
-                { id: 'navCreateOrder', permission: 'canCreateOrder', url: 'create-order.html', text: 'Create Order' },
-                { id: 'navPacking', permission: 'canAccessPacking', url: 'packing.html', text: 'Packing' },
-                { id: 'navDispatch', permission: 'canAccessDispatch', url: 'dispatch.html', text: 'Dispatch' },
-                { id: 'navOrders', permission: 'canViewOrders', url: 'orders.html', text: 'Orders' },
-                { id: 'navFormulation', permission: 'canAccessFormulation', url: 'formulation.html', text: 'Formulation' },
-                { id: 'navFormulationInventory', permission: 'canAccessFormulation', url: 'formulation-inventory.html', text: 'Formulation Inventory' },
-                { id: 'navBulkInventory', permission: 'canAccessPacking', url: 'bulk-inventory.html', text: 'Bulk Inventory' },
-                { id: 'navFinishedGoods', permission: 'canAccessPacking', url: 'finished-goods-inventory.html', text: 'Finished Goods' },
-                { id: 'navReports', permission: 'canAccessReports', url: 'reports.html', text: 'Reports' }
+                { 
+                    url: 'dashboard.html', 
+                    text: 'Dashboard',
+                    allowed: ['admin', 'packing', 'formulation', 'dispatch', 'viewer']
+                },
+                { 
+                    url: 'master-data.html', 
+                    text: 'Master Data',
+                    allowed: ['admin']
+                },
+                { 
+                    url: 'bottle-inventory.html', 
+                    text: 'Bottle Inventory',
+                    allowed: ['admin', 'packing']
+                },
+                { 
+                    url: 'create-order.html', 
+                    text: 'Create Order',
+                    allowed: ['admin', 'viewer']
+                },
+                { 
+                    url: 'packing.html', 
+                    text: 'Packing',
+                    allowed: ['admin', 'packing', 'viewer']
+                },
+                { 
+                    url: 'bulk-inventory.html', 
+                    text: 'Bulk Inventory',
+                    allowed: ['admin', 'packing', 'viewer']
+                },
+                { 
+                    url: 'finished-goods-inventory.html', 
+                    text: 'Finished Goods',
+                    allowed: ['admin', 'packing', 'viewer']
+                },
+                { 
+                    url: 'dispatch.html', 
+                    text: 'Dispatch',
+                    allowed: ['admin', 'dispatch', 'viewer']
+                },
+                { 
+                    url: 'orders.html', 
+                    text: 'Orders',
+                    allowed: ['admin', 'packing', 'formulation', 'dispatch', 'viewer']
+                },
+                { 
+                    url: 'formulation.html', 
+                    text: 'Formulation',
+                    allowed: ['admin', 'formulation', 'viewer']
+                },
+                { 
+                    url: 'formulation-inventory.html', 
+                    text: 'Formulation Inventory',
+                    allowed: ['admin', 'formulation', 'viewer']
+                },
+                { 
+                    url: 'reports.html', 
+                    text: 'Reports',
+                    allowed: ['admin', 'viewer']
+                },
+                { 
+                    url: 'user-management.html', 
+                    text: 'User Management',
+                    allowed: ['admin']
+                }
             ];
 
             const navContainer = document.getElementById('navLinks');
             if (!navContainer) return;
 
-            // Clear existing navigation
             navContainer.innerHTML = '';
 
-            // Add navigation items based on permissions
             navItems.forEach(item => {
-                if (user.permissions && user.permissions[item.permission]) {
+                if (item.allowed.includes(user.role)) {
                     const link = document.createElement('a');
                     link.href = item.url;
                     link.className = 'nav-item';
-                    link.id = item.id;
+                    
+                    // Add role-specific class for styling
+                    if (user.role === 'admin') link.classList.add('admin');
+                    else if (user.role === 'packing') link.classList.add('packing');
+                    else if (user.role === 'formulation') link.classList.add('formulation');
+                    else if (user.role === 'dispatch') link.classList.add('dispatch');
+                    
                     link.textContent = item.text;
                     
-                    // Highlight current page
                     const currentPage = window.location.pathname.split('/').pop();
                     if (currentPage === item.url) {
                         link.classList.add('active');
@@ -513,10 +688,15 @@
             const userNameEl = document.getElementById('userName');
             const userRoleEl = document.getElementById('userRole');
             const userAvatarEl = document.getElementById('userAvatar');
+            const roleBadge = document.getElementById('roleBadge');
             
             if (userNameEl) userNameEl.textContent = user.name || 'User';
             if (userRoleEl) userRoleEl.textContent = (user.role || 'user').replace('_', ' ').toUpperCase();
             if (userAvatarEl) userAvatarEl.textContent = (user.name || 'U').charAt(0).toUpperCase();
+            
+            if (roleBadge) {
+                roleBadge.textContent = (user.role || 'user').replace('_', ' ').toUpperCase();
+            }
             
             const welcomeMessage = document.getElementById('welcomeMessage');
             const roleMessage = document.getElementById('roleMessage');
@@ -526,19 +706,19 @@
             if (roleMessage) {
                 switch(user.role) {
                     case 'admin':
-                        roleMessage.textContent = 'You have full access to the system.';
+                        roleMessage.textContent = 'You have full access to all modules and can manage users.';
                         break;
                     case 'packing':
-                        roleMessage.textContent = 'You can manage packing, bulk inventory, finished goods, bottle inventory, and view orders.';
-                        break;
-                    case 'dispatch':
-                        roleMessage.textContent = 'You can manage dispatch operations and view orders.';
+                        roleMessage.textContent = 'You can manage packing, bulk inventory, finished goods, and bottle inventory.';
                         break;
                     case 'formulation':
-                        roleMessage.textContent = 'You can manage formulation requirements, formulation inventory, and view orders.';
+                        roleMessage.textContent = 'You can manage formulation requirements and formulation inventory.';
+                        break;
+                    case 'dispatch':
+                        roleMessage.textContent = 'You can manage dispatch operations.';
                         break;
                     case 'viewer':
-                        roleMessage.textContent = 'You have view-only access to orders.';
+                        roleMessage.textContent = 'You have view-only access to all modules.';
                         break;
                     default:
                         roleMessage.textContent = 'Here\'s what\'s happening with your orders today.';
@@ -546,43 +726,44 @@
             }
         }
         
-        // Load dashboard data - UPDATED with new stats
+        // Load dashboard data based on role
         async function loadDashboard(user) {
             try {
                 const ordersSnap = await db.collection("orders").get();
                 const orders = ordersSnap.docs.map(doc => doc.data());
                 
-                // Calculate stats
-                const totalOrders = orders.length;
-                const pendingOrders = orders.filter(o => o.status === 'pending').length;
-                const packedOrders = orders.filter(o => o.status === 'packed' || o.status === 'packing').length;
-                const dispatchedOrders = orders.filter(o => o.status === 'dispatched' || o.status === 'completed').length;
-                
-                // Get inventory stats for different roles
+                // Calculate stats based on role
                 let statsHtml = '';
                 
-                if (user.permissions.canViewOrders) {
+                // Common stats for all roles
+                if (user.role === 'admin' || user.role === 'packing' || user.role === 'formulation' || user.role === 'dispatch' || user.role === 'viewer') {
+                    const totalOrders = orders.length;
+                    const pendingOrders = orders.filter(o => o.status === 'pending').length;
+                    
                     statsHtml += `
                         <div class="stat-card">
                             <div class="stat-title">Total Orders</div>
                             <div class="stat-value">${totalOrders}</div>
                         </div>
                         <div class="stat-card">
-                            <div class="stat-title">Pending</div>
-                            <div class="stat-value">${pendingOrders}</div>
+                            <div class="stat-title">Pending Orders</div>
+                            <div class="stat-value warning">${pendingOrders}</div>
                         </div>
                     `;
                 }
                 
-                if (user.permissions.canAccessPacking) {
+                // Admin and Packing specific stats
+                if (user.role === 'admin' || user.role === 'packing') {
+                    const packingOrders = orders.filter(o => o.status === 'packing' || o.status === 'packed').length;
+                    
                     statsHtml += `
                         <div class="stat-card">
                             <div class="stat-title">In Packing</div>
-                            <div class="stat-value">${packedOrders}</div>
+                            <div class="stat-value teal">${packingOrders}</div>
                         </div>
                     `;
                     
-                    // Get bulk inventory stats for packing manager
+                    // Get bulk inventory stats
                     try {
                         const bulkSnap = await db.collection("bulk_inventory").get();
                         const bulkItems = bulkSnap.docs.map(doc => doc.data());
@@ -591,14 +772,14 @@
                         statsHtml += `
                             <div class="stat-card">
                                 <div class="stat-title">Bulk Stock</div>
-                                <div class="stat-value">${totalBulkStock.toFixed(2)} L</div>
+                                <div class="stat-value teal">${totalBulkStock.toFixed(2)} L</div>
                             </div>
                         `;
                     } catch (e) {
                         console.log("Bulk inventory not available");
                     }
                     
-                    // Get finished goods stats for packing manager
+                    // Get finished goods stats
                     try {
                         const fgSnap = await db.collection("finished_goods").get();
                         const fgItems = fgSnap.docs.map(doc => doc.data());
@@ -607,41 +788,49 @@
                         statsHtml += `
                             <div class="stat-card">
                                 <div class="stat-title">Finished Goods</div>
-                                <div class="stat-value">${totalFGStock}</div>
+                                <div class="stat-value teal">${totalFGStock}</div>
                             </div>
                         `;
                     } catch (e) {
                         console.log("Finished goods not available");
                     }
+                    
+                    // Get bottle inventory stats
+                    try {
+                        const bottleSnap = await db.collection("bottles").get();
+                        const bottles = bottleSnap.docs.map(doc => doc.data());
+                        const totalBottles = bottles.reduce((sum, b) => sum + (b.current_stock || 0), 0);
+                        
+                        statsHtml += `
+                            <div class="stat-card">
+                                <div class="stat-title">Bottles in Stock</div>
+                                <div class="stat-value teal">${totalBottles}</div>
+                            </div>
+                        `;
+                    } catch (e) {
+                        console.log("Bottle inventory not available");
+                    }
                 }
                 
-                if (user.permissions.canAccessDispatch) {
+                // Admin and Dispatch specific stats
+                if (user.role === 'admin' || user.role === 'dispatch') {
+                    const dispatchedOrders = orders.filter(o => o.status === 'dispatched' || o.status === 'completed').length;
+                    const readyToDispatch = orders.filter(o => o.status === 'packed').length;
+                    
                     statsHtml += `
                         <div class="stat-card">
-                            <div class="stat-title">To Dispatch</div>
-                            <div class="stat-value">${dispatchedOrders}</div>
+                            <div class="stat-title">Ready to Dispatch</div>
+                            <div class="stat-value info">${readyToDispatch}</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-title">Dispatched</div>
+                            <div class="stat-value success">${dispatchedOrders}</div>
                         </div>
                     `;
                 }
                 
-                if (user.permissions.canAccessFormulation) {
-                    // Calculate formulation stats
-                    const productsSnap = await db.collection("products").get();
-                    const products = productsSnap.docs.map(doc => doc.data());
-                    
-                    // Get unique technical names
-                    const technicalNames = new Set();
-                    products.forEach(p => {
-                        if (p.technical_name) technicalNames.add(p.technical_name);
-                    });
-                    
-                    statsHtml += `
-                        <div class="stat-card">
-                            <div class="stat-title">Technicals</div>
-                            <div class="stat-value">${technicalNames.size}</div>
-                        </div>
-                    `;
-                    
+                // Admin and Formulation specific stats
+                if (user.role === 'admin' || user.role === 'formulation') {
                     // Get formulation inventory stats
                     try {
                         const formulationInvSnap = await db.collection("formulation_inventory").get();
@@ -651,7 +840,7 @@
                         statsHtml += `
                             <div class="stat-card">
                                 <div class="stat-title">Formulation Stock</div>
-                                <div class="stat-value">${totalFormulationStock.toFixed(2)} L</div>
+                                <div class="stat-value purple">${totalFormulationStock.toFixed(2)} L</div>
                             </div>
                         `;
                     } catch (e) {
@@ -664,7 +853,7 @@
                 // Load quick actions
                 loadQuickActions(user);
                 
-                // Load recent orders
+                // Load recent orders (last 5)
                 loadRecentOrders(orders.slice(0, 5));
                 
             } catch (error) {
@@ -673,96 +862,158 @@
             }
         }
         
-        // UPDATED quick actions with new sections
+        // Load quick actions based on role
         function loadQuickActions(user) {
             const actions = [];
             
-            if (user.permissions.canCreateOrder) {
+            // Actions for Admin
+            if (user.role === 'admin') {
                 actions.push({
                     icon: '📝',
                     title: 'Create Order',
-                    desc: 'Create a new order',
-                    link: 'create-order.html'
+                    desc: 'Create new order',
+                    link: 'create-order.html',
+                    class: ''
                 });
-            }
-            
-            if (user.permissions.canAccessPacking) {
                 actions.push({
                     icon: '📦',
-                    title: 'Packing Section',
-                    desc: 'Pack orders for dispatch',
-                    link: 'packing.html'
+                    title: 'Packing',
+                    desc: 'Pack orders',
+                    link: 'packing.html',
+                    class: 'packing'
                 });
-                
                 actions.push({
                     icon: '🏭',
                     title: 'Bulk Inventory',
-                    desc: 'Manage Utsav Warehouse stock',
-                    link: 'bulk-inventory.html'
+                    desc: 'Manage bulk stock',
+                    link: 'bulk-inventory.html',
+                    class: 'packing'
                 });
-                
+                actions.push({
+                    icon: '🧪',
+                    title: 'Formulation',
+                    desc: 'Plan formulation',
+                    link: 'formulation.html',
+                    class: 'formulation'
+                });
+                actions.push({
+                    icon: '🚚',
+                    title: 'Dispatch',
+                    desc: 'Dispatch orders',
+                    link: 'dispatch.html',
+                    class: 'dispatch'
+                });
+                actions.push({
+                    icon: '👥',
+                    title: 'User Management',
+                    desc: 'Manage users',
+                    link: 'user-management.html',
+                    class: 'admin'
+                });
+            }
+            
+            // Actions for Packing
+            if (user.role === 'packing') {
+                actions.push({
+                    icon: '📦',
+                    title: 'Packing Section',
+                    desc: 'Pack orders',
+                    link: 'packing.html',
+                    class: 'packing'
+                });
+                actions.push({
+                    icon: '🏭',
+                    title: 'Bulk Inventory',
+                    desc: 'Manage Utsav stock',
+                    link: 'bulk-inventory.html',
+                    class: 'packing'
+                });
                 actions.push({
                     icon: '📦',
                     title: 'Finished Goods',
-                    desc: 'Manage finished goods inventory',
-                    link: 'finished-goods-inventory.html'
+                    desc: 'View finished stock',
+                    link: 'finished-goods-inventory.html',
+                    class: 'packing'
+                });
+                actions.push({
+                    icon: '🥫',
+                    title: 'Bottle Inventory',
+                    desc: 'Manage bottles',
+                    link: 'bottle-inventory.html',
+                    class: 'packing'
                 });
             }
             
-            if (user.permissions.canAccessDispatch) {
+            // Actions for Formulation
+            if (user.role === 'formulation') {
+                actions.push({
+                    icon: '🧪',
+                    title: 'Formulation Planning',
+                    desc: 'Plan requirements',
+                    link: 'formulation.html',
+                    class: 'formulation'
+                });
+                actions.push({
+                    icon: '📊',
+                    title: 'Formulation Stock',
+                    desc: 'View inventory',
+                    link: 'formulation-inventory.html',
+                    class: 'formulation'
+                });
+            }
+            
+            // Actions for Dispatch
+            if (user.role === 'dispatch') {
                 actions.push({
                     icon: '🚚',
                     title: 'Dispatch Section',
-                    desc: 'Dispatch packed orders',
-                    link: 'dispatch.html'
+                    desc: 'Dispatch orders',
+                    link: 'dispatch.html',
+                    class: 'dispatch'
                 });
             }
             
-            if (user.permissions.canViewOrders) {
+            // Actions for Viewer
+            if (user.role === 'viewer') {
                 actions.push({
                     icon: '📋',
                     title: 'View Orders',
                     desc: 'See all orders',
-                    link: 'orders.html'
+                    link: 'orders.html',
+                    class: ''
                 });
-            }
-            
-            if (user.permissions.canAccessFormulation) {
-                actions.push({
-                    icon: '🧪',
-                    title: 'Formulation Planning',
-                    desc: 'Plan technical requirements',
-                    link: 'formulation.html'
-                });
-                
-                actions.push({
-                    icon: '📊',
-                    title: 'Formulation Stock',
-                    desc: 'View formulation inventory',
-                    link: 'formulation-inventory.html'
-                });
-            }
-            
-            if (user.permissions.canAccessReports) {
                 actions.push({
                     icon: '📊',
                     title: 'Reports',
                     desc: 'View analytics',
-                    link: 'reports.html'
+                    link: 'reports.html',
+                    class: ''
                 });
-            }
-            
-            if (user.permissions.canAccessBottleInventory) {
                 actions.push({
-                    icon: '🥫',
-                    title: 'Bottle Inventory',
-                    desc: 'Manage bottle stock',
-                    link: 'bottle-inventory.html'
+                    icon: '📦',
+                    title: 'Packing',
+                    desc: 'View packing',
+                    link: 'packing.html',
+                    class: ''
+                });
+                actions.push({
+                    icon: '🏭',
+                    title: 'Bulk Inventory',
+                    desc: 'View bulk stock',
+                    link: 'bulk-inventory.html',
+                    class: ''
+                });
+                actions.push({
+                    icon: '🧪',
+                    title: 'Formulation',
+                    desc: 'View formulation',
+                    link: 'formulation.html',
+                    class: ''
                 });
             }
             
             const actionsHtml = actions.map(action => `
-                <a href="${action.link}" class="action-card">
+                <a href="${action.link}" class="action-card ${action.class}">
                     <div class="action-icon">${action.icon}</div>
                     <div class="action-title">${action.title}</div>
                     <div class="action-desc">${action.desc}</div>
@@ -790,13 +1041,23 @@
                 } else if (order.status === 'dispatched' || order.status === 'completed') {
                     statusClass = 'status-dispatched';
                     statusText = 'Dispatched';
+                } else if (order.status === 'formulating') {
+                    statusClass = 'status-formulating';
+                    statusText = 'Formulating';
                 }
+                
+                // Get order type
+                const orderType = order.order_type || 
+                    (order.lines?.some(l => l.type === 'bulk') ? 
+                     (order.lines?.some(l => l.type === 'packed') ? 'mixed' : 'bulk') : 'packed');
+                
+                const typeIcon = orderType === 'bulk' ? '🛢️' : (orderType === 'mixed' ? '📦🛢️' : '📦');
                 
                 return `
                     <div class="order-item" onclick="window.location.href='orders.html'">
                         <div class="order-info">
-                            <h4>Order #${order.order_number}</h4>
-                            <p>${order.order_date || 'N/A'} • ${order.total_boxes || 0} boxes</p>
+                            <h4>${typeIcon} Order #${order.order_number || 'Unknown'}</h4>
+                            <p>${order.order_date || 'N/A'} • ${order.total_boxes ? order.total_boxes + ' boxes' : (order.total_volume ? order.total_volume.toFixed(2) + ' L' : '0')}</p>
                         </div>
                         <span class="order-status ${statusClass}">${statusText}</span>
                     </div>
@@ -833,8 +1094,8 @@
         
         // Refresh every 30 seconds
         setInterval(() => {
-            if (user) {
-                loadDashboard(user);
+            if (currentUser) {
+                loadDashboard(currentUser);
             }
         }, 30000);
     </script>
